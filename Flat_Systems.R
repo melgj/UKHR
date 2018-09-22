@@ -1,4 +1,4 @@
-setwd("~/git_projects/ukhr/UKHR")
+#setwd("~/git_projects/UKHR_Project")
 
 #ukhr_master_BF <- read_csv("UKHR_Master_BF.csv",col_names = T)
 
@@ -50,6 +50,11 @@ trQuals <- trQuals%>%
 
 trQuals
 
+if(nrow(trQuals) > 0) {
+  trQuals$System_Name <- "Flat_TFC"
+}
+
+
 #write_csv(trQuals, "todays_Flat_TFC_Quals_081117")
 
 
@@ -96,6 +101,11 @@ todaySoftSiresFlatQ <- select(todaySoftSiresFlat, everything())
 
 todaySoftSiresFlatQ 
 
+if(nrow(todaySoftSiresFlatQ) > 0) {
+  todaySoftSiresFlatQ$System_Name <- "Soft_Ground_Flat_Sires"
+}
+
+
 #write_csv(todaySoftSiresFlatQ, "Soft Ground Sires Quals.csv")
 
 ##################################################################################################
@@ -109,7 +119,7 @@ trJkComboFlat <- ukFlat%>%
             WinPercent = sum(Actual)/Runs, Horses = length(unique(Horse)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
-  filter(Runs >= 50 & AE_Ratio >= 1.20 & meanPL >= 0.2 & WinPercent >= 0.10)%>%
+  filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.2, WinPercent >= 0.10, Archie > 2.50) %>%
   arrange(desc(AE_Ratio),desc(meanPL))
 
 trJkComboFlat
@@ -132,6 +142,11 @@ trJkComboFlatQ <- trJkComboFlatQ%>%
   arrange(Time24Hour, Meeting, Horse)
 
 trJkComboFlatQ
+
+if(nrow(trJkComboFlatQ) > 0) {
+  trJkComboFlatQ$System_Name <- "Flat_TJ_Combo"
+}
+
 
 #View(trJkComboFlatQ)
 
@@ -190,6 +205,11 @@ todayBWHQuals <- flat.TR.BW %>%
 
 todayBWHQuals
 
+if(nrow(todayBWHQuals) > 0) {
+  todayBWHQuals$System_Name <- "Flat_Soft_Ground_Hcp_Bottom_Weights"
+}
+
+
 #write_csv(todayBWHQuals, "Bottom Weight Hcp Soft Ground Quals.csv")
 
 #write_csv(todayBWHQ, "Today_Bottom_Wght_Hcp_Soft_Ground_2018_04_17.csv")
@@ -225,6 +245,11 @@ todayTrDrQuals <- flatTrDr %>%
 #                          Rating_Rank)
 
 todayTrDrQuals
+
+if(nrow(todayTrDrQuals) > 0) {
+  todayTrDrQuals$System_Name <- "Flat_Trainer_Hcp_Distance_Range"
+}
+
 
 ################################################################################
 
@@ -264,6 +289,11 @@ todaySireGngDistQ <- sireGngDist %>%
 
 
 todaySireGngDistQ 
+
+if(nrow(todaySireGngDistQ) > 0) {
+  todaySireGngDistQ$System_Name <- "Flat_Sires_Going_Distance_Range"
+}
+
 
 ################################################################################
 

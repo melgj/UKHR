@@ -1,3 +1,5 @@
+#setwd("~/git_projects/UKHR_Project")
+
 ukhr_master_BF <- ukhr_master_BF %>% 
   group_by(UKHR_RaceID) %>% 
   mutate(Rev_Draw = min_rank(desc(Stall))) 
@@ -248,7 +250,7 @@ t3gdAll <- arrange(t3gdAll, Time24Hour, Meeting, Horse)
 
 t3gdAll
 
-View(t3gdAll)
+#View(t3gdAll)
 
 write_csv(t3gdAll, "Top_3_Rated_Good_Draw.csv")
 

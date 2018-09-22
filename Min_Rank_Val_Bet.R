@@ -1,36 +1,38 @@
-top5 <- ukhr_master_BF %>% 
-  drop_na(Rating_Rank, BFSP_PL, ValueOdds_BetfairFormat, BetFairSPForecastWinPrice, VOR_Range, Value_Odds_Range,
-          Speed_Rank_Range) %>% 
-  filter(Rating_Rank <= 5, ValueOdds_BetfairFormat <= 21, Actual.Runners >= 5) %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(HiRnkValBet = if_else(Value_Odds_Ratio > 1.0, 1, 0),
-         Won = if_else(BFSP_PL > 0, 1, 0)) %>%
-  filter(HiRnkValBet == 1) %>% 
-  select(UKHR_RaceID, Year, Meeting, Horse, Ratings_Range ,Class_Rank_Range, Speed_Rank_Range, Runners_Range, RaceType, Handicap,Rating_Rank, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
-         Value_Odds_Ratio, VOR_Range, Value_Odds_Range, Betfair.Win.S.P., Won, BFSP_PL, HiRnkValBet) %>% 
-  mutate(Min_Rnk_Val_Bet = min_rank(Rating_Rank),
-         BFSPvVOBF = if_else(Betfair.Win.S.P. > ValueOdds_BetfairFormat, 1, 0)) %>% 
-  filter(Min_Rnk_Val_Bet == 1, 
-         Value_Odds_Ratio <= 5.0)
-
-head(top5)
-
-#nrow(top5)
-sum(top5$BFSP_PL)
-mean(top5$BFSP_PL)
-mean(top5$Betfair.Win.S.P.)
-mean(top5$BetFairSPForecastWinPrice)
-mean(top5$Won)
-           
-top5 %>% 
-  group_by(Speed_Rank_Range) %>% 
-  summarise(Bets = n(), 
-            Avg_PL = mean(BFSP_PL),
-            Total_PL = sum(BFSP_PL),
-            Winners = sum(Won),
-            Win_Percent = mean(Won)) %>% 
-  arrange(desc(Avg_PL)) %>% 
-  View()
+#setwd("~/git_projects/UKHR_Project")
+# 
+# top5 <- ukhr_master_BF %>% 
+#   drop_na(Rating_Rank, BFSP_PL, ValueOdds_BetfairFormat, BetFairSPForecastWinPrice, VOR_Range, Value_Odds_Range,
+#           Speed_Rank_Range) %>% 
+#   filter(Rating_Rank <= 5, ValueOdds_BetfairFormat <= 21, Actual.Runners >= 5) %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(HiRnkValBet = if_else(Value_Odds_Ratio > 1.0, 1, 0),
+#          Won = if_else(BFSP_PL > 0, 1, 0)) %>%
+#   filter(HiRnkValBet == 1) %>% 
+#   select(UKHR_RaceID, Year, Meeting, Horse, Ratings_Range ,Class_Rank_Range, Speed_Rank_Range, Runners_Range, RaceType, Handicap,Rating_Rank, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
+#          Value_Odds_Ratio, VOR_Range, Value_Odds_Range, Betfair.Win.S.P., Won, BFSP_PL, HiRnkValBet) %>% 
+#   mutate(Min_Rnk_Val_Bet = min_rank(Rating_Rank),
+#          BFSPvVOBF = if_else(Betfair.Win.S.P. > ValueOdds_BetfairFormat, 1, 0)) %>% 
+#   filter(Min_Rnk_Val_Bet == 1, 
+#          Value_Odds_Ratio <= 5.0)
+# 
+# head(top5)
+# 
+# #nrow(top5)
+# sum(top5$BFSP_PL)
+# mean(top5$BFSP_PL)
+# mean(top5$Betfair.Win.S.P.)
+# mean(top5$BetFairSPForecastWinPrice)
+# mean(top5$Won)
+#            
+# top5 %>% 
+#   group_by(Speed_Rank_Range) %>% 
+#   summarise(Bets = n(), 
+#             Avg_PL = mean(BFSP_PL),
+#             Total_PL = sum(BFSP_PL),
+#             Winners = sum(Won),
+#             Win_Percent = mean(Won)) %>% 
+#   arrange(desc(Avg_PL)) %>% 
+#   View()
 
 
 
@@ -76,7 +78,8 @@ top5 %>%
 top5Q <- today %>% 
   drop_na(Rating_Rank, ValueOdds_BetfairFormat, BetFairSPForecastWinPrice, VOR_Range, Value_Odds_Range,
           Speed_Rank_Range) %>% 
-  filter(Rating_Rank <= 5, ValueOdds_BetfairFormat <= 21, Runners >= 5) %>% 
+  filter(Rating_Rank <= 4 , ValueOdds_BetfairFormat <= 21, Runners >= 5, (Value_Odds_Ratio > 1 & Value_Odds_Ratio <= 5.0),
+         Ratings_Range != "Bottom_Third", Speed_Rank_Range != "Bottom_Third") %>% 
   group_by(UKHRCardRaceID) %>% 
   mutate(HiRnkValBet = if_else(Value_Odds_Ratio > 1.0, 1, 0)) %>% 
   filter(HiRnkValBet == 1) %>% 
@@ -84,7 +87,7 @@ top5Q <- today %>%
          Rating_Rank, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Value_Odds_Ratio, VOR_Range, 
          Value_Odds_Range, HiRnkValBet) %>% 
   mutate(Min_Rnk_Val_Bet = min_rank(Rating_Rank)) %>% 
-  filter(Min_Rnk_Val_Bet == 1, Value_Odds_Ratio <= 5.0) %>% 
+  filter(Min_Rnk_Val_Bet == 1) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
 top5Q
@@ -92,8 +95,8 @@ top5Q
 write_csv(top5Q, paste0("ValueTop5_",today$Date[1],".csv"))
 
 
-dualQuals <- allArchie %>% 
-  filter(Horse %in% top5Q$Horse)
+dualQuals <- top5Q %>% 
+  inner_join(asq, by = "Horse")
 
 dualQuals
 

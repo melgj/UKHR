@@ -4,7 +4,7 @@ library(stringr)
 library(lubridate)
 
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_06_30.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_07_31.csv", col_names = T)
 
 length(which(ukhr_master_BF$BetFairSPForecastWinPrice <= 0))
 
@@ -230,4 +230,4 @@ ukhr_master_BF2$ValueOdds_BetfairFormat <- ukhrOdds$Adj_Val_Odds
 #ukhr_master_BF2 <- ukhr_master_BF2 %>% 
  # filter(Year >= 2013)
 
-write_csv(ukhr_master_BF2, "UKHR_Master_BF_2018_07_31.csv")
+write_csv(ukhr_master_BF2, "UKHR_Master_BF_2018_08_31.csv")

@@ -1,4 +1,4 @@
-setwd("~/git_projects/ukhr/UKHR")
+#setwd("~/git_projects/UKHR_Project")
 
 
 ukAW <- filter(ukhr_master_BF, RaceType == "AW")
@@ -64,13 +64,16 @@ tapSiresT
 
 write_csv(tapSiresT, "TapetaSires.csv")
 
+
 tapSiresT_Quals <- tapSiresT %>% 
   left_join(today, by = c("Sire")) %>% 
   filter(!is.na(Time24Hour), Meeting %in% tapeta) 
 
 tapSiresT_Quals
-
-
+# 
+if(nrow(tapSiresT_Quals) > 0) {
+  tapSiresT_Quals$System_Name <- "Tapeta_Sires"
+}
 
 
 
@@ -110,6 +113,12 @@ polSiresT_Quals <- polSiresT %>%
   filter(!is.na(Time24Hour), Meeting %in% polytrack)
 
 polSiresT_Quals
+# 
+if(nrow(polSiresT_Quals) > 0) {
+  polSiresT_Quals$System_Name <- "Polytrack_Sires"
+}
+
+
 
 #plot polytrack sires 
 # 
@@ -148,6 +157,12 @@ fibSiresT_Quals <- fibSiresT %>%
   filter(!is.na(Time24Hour), Meeting %in% fibresand)
 
 fibSiresT_Quals
+# 
+if(nrow(fibSiresT_Quals) > 0) {
+  fibSiresT_Quals$System_Name <- "Fibresand_Sires"
+}
+
+
 
 #plot tapeta sires 
 # 
@@ -193,6 +208,12 @@ wolvesSires_Quals <- wolvesSires %>%
   filter(!is.na(Time24Hour), Meeting == "WOLVERHAMPTON")
 
 wolvesSires_Quals
+# 
+if(nrow(wolvesSires_Quals) > 0) {
+  wolvesSires_Quals$System_Name <- "Wolves_Sires"
+}
+
+
 
 # 
 # wlvPlot <- ggplot(wolvesSires) +
@@ -232,6 +253,12 @@ newcastleSires_Quals <- newcastleSires %>%
   filter(!is.na(Time24Hour), Meeting == "NEWCASTLE")
 
 newcastleSires_Quals
+
+if(nrow(newcastleSires_Quals) > 0) {
+  newcastleSires_Quals$System_Name <- "Newcastle_Sires"
+}
+
+
 
 
 
@@ -275,6 +302,12 @@ southwellSires_Quals <- southwellSires %>%
 
 southwellSires_Quals
 # 
+if(nrow(southwellSires_Quals) > 0) {
+  southwellSires_Quals$System_Name <- "Southwell_Sires"
+}
+
+
+# 
 # sthPlot <- ggplot(fibresandSires)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -308,6 +341,10 @@ polyMeetingSires_Quals <- polyMeetingSires %>%
 
 polyMeetingSires_Quals
 
+if(nrow(polyMeetingSires_Quals) > 0) {
+  polyMeetingSires_Quals$System_Name <- "Poly_Meeting__Sires"
+}
+
 
 
 ############################################################################################################
@@ -338,6 +375,11 @@ newcastleTrainers_Quals <- newcastleTrainers %>%
 
 newcastleTrainers_Quals
 
+if(nrow(newcastleTrainers_Quals) > 0) {
+  newcastleTrainers_Quals$System_Name <- "Tapeta_Sires"
+}
+
+
 
 
 wolvesTrainers <- ukAW%>%
@@ -362,6 +404,11 @@ wolvesTrainers_Quals <- wolvesTrainers %>%
   filter(!is.na(Time24Hour), Meeting == "WOLVERHAMPTON")
 
 wolvesTrainers_Quals
+
+if(nrow(wolvesTrainers_Quals) > 0) {
+  wolvesTrainers_Quals$System_Name <- "Wolves_Trainers"
+}
+
 
 
 
@@ -410,6 +457,11 @@ southwellTrainers_Quals <- southwellTrainers %>%
   filter(!is.na(Time24Hour), Meeting == "SOUTHWELL")
 
 southwellTrainers_Quals
+
+if(nrow(southwellTrainers_Quals) > 0) {
+  southwellTrainers_Quals$System_Name <- "Southwell_Trainers"
+}
+
 # 
 # sthPlot <- ggplot(fibresandSires)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
@@ -443,6 +495,11 @@ polyMeetingTrainers_Quals <- polyMeetingTrainers %>%
   filter(!is.na(Time24Hour), Meeting %in% polytrack)
 
 polyMeetingTrainers_Quals
+
+
+if(nrow(polyMeetingTrainers_Quals) > 0) {
+  polyMeetingTrainers_Quals$System_Name <- "Poly_Meeting_Trainers"
+}
 
 
 
@@ -497,6 +554,11 @@ todayAWTJQ <- trJkComboAW %>%
   filter(!is.na(Time24Hour))
 
 todayAWTJQ
+
+if(nrow(todayAWTJQ) > 0) {
+  todayAWTJQ$System_Name <- "AW_TJ_Combo"
+}
+
 
 #View(todayAWTJQ)
 
@@ -600,6 +662,12 @@ siresDistRangeQuals <- siresDistRange %>%
   filter(!is.na(Time24Hour))
 
 siresDistRangeQuals
+
+if(nrow(siresDistRangeQuals) > 0) {
+  siresDistRangeQuals$System_Name <- "AW_Sires_Distance_Range"
+}
+
+
 
 ###################################################
 

@@ -1,4 +1,4 @@
-setwd("~/git_projects/ukhr/UKHR")
+#setwd("~/git_projects/UKHR_Project")
 
 #ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_03_31.csv",col_names = T)
 
@@ -48,6 +48,10 @@ trTFCQuals <- trainersNH%>%
 
 trTFCQuals
 
+if(nrow(trTFCQuals) > 0) {
+  trTFCQuals$System_Name <- "NH_TFC"
+}
+
 #write_csv(trTFCQuals, "NH_TFC_Quals_041117")
 
 ####################################################################
@@ -84,6 +88,11 @@ NHSireQuals <- hdlStaySires%>%
 
 NHSireQuals
 
+if(nrow(NHSireQuals) > 0) {
+  NHSireQuals$System_Name <- "NH_Staying_Hurdle_Sires"
+}
+
+
 #View(NHSireQuals)
 
 #write_csv(NHSireQuals, "NH_LDH_Sires_Quals_041117")
@@ -119,6 +128,11 @@ trHLDQuals <- hdlStayTrainers%>%
 
 trHLDQuals
 
+if(nrow(trHLDQuals) > 0) {
+  trHLDQuals$System_Name <- "NH_Trainer_Staying_Hurdlers"
+}
+
+
 #View(trHLDQuals)
 
 #write_csv(trHLDQuals, "NH_Stay_Trnrs_Quals_041117")
@@ -137,7 +151,7 @@ trHLDQuals
 # 
 # NHQuals <- printNHCols
 
-NHQuals <- rbind(trHLDQuals,NHSireQuals,trTFCQuals)
+#NHQuals <- rbind(trHLDQuals, trTFCQuals)
 
 
 #####################################################################################################################
@@ -176,9 +190,16 @@ todaySoftSiresNHQ <- select(todaySoftSiresNH, everything())
 
 todaySoftSiresNHQ 
 
+if(nrow(todaySoftSiresNHQ) > 0) {
+  todaySoftSiresNHQ$System_Name <- "NH_Soft_Ground_Sires"
+}
 
-allNHSystemQualifiers <- NHQuals %>% 
+
+
+allNHSystemQualifiers <- trTFCQuals %>% 
   full_join(todaySoftSiresNHQ) %>% 
+  full_join(trHLDQuals) %>% 
+  full_join(NHSireQuals) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
 #allNHSystemQualifiers <- select(allNHSystemQualifiers, Time24Hour, Meeting, Horse, BetFairSPForecastWinPrice,

@@ -28,17 +28,38 @@ allSystemQualifiers <- allQualsFlatAW%>%
 
 allSystemQualifiers$Val_Ratio <-allSystemQualifiers$BetFairSPForecastWinPrice / allSystemQualifiers$ValueOdds_BetfairFormat
 
-allSystemQualifiers <- select(allSystemQualifiers, Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
-                              BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
-                              Age, Runs, meanPL, totalPL, Avg_BFVSP_PL, Total_BFVSP_PL, Avg_VSP_Stake, Total_VSP_Stake,VSP_ROI, Places, Exp_Places,
-                              Placed_AE_Ratio, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie)
-asq <- allSystemQualifiers %>% 
-  mutate(Placed_Archie = ifelse(Exp_Places >= 5.0,((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),0),
-         Place_Percent = Places/Runs)
+head(allSystemQualifiers)
 
-View(asq)
+asq <- allSystemQualifiers %>% 
+  mutate(Winners = round(Runs * WinPercent), Exp_Wins = Winners/AE_Ratio, 
+         Archie = ifelse(Exp_Wins >= 5,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0),
+         Placed_Archie = ifelse(Exp_Places >= 5.0, round(((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),2),0),
+         Place_Percent = Places/Runs,
+         Arch_Strength = cut(Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
+                             labels = c("-", "*", "**", "***", "****", "*****")),
+         Arch_Placed_Strength = cut(Placed_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
+                                    labels = c("-", "*", "**", "***", "****", "*****")),
+         Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat) %>% 
+  select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
+         Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, 
+         Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Dist_Range, 
+         RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age) %>% 
+  filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5) %>% 
+  arrange(Time24Hour, Meeting, Horse)
+
+# asq <- asq %>% 
+#   mutate(Placed_Archie = ifelse(Exp_Places >= 5.0, round(((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),2),0),
+#          Place_Percent = Places/Runs) %>% 
+#   filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5, !(AE_Ratio < 1.3 & Archie < 4.0)) %>% 
+#   arrange(Time24Hour, Meeting, Horse)
+
+#View(asq)
 
 length(unique(asq$Horse))
+
+systemSummaryTables <- read_csv("Summary_System_Results_Tables_July_2018.csv", col_names = T)
+goodSystems <- read_csv("Good_Performing_Systems_July_2018.csv", col_names = T)
+poorSystems <- read_csv("Poor_Performing_Systems_July_2018.csv", col_names = T)
 
 
 #####################################################################################
@@ -46,65 +67,95 @@ length(unique(asq$Horse))
 # Archie Score Calculation  
 # Formula: (Runners * (Winners - Expected Winners) ^ 2) / Expected Winners * (Runners - Expected Winners)
 
-allArchie <- asq %>% 
-  mutate(Winners = round(Runs * WinPercent), Exp_Wins = Winners/AE_Ratio, 
-         Archie = ifelse(Exp_Wins >= 5,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0),
-         Placed_Archie = ifelse(Exp_Places >= 5.0,((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),0),
-         Arch_Strength = cut(Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
-                             labels = c("-", "*", "**", "***", "****", "*****")),
-         Arch_Placed_Strength = cut(Placed_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
-                             labels = c("-", "*", "**", "***", "****", "*****")),
-         Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat)
+# allArchie <- asq %>% 
+#   mutate(Winners = round(Runs * WinPercent), Exp_Wins = Winners/AE_Ratio, 
+#          Archie = ifelse(Exp_Wins >= 5,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0),
+#          Placed_Archie = ifelse(Exp_Places >= 5.0, round(((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),2),0),
+#          Arch_Strength = cut(Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
+#                              labels = c("-", "*", "**", "***", "****", "*****")),
+#          Arch_Placed_Strength = cut(Placed_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
+#                              labels = c("-", "*", "**", "***", "****", "*****")),
+#          Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat)
 
-allArchie <- allArchie %>% 
-  select(Time24Hour, Meeting, Horse, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
+allArchie <- asq %>% 
+  select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
          Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, 
          Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Dist_Range, 
          RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age) %>% 
-  filter(Archie > 3.5, Exp_Wins >= 5, AE_Ratio >= 1.20, Placed_AE_Ratio > 1.05) %>% 
+  filter(Archie > 4.0, Exp_Wins >= 5, AE_Ratio >= 1.40, !(System_Name %in% poorSystems$System_Name)) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
 allArchie
 
-length(unique(allArchie$Horse))
-
 View(allArchie)
 
-highArchieQuals <- filter(allArchie, Archie >= 5.5, meanPL >= 0.20, WinPercent >= 0.12, AE_Ratio >= 1.30, Placed_AE_Ratio >= 1.10)
+length(unique(allArchie$Horse))
 
-highArchieQuals <- highArchieQuals %>% 
-  # select(Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
-  #        BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
-  #        Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie, 
-  #        Arch_Strength, Arch_Placed_Strength) %>% 
+#todayArchie <- allArchie %>% 
+  #left_join(systemSummaryTables, by = "System_Name")
+ 
+# todayArchie
+# 
+archieGoodSystems <- allArchie %>% 
+ filter(System_Name %in% goodSystems$System_Name) %>% 
+ arrange(Time24Hour, Meeting, Horse)
+# 
+archieGoodSystems
+
+View(archieGoodSystems)
+# 
+# View(archieGoodSystems)
+# 
+# 
+highArchieQuals <- filter(asq, Archie >= 6.5, AE_Ratio >= 1.20)
+
+highArchieQuals <- highArchieQuals %>%
+  select(Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
+        BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
+        Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie,
+        Arch_Strength, Arch_Placed_Strength) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 highArchieQuals
 
 View(highArchieQuals)
 
+# 
+# eliteArchieQuals <- filter(allArchie, Archie >= 8.5, AE_Ratio >= 1.20)
+# 
+# eliteArchieQuals <- eliteArchieQuals %>% 
+#   # select(Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
+#   #        BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms, 
+#   #        Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie, 
+#   #        Arch_Strength, Arch_Placed_Strength) %>% 
+#   arrange(Time24Hour, Meeting, Horse)
+# 
+# eliteArchieQuals
+# 
+# View(eliteArchieQuals)
+# 
+# highAERQuals <- filter(allArchie, AE_Ratio >= 1.40) %>% 
+#   arrange(Time24Hour, Meeting, Horse)
+# 
+# highAERQuals
 
-eliteArchieQuals <- filter(allArchie, Archie >= 8.0, AE_Ratio >= 1.40, meanPL >= 0.20, WinPercent >= 0.12, Placed_AE_Ratio >= 1.15)
 
-eliteArchieQuals <- eliteArchieQuals %>% 
-  # select(Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
-  #        BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms, 
-  #        Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie, 
-  #        Arch_Strength, Arch_Placed_Strength) %>% 
-  arrange(Time24Hour, Meeting, Horse)
-
-eliteArchieQuals
-
-View(eliteArchieQuals)
 #valArchieQuals <- filter(archieQuals, Val_Ratio >= 1.0)
 
 #valArchieQuals
+write_csv(asq, paste0("All_System_Quals_", today$Date[1], ".csv"))
+# 
+write_csv(highArchieQuals, paste0("High_Archie_Quals_", today$Date[1], ".csv"))
+# 
+write_csv(archieGoodSystems, paste0("Good_System_Quals_", today$Date[1], ".csv"))
 
-write_csv(highArchieQuals, (paste0("High_Archie_Quals_", today$Date[1], ".csv")))
+write_csv(allArchie, paste0("All_Archie_Quals_", today$Date[1], ".csv"))
 
-write_csv(allArchie, (paste0("All_Archie_Quals_", today$Date[1], ".csv")))
 
-write_csv(eliteArchieQuals,(paste0("Elite_Archie_Quals_", today$Date[1], ".csv")))
+
+# write_csv(eliteArchieQuals, paste0("Elite_Archie_Quals_", today$Date[1], ".csv"))
+# 
+# write_csv(highAERQuals, paste0("High_AER_Archie_Quals_", today$Date[1], ".csv"))
 
 
 

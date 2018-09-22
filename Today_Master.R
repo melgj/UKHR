@@ -10,11 +10,14 @@ cl <- makePSOCKcluster(4) # number of cores to use
 registerDoParallel(cl)
 
 
-setwd("~/git_projects/ukhr/UKHR")
+setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_07_31.csv",col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_08_31.csv",col_names = T)
+
+#ukhr_master_BF <- ukhr_master_BF %>% 
+  #filter(Year != 2018)
 
 ukhr_master_BF <- ukhr_master_BF %>% 
   group_by(UKHR_RaceID) %>% 
@@ -132,6 +135,17 @@ ukhr_master_BF <- ukhr_master_BF %>%
 ukhr_master_BF <- ukhr_master_BF %>%
   group_by(UKHR_RaceID) %>%
   mutate(FC_Fav_Rank = min_rank(BetFairSPForecastWinPrice))
+
+ukhr_master_BF <- ukhr_master_BF %>%
+  group_by(UKHR_RaceID) %>%
+  mutate(FcFav_Odds = min(BetFairSPForecastWinPrice))
+
+ukhr_master_BF <- ukhr_master_BF %>%
+  group_by(UKHR_RaceID) %>%
+  mutate(FcFav_Odds_Range = cut(FcFav_Odds, breaks = c(0, 1.5 ,2, 4, 6, 11, 100),
+                                labels = c("<= 1.5",">1.5 to 2",">2 to 4", ">4 to 6", ">6 to 11", ">11"),
+                                ordered_result = T))
+
 
 
 #colnames(ukhr_master_BF)
@@ -283,6 +297,22 @@ today <- today %>%
 today <- today %>%
   group_by(UKHRCardRaceID) %>%
   mutate(FC_Fav_Rank = min_rank(BetFairSPForecastWinPrice))
+
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
+  mutate(FcFav_Odds = min(BetFairSPForecastWinPrice))
+
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
+  mutate(FcFav_Odds_Range = cut(FcFav_Odds, breaks = c(0, 1.5 ,2, 4, 6, 11, 100),
+                                labels = c("<= 1.5",">1.5 to 2",">2 to 4", ">4 to 6", ">6 to 11", ">11"),
+                                ordered_result = T))
+
+today <- today %>% 
+  mutate(Runners_Range = cut(Runners, breaks = c(0, 8, 16, 100),
+                             labels = c("<=8", "9-16", "17+"),
+                             ordered_result = T)) 
+
 
 #system qualifier columns for export to csv
 

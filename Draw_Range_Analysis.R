@@ -289,12 +289,12 @@ write_csv(tbdAll, "Today_Bad_Draw.csv")
 
 ###############################################################################################
 
-qualsGD <- filter(allArchie,
+qualsGD <- filter(asq,
                   Horse %in% todayGoodDraw$Horse | 
                     Horse %in% todayGoodDrawStall$Horse |
                     Horse %in% todayGoodRevDraw$Horse)
 
-qualsBD <- filter(allArchie,
+qualsBD <- filter(asq,
                   Horse %in% todayBadDraw$Horse | 
                     Horse %in% todayBadDrawStall$Horse |
                     Horse %in% todayBadRevDraw$Horse)

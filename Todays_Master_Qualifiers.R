@@ -107,10 +107,10 @@ View(archieGoodSystems)
 # View(archieGoodSystems)
 # 
 # 
-highArchieQuals <- filter(asq, Archie >= 6.5, AE_Ratio >= 1.20)
+highArchieQuals <- filter(asq, Archie >= 8.5, AE_Ratio >= 1.20)
 
 highArchieQuals <- highArchieQuals %>%
-  select(Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
+  select(Time24Hour, Meeting, Horse, System_Name,Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
         BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
         Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie,
         Arch_Strength, Arch_Placed_Strength) %>%
@@ -119,6 +119,19 @@ highArchieQuals <- highArchieQuals %>%
 highArchieQuals
 
 View(highArchieQuals)
+
+goodStatsQuals <- filter(asq, Archie >= 6.0, AE_Ratio >= 1.20)
+
+goodStatsQuals <- goodStatsQuals %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
+         BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
+         Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie,
+         Arch_Strength, Arch_Placed_Strength) %>%
+  arrange(Time24Hour, Meeting, Horse)
+
+goodStatsQuals
+
+View(goodStatsQuals)
 
 # 
 # eliteArchieQuals <- filter(allArchie, Archie >= 8.5, AE_Ratio >= 1.20)
@@ -134,11 +147,11 @@ View(highArchieQuals)
 # 
 # View(eliteArchieQuals)
 # 
-# highAERQuals <- filter(allArchie, AE_Ratio >= 1.40) %>% 
-#   arrange(Time24Hour, Meeting, Horse)
+# # highAERQuals <- filter(allArchie, AE_Ratio >= 1.40) %>% 
+# #   arrange(Time24Hour, Meeting, Horse)
+# # 
+# # highAERQuals
 # 
-# highAERQuals
-
 
 #valArchieQuals <- filter(archieQuals, Val_Ratio >= 1.0)
 
@@ -151,11 +164,9 @@ write_csv(archieGoodSystems, paste0("Good_System_Quals_", today$Date[1], ".csv")
 
 write_csv(allArchie, paste0("All_Archie_Quals_", today$Date[1], ".csv"))
 
-
-
-# write_csv(eliteArchieQuals, paste0("Elite_Archie_Quals_", today$Date[1], ".csv"))
+write_csv(goodStatsQuals, paste0("Good_Stats_Quals_", today$Date[1], ".csv"))
 # 
-# write_csv(highAERQuals, paste0("High_AER_Archie_Quals_", today$Date[1], ".csv"))
+#write_csv(highAERQuals, paste0("High_AER_Archie_Quals_", today$Date[1], ".csv"))
 
 
 

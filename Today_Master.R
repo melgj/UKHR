@@ -14,7 +14,7 @@ setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_08_31.csv",col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_08_31.csv", col_names = T)
 
 #ukhr_master_BF <- ukhr_master_BF %>% 
   #filter(Year != 2018)
@@ -436,7 +436,6 @@ table(today$Meeting, today$RaceType)
 # 11.00 	0%
 # 11.50 	0%
 # 12.00 	0%
-
 
 
 

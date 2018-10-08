@@ -14,138 +14,140 @@ setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_08_31.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_09_30.csv", col_names = T)
+
+unique(ukhr_master_BF$Year)
 
 #ukhr_master_BF <- ukhr_master_BF %>% 
   #filter(Year != 2018)
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Stall = min_rank(StallNumber))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Rating_Rank = min_rank(RatingsPosition))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Class_Rank = min_rank(ClassPosition))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Class_Rank_Range = cut(Class_Rank, 3,
-                             labels = c("Top_Third", "Middle_Third", "Bottom_Third"), 
-                             ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Spd_Rank = min_rank(SpeedRatingRank))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Speed_Rank_Range = cut(Spd_Rank, 3,
-                                labels = c("Top_Third", "Middle_Third", "Bottom_Third"), 
-                                ordered_result = T))
-
-
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Ratings_Range = cut(Rating_Rank, 3,
-                             labels = c("Top_Third", "Middle_Third" ,"Bottom_Third"), 
-                             ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Weight_Range = cut(desc(Weight_Pounds), 3,
-                            labels = c("High", "Middle", "Low"),
-                            ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(LTO_Days_Range = cut(DaysSinceLastRun, breaks = c(0, 4, 7, 35, 91, 182, 365, 1000),
-                              labels = c("<=4", "<=7", "<=35", "<=91", "<=182", "<=365", "<=1000"), 
-                              ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(BFSPFC_Odds_Range = cut(BetFairSPForecastWinPrice, breaks = c(0, 6, 11, 21, 51, 1000),
-                                 labels = c("<=6", ">6 to 11", ">11 to 21", ">21 to 51", ">51"),
-                                 ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(BFSP_Odds_Range = cut(Betfair.Win.S.P., breaks = c(0, 2, 6, 11, 21, 51, 1000),
-                                 labels = c("<=2","<=6", ">6 to 11", ">11 to 21", ">21 to 51", ">51"),
-                                 ordered_result = T))
-
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Value_Odds_Range = cut(ValueOdds_BetfairFormat, breaks = c(0, 6, 11, 21, 51, 1000),
-                                labels = c("<=6", ">6 to 11", ">11 to 21",">21 to 51", ">51"),
-                                ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Value_Odds_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat,
-         VOR_Range = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 2.5, 5.0, 10, 100),
-                         labels = c("<=0.5", ">0.5 to 1.0", ">1 to 2.50", ">2.50 to 5.0", ">5 to 10", ">10"),
-                         ordered_result = T)) 
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(BFSP_ValOdds_Ratio = Betfair.Win.S.P. / ValueOdds_BetfairFormat,
-         BFSP_VOR_Range = cut(BFSP_ValOdds_Ratio, breaks = c(0, 0.5, 1.0, 2.5, 5.0, 10, 100),
-                         labels = c("<=0.5", ">0.5 to 1.0", ">1 to 2.50", ">2.50 to 5.0", ">5 to 10", ">10"),
-                         ordered_result = T)) 
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Runners_Range = cut(Actual.Runners, breaks = c(0, 8, 16, 100),
-                              labels = c("<=8", "9-16", "17+"),
-                              ordered_result = T)) 
-
-
-
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Place_Expected = 1/Betfair.Place.S.P.)
-
-slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT") 
-
-fastGround <- c("GOOD", "GD-FM", "FIRM", "HARD")
-
-syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
-
-softGround <- c("SOFT", "SFT-HVY", "HEAVY")
-
-unique(ukhr_master_BF$Going)
-
-ukhr_master_BF$Going_Range <- ifelse(ukhr_master_BF$Going %in% slowGround, "SLOW", 
-                                     ifelse(ukhr_master_BF$Going %in% fastGround,"FAST", "SYNTHETIC"))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(Weight_Rank = min_rank(desc(Weight_Pounds)))
-
-#head(ukhr_master_BF$Weight_Rank, 30)   
-#head(ukhr_master_BF$Weight_Pounds, 30)
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(Rev_Weight_Rank = min_rank(Weight_Pounds))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(Fav_Rank = min_rank(Betfair.Win.S.P.))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(FC_Fav_Rank = min_rank(BetFairSPForecastWinPrice))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(FcFav_Odds = min(BetFairSPForecastWinPrice))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(FcFav_Odds_Range = cut(FcFav_Odds, breaks = c(0, 1.5 ,2, 4, 6, 11, 100),
-                                labels = c("<= 1.5",">1.5 to 2",">2 to 4", ">4 to 6", ">6 to 11", ">11"),
-                                ordered_result = T))
-
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(Stall = min_rank(StallNumber))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(Rating_Rank = min_rank(RatingsPosition))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(Class_Rank = min_rank(ClassPosition))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(Class_Rank_Range = cut(Class_Rank, 3,
+#                              labels = c("Top_Third", "Middle_Third", "Bottom_Third"), 
+#                              ordered_result = T))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(Spd_Rank = min_rank(SpeedRatingRank))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(Speed_Rank_Range = cut(Spd_Rank, 3,
+#                                 labels = c("Top_Third", "Middle_Third", "Bottom_Third"), 
+#                                 ordered_result = T))
+# 
+# 
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(Ratings_Range = cut(Rating_Rank, 3,
+#                              labels = c("Top_Third", "Middle_Third" ,"Bottom_Third"), 
+#                              ordered_result = T))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(Weight_Range = cut(desc(Weight_Pounds), 3,
+#                             labels = c("High", "Middle", "Low"),
+#                             ordered_result = T))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(LTO_Days_Range = cut(DaysSinceLastRun, breaks = c(0, 4, 7, 35, 91, 182, 365, 1000),
+#                               labels = c("<=4", "<=7", "<=35", "<=91", "<=182", "<=365", "<=1000"), 
+#                               ordered_result = T))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(BFSPFC_Odds_Range = cut(BetFairSPForecastWinPrice, breaks = c(0, 6, 11, 21, 51, 1000),
+#                                  labels = c("<=6", ">6 to 11", ">11 to 21", ">21 to 51", ">51"),
+#                                  ordered_result = T))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(BFSP_Odds_Range = cut(Betfair.Win.S.P., breaks = c(0, 2, 6, 11, 21, 51, 1000),
+#                                  labels = c("<=2","<=6", ">6 to 11", ">11 to 21", ">21 to 51", ">51"),
+#                                  ordered_result = T))
+# 
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(Value_Odds_Range = cut(ValueOdds_BetfairFormat, breaks = c(0, 6, 11, 21, 51, 1000),
+#                                 labels = c("<=6", ">6 to 11", ">11 to 21",">21 to 51", ">51"),
+#                                 ordered_result = T))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(Value_Odds_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat,
+#          VOR_Range = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 2.5, 5.0, 10, 100),
+#                          labels = c("<=0.5", ">0.5 to 1.0", ">1 to 2.50", ">2.50 to 5.0", ">5 to 10", ">10"),
+#                          ordered_result = T)) 
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(BFSP_ValOdds_Ratio = Betfair.Win.S.P. / ValueOdds_BetfairFormat,
+#          BFSP_VOR_Range = cut(BFSP_ValOdds_Ratio, breaks = c(0, 0.5, 1.0, 2.5, 5.0, 10, 100),
+#                          labels = c("<=0.5", ">0.5 to 1.0", ">1 to 2.50", ">2.50 to 5.0", ">5 to 10", ">10"),
+#                          ordered_result = T)) 
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(Runners_Range = cut(Actual.Runners, breaks = c(0, 8, 16, 100),
+#                               labels = c("<=8", "9-16", "17+"),
+#                               ordered_result = T)) 
+# 
+# 
+# 
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(Place_Expected = 1/Betfair.Place.S.P.)
+# 
+# slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT") 
+# 
+# fastGround <- c("GOOD", "GD-FM", "FIRM", "HARD")
+# 
+# syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
+# 
+# softGround <- c("SOFT", "SFT-HVY", "HEAVY")
+# 
+# unique(ukhr_master_BF$Going)
+# 
+# ukhr_master_BF$Going_Range <- ifelse(ukhr_master_BF$Going %in% slowGround, "SLOW", 
+#                                      ifelse(ukhr_master_BF$Going %in% fastGround,"FAST", "SYNTHETIC"))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>%
+#   group_by(UKHR_RaceID) %>%
+#   mutate(Weight_Rank = min_rank(desc(Weight_Pounds)))
+# 
+# #head(ukhr_master_BF$Weight_Rank, 30)   
+# #head(ukhr_master_BF$Weight_Pounds, 30)
+# 
+# ukhr_master_BF <- ukhr_master_BF %>%
+#   group_by(UKHR_RaceID) %>%
+#   mutate(Rev_Weight_Rank = min_rank(Weight_Pounds))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>%
+#   group_by(UKHR_RaceID) %>%
+#   mutate(Fav_Rank = min_rank(Betfair.Win.S.P.))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>%
+#   group_by(UKHR_RaceID) %>%
+#   mutate(FC_Fav_Rank = min_rank(BetFairSPForecastWinPrice))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>%
+#   group_by(UKHR_RaceID) %>%
+#   mutate(FcFav_Odds = min(BetFairSPForecastWinPrice))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>%
+#   group_by(UKHR_RaceID) %>%
+#   mutate(FcFav_Odds_Range = cut(FcFav_Odds, breaks = c(0, 1.5 ,2, 4, 6, 11, 100),
+#                                 labels = c("<= 1.5",">1.5 to 2",">2 to 4", ">4 to 6", ">6 to 11", ">11"),
+#                                 ordered_result = T))
+# 
 
 
 #colnames(ukhr_master_BF)
@@ -273,6 +275,14 @@ today <- today %>%
          VOR_Range = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 2.5, 5.0, 10, 100),
                          labels = c("<=0.5", ">0.5 to 1.0", ">1 to 2.50", ">2.50 to 5.0", ">5 to 10", ">10"),
                          ordered_result = T)) 
+
+slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT")
+
+fastGround <- c("GOOD", "GD-FM", "FIRM", "HARD")
+
+syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
+
+softGround <- c("SOFT", "SFT-HVY", "HEAVY")
 
 today$Going_Range <- ifelse(today$Going %in% slowGround, "SLOW",
                             ifelse(today$Going %in% fastGround,"FAST", "SYNTHETIC"))

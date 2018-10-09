@@ -342,7 +342,7 @@ polyMeetingSires_Quals <- polyMeetingSires %>%
 polyMeetingSires_Quals
 
 if(nrow(polyMeetingSires_Quals) > 0) {
-  polyMeetingSires_Quals$System_Name <- "Poly_Meeting__Sires"
+  polyMeetingSires_Quals$System_Name <- "Poly_Meeting_Sires"
 }
 
 
@@ -376,7 +376,7 @@ newcastleTrainers_Quals <- newcastleTrainers %>%
 newcastleTrainers_Quals
 
 if(nrow(newcastleTrainers_Quals) > 0) {
-  newcastleTrainers_Quals$System_Name <- "Tapeta_Sires"
+  newcastleTrainers_Quals$System_Name <- "Newcastle_Trainers"
 }
 
 

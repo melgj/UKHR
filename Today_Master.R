@@ -18,6 +18,13 @@ ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_09_30.csv", col_names = T)
 
 unique(ukhr_master_BF$Year)
 
+ukhr_master_BF <- ukhr_master_BF %>% 
+  group_by(UKHR_RaceID) %>% 
+  mutate(Fin_Pos = min_rank(LengthsBehindTotal),
+         Exp_Btn = Actual.Runners - Fav_Rank,
+         Act_Btn = Actual.Runners - Fin_Pos)
+
+
 #ukhr_master_BF <- ukhr_master_BF %>% 
   #filter(Year != 2018)
 # 
@@ -278,7 +285,7 @@ today <- today %>%
 
 slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT")
 
-fastGround <- c("GOOD", "GD-FM", "FIRM", "HARD")
+fastGround <- c("GD-FM", "FIRM", "HARD")
 
 syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
 

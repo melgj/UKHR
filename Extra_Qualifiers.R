@@ -23,6 +23,8 @@ hcpTr3yo <- ukhr_master_BF %>%
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 30, AE_Ratio >= 1.20, meanPL >= 0.10, Archie > 2.5, Exp_Wins >= 5) %>%
   arrange(desc(AE_Ratio))
@@ -62,6 +64,8 @@ trAge <- ukhr_master_BF %>%
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 100, AE_Ratio >= 1.20, meanPL >= 0.10, Archie > 2.5, Exp_Wins >= 5) %>%
   arrange(desc(AE_Ratio))
@@ -150,6 +154,8 @@ trLtoW <- ukhr_master_BF %>%
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 30, AE_Ratio >= 1.20, meanPL >= 0.10, Archie > 2.5, Exp_Wins >= 5) %>%
   arrange(desc(AE_Ratio))
@@ -253,6 +259,8 @@ lowMileageTrainers <- filter(ukhr_master_BF, Age <= 4, NumberOfResults  <= 5) %>
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 30, AE_Ratio >= 1.20, meanPL >= 0.2, WinPercent >= 0.10, Horses >= 5, Archie > 2.50, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -284,6 +292,8 @@ Trainers_VOR_Rtng <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -298,6 +308,8 @@ Trainers_VOR <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -312,6 +324,8 @@ Trainers_Days <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -326,6 +340,8 @@ Trainers_Days_Odds <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -340,6 +356,8 @@ Trainer_Value_Odds <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -354,6 +372,8 @@ Trainer_Value_Odds_2 <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -369,6 +389,8 @@ Trainer_Odds <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -383,6 +405,8 @@ Trainer_Odds_VOR <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
@@ -397,6 +421,8 @@ sireMeetingValue <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Sire))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -412,6 +438,8 @@ sireMeetingVOR <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Sire))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -426,6 +454,8 @@ sireGoingValue <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Sire))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -440,6 +470,8 @@ sireGoingVOR <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Sire))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -469,6 +501,8 @@ trainerValueVOR <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -484,6 +518,8 @@ jockeyValueVOR <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 100, AE_Ratio >= 1.20, Placed_AE_Ratio >= 1.05, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Jockey))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -500,6 +536,8 @@ jockeyVOR <- ukhr_master_BF %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 100, AE_Ratio >= 1.20, Placed_AE_Ratio >= 1.05, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Jockey))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -817,6 +855,8 @@ trainerNew <- newTrainer %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -849,6 +889,8 @@ classDropper <- classDrop %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -884,6 +926,8 @@ classRiser <- classRise %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -914,6 +958,8 @@ impHorse <- improver %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -944,6 +990,8 @@ impHorseVOR <- improver %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -978,6 +1026,8 @@ newDistance <- newTrip %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
   arrange(desc(AE_Ratio, Archie))
@@ -1009,6 +1059,8 @@ newDistanceVOR <- newTrip %>%
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
   arrange(desc(AE_Ratio, Archie))

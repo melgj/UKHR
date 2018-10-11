@@ -40,6 +40,8 @@ goodDrawRange <- ukFA %>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), 
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, Archie > 3.5, Exp_Wins >= 5)%>%
   filter(!is.na(Draw_Range)) %>% 
@@ -53,6 +55,8 @@ badDrawRange <- ukFA %>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), 
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 50, AE_Ratio <= 0.75, meanPL <= -0.20, Archie > 3.5, Exp_Wins >= 5)%>%
   filter(!is.na(Draw_Range)) %>% 
@@ -68,6 +72,8 @@ goodDrawStall <- ukFA %>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), 
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, Archie > 3.5, Exp_Wins >= 5)%>%
   filter(!is.na(Stall)) %>% 
@@ -81,6 +87,8 @@ badDrawStall <- ukFA %>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), 
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 50, AE_Ratio <= 0.75, meanPL <= -0.20, Archie > 3.5, Exp_Wins >= 5)%>%
   filter(!is.na(Stall)) %>% 
@@ -96,6 +104,8 @@ goodRevDraw <- ukFA %>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), 
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, Archie > 3.5, Exp_Wins >= 5)%>%
   filter(!is.na(Rev_Draw)) %>% 
@@ -109,6 +119,8 @@ badRevDraw <- ukFA %>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), 
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
   filter(Runs >= 50, AE_Ratio <= 0.75, meanPL <= -0.20, Archie > 3.5, Exp_Wins >= 5)%>%
   filter(!is.na(Rev_Draw)) %>% 
@@ -146,7 +158,7 @@ todayGoodDraw <- goodDrawRange %>%
   left_join(todayFlatDraws, by = c("Meeting", "RaceType", "Furlongs", "Draw_Range", "Going_Range")) %>% 
   filter(!is.na(Time24Hour), Runners >= 8) %>% 
   select(Time24Hour, Meeting, RaceType, Horse, Draw_Range, Stall, Runners, Going_Range, Furlongs, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
-         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Archie) %>% 
+         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Btn_AE_Ratio, Archie) %>% 
   arrange(Time24Hour, Rating_Rank)
 
 
@@ -161,7 +173,7 @@ todayBadDraw <- badDrawRange %>%
   left_join(todayFlatDraws, by = c("Meeting", "RaceType", "Furlongs", "Draw_Range", "Going_Range")) %>% 
   filter(!is.na(Time24Hour), Runners >= 8) %>% 
   select(Time24Hour, Meeting, RaceType, Horse, Draw_Range, Stall, Runners, Going_Range, Furlongs, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
-         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Archie) %>% 
+         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Btn_AE_Ratio, Archie) %>% 
   arrange(Time24Hour, Rating_Rank)
 
 
@@ -177,7 +189,7 @@ todayGoodDrawStall <- goodDrawStall %>%
   left_join(todayFlatDraws, by = c("Meeting", "RaceType", "Furlongs", "Stall", "Going_Range")) %>% 
   filter(!is.na(Time24Hour), Runners >= 8) %>% 
   select(Time24Hour, Meeting, RaceType, Horse, Draw_Range, Stall, Runners, Going_Range, Furlongs, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
-         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Archie) %>% 
+         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Btn_AE_Ratio, Archie) %>% 
   arrange(Time24Hour, Rating_Rank)
 
 
@@ -192,7 +204,7 @@ todayBadDrawStall <- badDrawStall %>%
   left_join(todayFlatDraws, by = c("Meeting", "RaceType", "Furlongs", "Stall", "Going_Range")) %>% 
   filter(!is.na(Time24Hour), Runners >= 8) %>% 
   select(Time24Hour, Meeting, RaceType, Horse, Draw_Range, Stall, Runners, Going_Range, Furlongs, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
-         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Archie) %>% 
+         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Btn_AE_Ratio, Archie) %>% 
   arrange(Time24Hour, Rating_Rank)
 
 
@@ -209,7 +221,7 @@ todayGoodRevDraw <- goodRevDraw %>%
   left_join(todayFlatDraws, by = c("Meeting", "RaceType", "Furlongs", "Rev_Draw", "Going_Range")) %>% 
   filter(!is.na(Time24Hour), Runners >= 8) %>% 
   select(Time24Hour, Meeting, RaceType, Horse, Draw_Range, Rev_Draw, Stall, Runners, Going_Range, Furlongs, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
-         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Archie) %>% 
+         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Btn_AE_Ratio, Archie) %>% 
   arrange(Time24Hour, Rating_Rank)
 
 
@@ -224,7 +236,7 @@ todayBadRevDraw <- badRevDraw %>%
   left_join(todayFlatDraws, by = c("Meeting", "RaceType", "Furlongs", "Rev_Draw", "Going_Range")) %>% 
   filter(!is.na(Time24Hour), Runners >= 8) %>% 
   select(Time24Hour, Meeting, RaceType, Horse, Draw_Range, Rev_Draw, Stall, Runners, Going_Range, Furlongs, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
-         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Archie) %>% 
+         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Btn_AE_Ratio, Archie) %>% 
   arrange(Time24Hour, Rating_Rank)
 
 
@@ -256,51 +268,69 @@ write_csv(t3gdAll, "Top_3_Rated_Good_Draw.csv")
 
 # All Good Draws
 
-tgd <- filter(today, Horse %in% todayGoodDraw$Horse | 
-                 Horse %in% todayGoodDrawStall$Horse |
-                 Horse %in% todayGoodRevDraw$Horse)
+goodDrawToday <- todayGoodDraw %>% 
+  full_join(todayGoodDrawStall) %>% 
+  full_join(todayGoodRevDraw) %>% 
+  select(Time24Hour, Meeting, RaceType, Horse, Draw_Range, Rev_Draw, Stall, Runners, Going_Range, Furlongs, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
+         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Btn_AE_Ratio, Archie) %>% 
+  arrange(Time24Hour, Meeting, Horse, desc(AE_Ratio))
+  
+goodDrawToday
 
-tgdAll <- select(tgd, Time24Hour, Meeting, Horse, Trainer, Handicap, Furlongs, 
-                  Stall, RaceType, Rating_Rank, BetFairSPForecastWinPrice, 
-                  ValueOdds_BetfairFormat)
+#View(goodDrawToday)
 
-tgdAll <- arrange(tgdAll, Time24Hour, Meeting, Horse)
 
-tgdAll
 
-write_csv(tgdAll, "Today_Good_Draw.csv")
+# tgd <- filter(today, Horse %in% todayGoodDraw$Horse | 
+#                  Horse %in% todayGoodDrawStall$Horse |
+#                  Horse %in% todayGoodRevDraw$Horse)
+# 
+# tgdAll <- select(tgd, Time24Hour, Meeting, Horse, Trainer, Handicap, Furlongs, 
+#                   Stall, RaceType, Rating_Rank, BetFairSPForecastWinPrice, 
+#                   ValueOdds_BetfairFormat)
+# 
+# tgdAll <- arrange(tgdAll, Time24Hour, Meeting, Horse)
+# 
+# tgdAll
+
+write_csv(goodDrawToday, "Today_Good_Draw.csv")
 
 
 # All Bad Draws
 
-tbd <- filter(today, Horse %in% todayBadDraw$Horse | 
-                 Horse %in% todayBadDrawStall$Horse |
-                 Horse %in% todayBadRevDraw$Horse)
+badDrawToday <- todayBadDraw %>% 
+  full_join(todayBadDrawStall) %>% 
+  full_join(todayBadRevDraw) %>% 
+  select(Time24Hour, Meeting, RaceType, Horse, Draw_Range, Rev_Draw, Stall, Runners, Going_Range, Furlongs, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, 
+         Rating_Rank, Runs, meanPL, totalPL, AE_Ratio, ValueOdds_BetfairFormat, WinPercent, Winners, Exp_Wins, Btn_AE_Ratio, Archie) %>% 
+  arrange(Time24Hour, Meeting, Horse, desc(AE_Ratio))
 
-tbdAll <- select(tbd, Time24Hour, Meeting, Horse, Trainer, Handicap, Furlongs, 
-                  Stall, RaceType, Rating_Rank, BetFairSPForecastWinPrice, 
-                  ValueOdds_BetfairFormat)
+badDrawToday
 
-tbdAll <- arrange(tbdAll, Time24Hour, Meeting, Horse)
+View(badDrawToday)
 
-tbdAll
+# tbd <- filter(today, Horse %in% todayBadDraw$Horse | 
+#                  Horse %in% todayBadDrawStall$Horse |
+#                  Horse %in% todayBadRevDraw$Horse)
+# 
+# tbdAll <- select(tbd, Time24Hour, Meeting, Horse, Trainer, Handicap, Furlongs, 
+#                   Stall, RaceType, Rating_Rank, BetFairSPForecastWinPrice, 
+#                   ValueOdds_BetfairFormat)
+# 
+# tbdAll <- arrange(tbdAll, Time24Hour, Meeting, Horse)
+# 
+# tbdAll
 
-write_csv(tbdAll, "Today_Bad_Draw.csv")
+write_csv(badDrawToday, "Today_Bad_Draw.csv")
 
 ###############################################################################################
 
-qualsGD <- filter(asq,
-                  Horse %in% todayGoodDraw$Horse | 
-                    Horse %in% todayGoodDrawStall$Horse |
-                    Horse %in% todayGoodRevDraw$Horse)
+qualsGD <- filter(asq, Horse %in% goodDrawToday$Horse)
 
-qualsBD <- filter(asq,
-                  Horse %in% todayBadDraw$Horse | 
-                    Horse %in% todayBadDrawStall$Horse |
-                    Horse %in% todayBadRevDraw$Horse)
+qualsBD <- filter(asq, Horse %in% badDrawToday$Horse)
 
-qualsBD
 qualsGD
+qualsBD
 
 write_csv(qualsBD, "Archie_Quals_Bad_Draw.csv")
 write_csv(qualsGD, "Archie_Quals_Good_Draw.csv")

@@ -28,6 +28,8 @@ trainersNH <- ukNH%>%
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
             WinPercent = sum(Actual)/Runs, Horses = length(unique(Horse)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
   filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
   arrange(desc(AE_Ratio))
@@ -67,6 +69,8 @@ hdlStaySires <- ukHurdle%>%
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
             WinPercent = sum(Actual)/Runs, Horses = length(unique(Horse)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
   filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
   arrange(desc(AE_Ratio))
@@ -108,6 +112,8 @@ hdlStayTrainers<- ukHurdle%>%
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
             WinPercent = sum(Actual)/Runs, Horses = length(unique(Horse)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
   filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
   arrange(Trainer,desc(AE_Ratio),desc(meanPL))
@@ -170,6 +176,8 @@ softSiresNH <- softGroundNH%>%
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
             WinPercent = sum(Actual)/Runs, Horses = length(unique(Horse)),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
   filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
   arrange(desc(AE_Ratio),desc(meanPL))

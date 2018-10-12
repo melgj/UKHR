@@ -85,7 +85,7 @@ allArchie <- asq %>%
          Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, 
          totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, 
          Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age) %>% 
-  filter(Archie > 4.0, Exp_Wins >= 5, AE_Ratio >= 1.40, !(System_Name %in% poorSystems$System_Name)) %>% 
+  filter(Archie >= 4.0, Exp_Wins >= 5, AE_Ratio >= 1.20) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
 allArchie
@@ -123,7 +123,7 @@ highArchieQuals
 
 View(highArchieQuals)
 
-goodStatsQuals <- filter(asq, Archie >= 6.0, AE_Ratio >= 1.20)
+goodStatsQuals <- filter(asq, Archie >= 4.0, AE_Ratio >= 1.40, Placed_AE_Ratio >= 1.10)
 
 goodStatsQuals <- goodStatsQuals %>%
   select(Time24Hour, Meeting, Horse, System_Name, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,

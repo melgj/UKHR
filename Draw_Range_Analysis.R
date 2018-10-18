@@ -307,7 +307,7 @@ badDrawToday <- todayBadDraw %>%
 
 badDrawToday
 
-View(badDrawToday)
+#View(badDrawToday)
 
 # tbd <- filter(today, Horse %in% todayBadDraw$Horse | 
 #                  Horse %in% todayBadDrawStall$Horse |

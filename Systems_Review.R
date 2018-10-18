@@ -13,138 +13,24 @@ setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_08_31.csv",col_names = T)
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Stall = min_rank(StallNumber))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Rating_Rank = min_rank(RatingsPosition))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Class_Rank = min_rank(ClassPosition))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Class_Rank_Range = cut(Class_Rank, 3,
-                                labels = c("Top_Third", "Middle_Third", "Bottom_Third"), 
-                                ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Spd_Rank = min_rank(SpeedRatingRank))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Speed_Rank_Range = cut(Spd_Rank, 3,
-                                labels = c("Top_Third", "Middle_Third", "Bottom_Third"), 
-                                ordered_result = T))
-
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_09_30.csv",col_names = T)
 
 
 ukhr_master_BF <- ukhr_master_BF %>% 
   group_by(UKHR_RaceID) %>% 
-  mutate(Ratings_Range = cut(Rating_Rank, 3,
-                             labels = c("Top_Third", "Middle_Third" ,"Bottom_Third"), 
-                             ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Weight_Range = cut(desc(Weight_Pounds), 3,
-                            labels = c("High", "Middle", "Low"),
-                            ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(LTO_Days_Range = cut(DaysSinceLastRun, breaks = c(0, 4, 7, 35, 91, 182, 365, 1000),
-                              labels = c("<=4", "<=7", "<=35", "<=91", "<=182", "<=365", "<=1000"), 
-                              ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(BFSPFC_Odds_Range = cut(BetFairSPForecastWinPrice, breaks = c(0, 6, 11, 21, 51, 1000),
-                                 labels = c("<=6", ">6 to 11", ">11 to 21", ">21 to 51", ">51"),
-                                 ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Value_Odds_Range = cut(ValueOdds_BetfairFormat, breaks = c(0, 6, 11, 21, 51, 1000),
-                                labels = c("<=6", ">6 to 11", ">11 to 21",">21 to 51", ">51"),
-                                ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Value_Odds_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat,
-         VOR_Range = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 2.5, 5.0, 10, 100),
-                         labels = c("<=0.5", ">0.5 to 1.0", ">1 to 2.50", ">2.50 to 5.0", ">5 to 10", ">10"),
-                         ordered_result = T)) 
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(BFSP_ValOdds_Ratio = Betfair.Win.S.P. / ValueOdds_BetfairFormat,
-         BFSP_VOR_Range = cut(BFSP_ValOdds_Ratio, breaks = c(0, 0.5, 1.0, 2.5, 5.0, 10, 100),
-                              labels = c("<=0.5", ">0.5 to 1.0", ">1 to 2.50", ">2.50 to 5.0", ">5 to 10", ">10"),
-                              ordered_result = T)) 
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(BFSP_Odds_Range = cut(Betfair.Win.S.P., breaks = c(0, 2, 6, 11, 21, 51, 1000),
-                               labels = c("<=2","<=6", ">6 to 11", ">11 to 21", ">21 to 51", ">51"),
-                               ordered_result = T))
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Runners_Range = cut(Actual.Runners, breaks = c(0, 8, 16, 100),
-                             labels = c("<=8", "9-16", "17+"),
-                             ordered_result = T)) 
+  mutate(Fin_Pos = min_rank(LengthsBehindTotal),
+         Exp_Btn = Actual.Runners - Fav_Rank,
+         Act_Btn = Actual.Runners - Fin_Pos)
 
 
 
 
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Place_Expected = 1/Betfair.Place.S.P.)
 
-slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT") 
-
-fastGround <- c("GOOD", "GD-FM", "FIRM", "HARD")
-
-syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
-
-softGround <- c("SOFT", "SFT-HVY", "HEAVY")
-
-unique(ukhr_master_BF$Going)
-
-ukhr_master_BF$Going_Range <- ifelse(ukhr_master_BF$Going %in% slowGround, "SLOW", 
-                                     ifelse(ukhr_master_BF$Going %in% fastGround,"FAST", "SYNTHETIC"))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(Weight_Rank = min_rank(desc(Weight_Pounds)))
 
 #head(ukhr_master_BF$Weight_Rank, 30)   
 #head(ukhr_master_BF$Weight_Pounds, 30)
 
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(Rev_Weight_Rank = min_rank(Weight_Pounds))
 
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(Fav_Rank = min_rank(Betfair.Win.S.P.))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(FC_Fav_Rank = min_rank(BetFairSPForecastWinPrice))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(FcFav_Odds = min(BetFairSPForecastWinPrice))
-
-ukhr_master_BF <- ukhr_master_BF %>%
-  group_by(UKHR_RaceID) %>%
-  mutate(FcFav_Odds_Range = cut(FcFav_Odds, breaks = c(0, 1.5 ,2, 4, 6, 11, 100),
-                                labels = c("<= 1.5",">1.5 to 2",">2 to 4", ">4 to 6", ">6 to 11", ">11"),
-                                ordered_result = T))
-
-
-
-
-colnames(ukhr_master_BF)
 
 #head(ukhr_master_BF$VSP_Stake)
 
@@ -164,6 +50,16 @@ ukhr_master_BF <-  ukhr_master_BF %>%
   filter(Year != 2018)
 
 
+slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT")
+
+fastGround <- c("GD-FM", "FIRM", "HARD")
+
+syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
+
+softGround <- c("SOFT", "SFT-HVY", "HEAVY")
+
+
+
 
 #############################################
 
@@ -171,6 +67,10 @@ allAWQuals <- todayAllAW_Qualifiers %>%
   arrange(Time24Hour,Meeting,Horse)
 
 allAWQuals
+
+#View(allAWQuals)
+
+#write_csv(allAWQuals, "todays_ALL_AW_Qualifiers_2017_22_12_17.csv")
 
 #join AW & Flat Qualifiers
 
@@ -189,119 +89,129 @@ allSystemQualifiers <- allQualsFlatAW%>%
 
 allSystemQualifiers$Val_Ratio <-allSystemQualifiers$BetFairSPForecastWinPrice / allSystemQualifiers$ValueOdds_BetfairFormat
 
-allSystemQualifiers <- allSystemQualifiers %>%
-  mutate(BFSP_Odds_Range = cut(Betfair.Win.S.P., breaks = c(0, 6, 11, 21, 51, 1000),
-                               labels = c("<=6", ">6 to 11", ">11 to 21", ">21 to 51", ">51"),
-                               ordered_result = T))
-
-
-allSystemQualifiers <- select(allSystemQualifiers, Time24Hour, Meeting, Horse, System_Name, Trainer, Jockey, Sire, Dist_Range, 
-                              RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range, BFSPFC_Odds_Range,
-                              BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, 
-                              NumberOfResults, Alarms, Age, Runs, meanPL, totalPL, Avg_BFVSP_PL, Total_BFVSP_PL, Avg_VSP_Stake,
-                              Total_VSP_Stake,VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, BF_Place_ROI, AE_Ratio, WinPercent, 
-                              Winners, Exp_Wins, BFSP_PL, Actual, Expected, Betfair.Placed,Place_Expected, BF_Placed_SP_PL, 
-                              Betfair.Win.S.P., BFSP_Odds_Range, VSP_PL, Runners, Month, Result, LengthsBehindTotal, Archie)
+head(allSystemQualifiers)
 
 asq <- allSystemQualifiers %>% 
-  mutate(Placed_Archie = ifelse(Exp_Places >= 5.0,((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),0),
-         Place_Percent = Places/Runs) %>% 
-  filter(Archie > 2.50)
-
-#View(asq)
-
-length(unique(asq$Horse))
-
-
-#####################################################################################
-
-# Archie Score Calculation  
-# Formula: (Runners * (Winners - Expected Winners) ^ 2) / Expected Winners * (Runners - Expected Winners)
-
-allArchie <- asq %>% 
   mutate(Winners = round(Runs * WinPercent), Exp_Wins = Winners/AE_Ratio, 
          Archie = ifelse(Exp_Wins >= 5,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0),
-         Placed_Archie = ifelse(Exp_Places >= 5.0,((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),0),
+         Placed_Archie = ifelse(Exp_Places >= 5.0, round(((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),2),0),
+         #Btn_Archie = ifelse(Total_Exp_Btn >= 5,((Runs * ((Total_Btn - Total_Exp_Btn) ^ 2)) / (Total_Exp_Btn * (Runs - Total_Exp_Btn))),0),
+         Place_Percent = Places/Runs,
          Arch_Strength = cut(Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
                              labels = c("-", "*", "**", "***", "****", "*****")),
          Arch_Placed_Strength = cut(Placed_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
                                     labels = c("-", "*", "**", "***", "****", "*****")),
-         Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat)
+         #Arch_Btn_Strength = cut(Btn_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
+         #labels = c("-", "*", "**", "***", "****", "*****")),
+         Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat) %>% 
+  select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
+         Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, 
+         totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, 
+         Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, 
+         BFSP_PL, BF_Placed_SP_PL, Actual, Expected, Betfair.Placed, Place_Expected) %>% 
+  filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5) %>% 
+  arrange(Time24Hour, Meeting, Horse)
 
-allArchie <- allArchie %>% 
-  select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie,
-         Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, BFSP_PL, VSP_PL, Betfair.Win.S.P., BFSP_Odds_Range,
-         Actual, Expected, Betfair.Placed, Place_Expected, BF_Placed_SP_PL, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, 
-         VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, 
-         Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, 
-         Runners, Month, Result, LengthsBehindTotal, Age) %>% 
-  filter(Archie > 3.5, Exp_Wins >= 5, AE_Ratio >= 1.20, Placed_AE_Ratio > 1.05) %>% 
+
+#####################################################################################
+
+allArchie <- asq %>% 
+  select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
+         Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, 
+         totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, 
+         Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age,
+         BFSP_PL, BF_Placed_SP_PL, Actual, Expected, Betfair.Placed, Place_Expected) %>% 
+  filter(Archie >= 4.0, Exp_Wins >= 5, AE_Ratio >= 1.20) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
 allArchie
 
+#iew(allArchie)
+
 length(unique(allArchie$Horse))
 
-#View(allArchie)
+#todayArchie <- allArchie %>% 
+#left_join(systemSummaryTables, by = "System_Name")
 
-highArchieQuals <- filter(allArchie, Archie >= 5.5, meanPL >= 0.20, WinPercent >= 0.12, AE_Ratio >= 1.30, Placed_AE_Ratio >= 1.10)
+# todayArchie
+# 
 
-highArchieQuals <- highArchieQuals %>% 
-  # select(Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
-  #        BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
-  #        Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie, 
-  #        Arch_Strength, Arch_Placed_Strength) %>% 
+# View(archieGoodSystems)
+# 
+# 
+highArchieQuals <- filter(asq, Archie >= 8.5, AE_Ratio >= 1.20)
+
+highArchieQuals <- highArchieQuals %>%
+  select(Time24Hour, Meeting, Horse, System_Name,Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
+         BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
+         Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI, AE_Ratio, 
+         WinPercent, Winners, Exp_Wins, Archie, Total_Exp_Btn, Total_Btn, Btn_AE_Ratio, Arch_Strength, Arch_Placed_Strength,
+         BFSP_PL, BF_Placed_SP_PL, Actual, Expected, Betfair.Placed, Place_Expected) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 highArchieQuals
 
 #View(highArchieQuals)
 
+goodStatsQuals <- filter(asq, Archie >= 4.0, AE_Ratio >= 1.40, Placed_AE_Ratio >= 1.10)
 
-eliteArchieQuals <- filter(allArchie, Archie >= 8.0, AE_Ratio >= 1.40, meanPL >= 0.20, WinPercent >= 0.12, Placed_AE_Ratio >= 1.15)
-
-eliteArchieQuals <- eliteArchieQuals %>% 
-  # select(Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
-  #        BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms, 
-  #        Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie, 
-  #        Arch_Strength, Arch_Placed_Strength) %>% 
+goodStatsQuals <- goodStatsQuals %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, 
+         Ratings_Range, VOR_Range, BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, 
+         Rev_Weight_Rank, NumberOfResults, Alarms, Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie,
+         Place_Percent, BF_Place_ROI, AE_Ratio, WinPercent, Winners, Exp_Wins, Archie, Total_Exp_Btn, Total_Btn, Btn_AE_Ratio, Arch_Strength, 
+         Arch_Placed_Strength, BFSP_PL, BF_Placed_SP_PL, Actual, Expected, Betfair.Placed, Place_Expected) %>%
   arrange(Time24Hour, Meeting, Horse)
 
-eliteArchieQuals
+goodStatsQuals
 
-#View(eliteArchieQuals)
+#View(goodStatsQuals)
 
-highAERQuals <- filter(allArchie, AE_Ratio >= 1.60, Placed_AE_Ratio >= 1.20) %>% 
-  arrange(Time24Hour, Meeting, Horse)
-
-highAERQuals
-# 
-# write_csv(asq, "All_System_Qualifiers_to_2018_08.csv")
+write_csv(asq, "All_System_Qualifiers_to_2018_09.csv")
 # #
-# write_csv(allArchie, "All_Archie_Quals_to_2018_08.csv")
+write_csv(allArchie, "All_Archie_Quals_to_2018_09.csv")
 # #
-# write_csv(highArchieQuals, "All_High_Archie_Quals_to_2018_08.csv")
+write_csv(highArchieQuals, "All_High_Archie_Quals_to_2018_09.csv")
 # #
-# write_csv(eliteArchieQuals, "All_Elite_Archie_Quals_to_2018_08.csv")
+write_csv(goodStatsQuals, "All_Good_Stats_Quals_to_2018_09.csv")
 # #
 # write_csv(highAERQuals, "All_High_AER_Archie_Quals_to_2018_08.csv")
 
-systemsAnalysisASQ_2018 <- read_csv("All_System_Qualifiers_to_2018_08.csv", col_names = T)
+systemsAnalysisASQ_2018 <- read_csv("All_System_Qualifiers_to_2018_09.csv", col_names = T)
 
-systemsAnalysis2018 <- read_csv("All_Archie_Quals_to_2018_08.csv", col_names = T)
+systemsAnalysisArchie_2018 <- read_csv("All_Archie_Quals_to_2018_09.csv", col_names = T)
 
-systemsAnalysis2018High <- read_csv("All_High_Archie_Quals_to_2018_08.csv", col_names = T)
+systemsAnalysisHighArch_2018 <- read_csv("All_High_Archie_Quals_to_2018_09.csv", col_names = T)
 
-systemsAnalysis2018Elite <- read_csv("All_Elite_Archie_Quals_to_2018_08.csv", col_names = T)
+systemsAnalysisGoodStats_2018 <- read_csv("All_Good_Stats_Quals_to_2018_09.csv", col_names = T)
 
-systemsAnalysis2018AER <- read_csv("All_High_AER_Archie_Quals_to_2018_08.csv", col_names = T)
+#systemsAnalysis2018AER <- read_csv("All_High_AER_Archie_Quals_to_2018_08.csv", col_names = T)
 
-colnames(systemsAnalysis2018)
+colnames(systemsAnalysisASQ_2018)
+
+systemsAnalysisASQ_2018 <- systemsAnalysisASQ_2018 %>% 
+  mutate(Archie_Range = cut(Archie, breaks = c(0, 4.0, 6.0, 8.0, 100),
+                            labels = c("<=4", ">4 to 6", ">6 to 8",">8"), 
+                            ordered_result = T),
+         Placed_AER_Range = cut(Placed_AE_Ratio, breaks = c(0, 1.0, 1.1, 1.2, 100),
+                                labels = c("<=1.0", ">1 to 1.1", ">1.1 to 1.2",">1.2"), 
+                                ordered_result = T),
+         AER_Range = cut(AE_Ratio, breaks = c(0, 1.3, 1.4, 1.6, 1.8, 100),
+                         labels = c("<=1.3", ">1.3 to 1.4", ">1.4 to 1.6",">1.6 to 1.8", ">1.8"), 
+                         ordered_result = T),
+         Value_Odds_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat,
+         VOR_Range_2 = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 5.0, 10.0, 1000),
+                           labels = c("<=0.5", ">0.5 to 1.0", ">1.0 to 1.25",">1.25 to 1.50", ">1.5 to 1.75", ">1.75 to 2.0",
+                                               ">2.0 to 2.5", ">2.5 to 5.0", ">5.0 to 10.0", ">10.0"), 
+                           ordered_result = T),
+         Btn_AER_Range = cut(Btn_AE_Ratio, breaks = c(0, 1.0, 50.0),
+                                labels = c("<=1.0",">1.0"), 
+                                ordered_result = T))
 
 #sa <- systemsAnalysis2018 %>% 
  # filter(ValueOdds_BetfairFormat < BetFairSPForecastWinPrice)
 
-systemsSummary <- systemsAnalysis2018 %>%
+systemsSummaryAll <- systemsAnalysisASQ_2018 %>%
   group_by(System_Name) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
@@ -312,36 +222,65 @@ systemsSummary <- systemsAnalysis2018 %>%
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), 
             Exp_Places = sum(Place_Expected, na.rm = T),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+  #filter(Handicap == "HANDICAP") %>% 
+  
   #filter(Runs >= 20, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
 
-systemsSummary
+systemsSummaryAll
 
-View(systemsSummary)
+View(systemsSummaryAll)
+
+systemsSummaryAll %>% 
+  summarise(Avg_Profit = sum(totalPL)/sum(Runs),
+            Total_Profit = sum(totalPL),
+            Total_Runners = sum(Runs))
 
 #colSums(systemsSummary[,2:13])
 
 #write_csv(systemsSummary, "Summary_System_Results_Tables_July_2018.csv")
 
-poorPerforming <- systemsSummary %>% 
-  filter(Runs >= 30, AE_Ratio <= 0.9, meanPL < 0, Placed_AE_Ratio <= 1.0, Exp_Wins >= 5) %>% 
+poorPerforming <- systemsSummaryAll %>% 
+  filter(Runs >= 50, AE_Ratio <= 0.9, meanPL < 0, Placed_AE_Ratio <= 1.0, Exp_Wins >= 5) %>% 
   arrange(AE_Ratio, desc(Archie))
 
 poorPerforming
 
 View(poorPerforming)
 
-#write_csv(poorPerforming, "Poor_Performing_Systems_July_2018.csv")
+write_csv(poorPerforming, "Poor_Performing_Systems.csv")
 
-goodPerforming <- systemsSummary %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.1, Placed_AE_Ratio >= 1.0, Exp_Wins >= 5) %>% 
+goodPerforming <- systemsSummaryAll %>% 
+  filter(Runs >= 50, AE_Ratio >= 1.1, Placed_AE_Ratio >= 1.0, Exp_Wins >= 5) %>% 
   arrange(desc(AE_Ratio, Archie))
 
 goodPerforming
 
 View(goodPerforming)
 
-systemsSummaryHigh <- systemsAnalysis2018High %>%
+write_csv(goodPerforming, "Good_Performing_Systems.csv")
+
+systemsAnalysisHighArch_2018 <- systemsAnalysisHighArch_2018 %>% 
+  mutate(Archie_Range = cut(Archie, breaks = c(0, 4.0, 6.0, 8.0, 100),
+                            labels = c("<=4", ">4 to 6", ">6 to 8",">8"), 
+                            ordered_result = T),
+         Placed_AER_Range = cut(Placed_AE_Ratio, breaks = c(0, 1.0, 1.1, 1.2, 100),
+                                labels = c("<=1.0", ">1 to 1.1", ">1.1 to 1.2",">1.2"), 
+                                ordered_result = T),
+         AER_Range = cut(AE_Ratio, breaks = c(0, 1.3, 1.4, 1.6, 1.8, 100),
+                         labels = c("<=1.3", ">1.3 to 1.4", ">1.4 to 1.6",">1.6 to 1.8", ">1.8"), 
+                         ordered_result = T),
+         Value_Odds_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat,
+         VOR_Range_2 = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 5.0, 10.0, 1000),
+                           labels = c("<=0.5", ">0.5 to 1.0", ">1.0 to 1.25",">1.25 to 1.50", ">1.5 to 1.75", ">1.75 to 2.0",
+                                      ">2.0 to 2.5", ">2.5 to 5.0", ">5.0 to 10.0", ">10.0"), 
+                           ordered_result = T),
+         Btn_AER_Range = cut(Btn_AE_Ratio, breaks = c(0, 1.0, 50.0),
+                             labels = c("<=1.0",">1.0"), 
+                             ordered_result = T))
+
+
+systemsSummaryHigh <- systemsAnalysisHighArch_2018 %>%
   group_by(System_Name) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
@@ -359,7 +298,12 @@ systemsSummaryHigh
 
 View(systemsSummaryHigh)
 
-write_csv(systemsSummaryHigh, "Summary_System_Tables_High_Archie_2018_07.csv")
+systemsSummaryHigh %>% 
+  summarise(Avg_Profit = sum(totalPL)/sum(Runs),
+            Total_Profit = sum(totalPL),
+            Total_Runners = sum(Runs))
+
+#write_csv(systemsSummaryHigh, "Summary_System_Tables_High_Archie_2018_07.csv")
 
 
 poorPerformingHigh <- systemsSummaryHigh %>% 
@@ -380,7 +324,74 @@ View(goodPerformingHigh)
 
 #write_csv(poorPerforming, "Poor_Performing_Systems_July_2018.csv")
 
-systemsSummaryElite <- systemsAnalysis2018Elite %>%
+systemsAnalysisGoodStats_2018 <- systemsAnalysisGoodStats_2018 %>% 
+  mutate(Archie_Range = cut(Archie, breaks = c(0, 4.0, 6.0, 8.0, 100),
+                            labels = c("<=4", ">4 to 6", ">6 to 8",">8"), 
+                            ordered_result = T),
+         Placed_AER_Range = cut(Placed_AE_Ratio, breaks = c(0, 1.0, 1.1, 1.2, 100),
+                                labels = c("<=1.0", ">1 to 1.1", ">1.1 to 1.2",">1.2"), 
+                                ordered_result = T),
+         AER_Range = cut(AE_Ratio, breaks = c(0, 1.3, 1.4, 1.6, 1.8, 100),
+                         labels = c("<=1.3", ">1.3 to 1.4", ">1.4 to 1.6",">1.6 to 1.8", ">1.8"), 
+                         ordered_result = T),
+         Value_Odds_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat,
+         VOR_Range_2 = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 5.0, 10.0, 1000),
+                           labels = c("<=0.5", ">0.5 to 1.0", ">1.0 to 1.25",">1.25 to 1.50", ">1.5 to 1.75", ">1.75 to 2.0",
+                                      ">2.0 to 2.5", ">2.5 to 5.0", ">5.0 to 10.0", ">10.0"), 
+                           ordered_result = T),
+         Btn_AER_Range = cut(Btn_AE_Ratio, breaks = c(0, 1.0, 50.0),
+                             labels = c("<=1.0",">1.0"), 
+                             ordered_result = T))
+
+
+systemsSummaryGoodStats <- systemsAnalysisGoodStats_2018 %>%
+  group_by(Btn_AER_Range) %>%
+  summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+            #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+            #Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+            AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), 
+            BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), 
+            Exp_Places = sum(Place_Expected, na.rm = T),
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+  #filter(Runs >= 20, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
+  arrange(desc(AE_Ratio, Archie))
+
+systemsSummaryGoodStats
+
+#write_csv(systemsSummaryElite, "Summary_System_Tables_Elite_Archie_2018_07.csv")
+
+View(systemsSummaryGoodStats)
+
+systemsSummaryGoodStats %>% 
+  summarise(Avg_Profit = sum(totalPL)/sum(Runs),
+            Total_Profit = sum(totalPL),
+            Total_Runners = sum(Runs))
+
+
+poorPerformingGoodStats <- systemsSummaryGoodStats %>% 
+  filter(Runs >= 30, AE_Ratio <= 0.9, meanPL < 0, Placed_AE_Ratio <= 1.0, Exp_Wins >= 5) %>% 
+  arrange(AE_Ratio, desc(Archie))
+
+poorPerformingGoodStats
+
+View(poorPerformingGoodStats)
+
+
+goodPerformingGoodStats <- systemsSummaryGoodStats %>% 
+  filter(Runs >= 30, AE_Ratio >= 1.1, Placed_AE_Ratio >= 1.0, Exp_Wins >= 5) %>% 
+  arrange(desc(AE_Ratio, Archie))
+
+goodPerformingGoodStats
+
+View(goodPerformingGoodStats)
+
+
+
+
+systemsSummaryAllHcp <- systemsAnalysisASQ_2018 %>%
+  filter(Handicap == "HANDICAP", Ratings_Range != "Bottom_Third") %>% 
   group_by(System_Name) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
@@ -390,108 +401,88 @@ systemsSummaryElite <- systemsAnalysis2018Elite %>%
             BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), 
             Exp_Places = sum(Place_Expected, na.rm = T),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+            Archie = round((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)),2))%>%
+  #filter(Handicap == "HANDICAP") %>% 
+  
   #filter(Runs >= 20, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, Archie))
 
-systemsSummaryElite
+systemsSummaryAllHcp
 
-write_csv(systemsSummaryElite, "Summary_System_Tables_Elite_Archie_2018_07.csv")
+View(systemsSummaryAllHcp)
 
-View(systemsSummaryElite)
-
-poorPerformingElite <- systemsSummaryElite %>% 
+poorPerformingHcp <- systemsSummaryAllHcp %>% 
   filter(Runs >= 30, AE_Ratio <= 0.9, meanPL < 0, Placed_AE_Ratio <= 1.0, Exp_Wins >= 5) %>% 
   arrange(AE_Ratio, desc(Archie))
 
-poorPerformingElite
+poorPerformingHcp
 
-View(poorPerformingElite)
+View(poorPerformingHcp)
 
 
-goodPerformingElite <- systemsSummaryElite %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.1, Placed_AE_Ratio >= 1.0, Exp_Wins >= 5) %>% 
+goodPerformingHcp <- systemsSummaryAllHcp %>% 
+  filter(Runs >= 30, AE_Ratio > 1.1, Placed_AE_Ratio >= 1.0, Exp_Wins >= 5) %>% 
   arrange(desc(AE_Ratio, Archie))
 
-goodPerformingElite
+goodPerformingHcp
 
-View(goodPerformingElite)
+View(goodPerformingHcp)
+
 
 ##############################################################
-
-systemsAnalysisASQ_2018 <- systemsAnalysisASQ_2018 %>% 
-  mutate(Archie_Range = cut(Archie, breaks = c(0, 4.0, 6.0, 8.0, 100),
-                         labels = c("<=4", ">4 to 6", ">6 to 8",">8"), 
-                         ordered_result = T),
-         Placed_AER_Range = cut(Placed_AE_Ratio, breaks = c(0, 1.0, 1.1, 1.2, 100),
-                                labels = c("<=1.0", ">1 to 1.1", ">1.1 to 1.2",">1.2"), 
-                                ordered_result = T),
-         AER_Range = cut(AE_Ratio, breaks = c(0, 1.3, 1.4, 1.6, 1.8, 100),
-                         labels = c("<=1.3", ">1.3 to 1.4", ">1.4 to 1.6",">1.6 to 1.8", ">1.8"), 
-                         ordered_result = T),
-         
-         Value_Odds_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat,
-         
-         VOR_Range_2 = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 5.0, 10.0, 1000),
-                                labels = c("<=0.5", ">0.5 to 1.0", ">1.0 to 1.25",">1.25 to 1.50", ">1.5 to 1.75", ">1.75 to 2.0",
-                                           ">2.0 to 2.5", ">2.5 to 5.0", ">5.0 to 10.0", ">10.0"), 
-                                ordered_result = T))
-
-         
-
-SystemsSummaryASQ <- systemsAnalysisASQ_2018 %>%
-  filter(AE_Ratio >= 1.40, Archie >= 4.0, Ratings_Range != "Bottom_Third") %>% 
-  group_by(VOR_Range_2) %>%
-  summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
-            #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
-            #Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
-            AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
-            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), 
-            BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
-            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), 
-            Exp_Places = sum(Place_Expected, na.rm = T),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
-  #filter(Runs >= 20, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
-  arrange(desc(AE_Ratio, Archie))
-
-SystemsSummaryASQ
-
-View(SystemsSummaryASQ)
-
-poorPerformingASQ <- SystemsSummaryASQ %>% 
-  filter(Runs >= 30, AE_Ratio < 1.0, Placed_AE_Ratio < 1.0, Exp_Wins >= 5) %>% 
-  arrange(AE_Ratio, desc(Archie))
-
-poorPerformingASQ
-
-View(poorPerformingASQ)
-
-
-goodPerformingASQ <- SystemsSummaryASQ %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.1, Placed_AE_Ratio >= 1.0, Exp_Wins >= 5) %>% 
-  arrange(desc(AE_Ratio, Archie))
-
-goodPerformingASQ
-
-View(goodPerformingASQ)
-
-SystemsSummaryASQ_Filtered <- SystemsSummaryASQ %>% 
-  filter(!(System_Name %in% poorPerformingASQ$System_Name)) %>% 
-  arrange(desc(AE_Ratio, Archie))
-
-SystemsSummaryASQ_Filtered
-  
-
-View(SystemsSummaryASQ_Filtered)
-
-
-
-
-
-
-write_csv(goodPerformingASQ, "Good_Performing_Systems_July_2018.csv" )
+# SystemsSummaryASQ <- systemsAnalysisASQ_2018 %>%
+#   filter(AE_Ratio >= 1.40, Archie >= 4.0, Ratings_Range != "Bottom_Third") %>% 
+#   group_by(VOR_Range_2) %>%
+#   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+#             #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+#             #Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+#             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+#             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), 
+#             BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+#             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), 
+#             Exp_Places = sum(Place_Expected, na.rm = T),
+#             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+#   #filter(Runs >= 20, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
+#   arrange(desc(AE_Ratio, Archie))
 # 
-write_csv(poorPerformingASQ, "Poor_Performing_Systems_July_2018.csv")
+# SystemsSummaryASQ
+# 
+# View(SystemsSummaryASQ)
+# 
+# poorPerformingASQ <- SystemsSummaryASQ %>% 
+#   filter(Runs >= 30, AE_Ratio < 1.0, Placed_AE_Ratio < 1.0, Exp_Wins >= 5) %>% 
+#   arrange(AE_Ratio, desc(Archie))
+# 
+# poorPerformingASQ
+
+# View(poorPerformingASQ)
+# 
+# 
+# goodPerformingASQ <- SystemsSummaryASQ %>% 
+#   filter(Runs >= 30, AE_Ratio >= 1.1, Placed_AE_Ratio >= 1.0, Exp_Wins >= 5) %>% 
+#   arrange(desc(AE_Ratio, Archie))
+# 
+# goodPerformingASQ
+# 
+# View(goodPerformingASQ)
+# 
+# SystemsSummaryASQ_Filtered <- SystemsSummaryASQ %>% 
+#   filter(!(System_Name %in% poorPerformingASQ$System_Name)) %>% 
+#   arrange(desc(AE_Ratio, Archie))
+# 
+# SystemsSummaryASQ_Filtered
+#   
+# 
+# View(SystemsSummaryASQ_Filtered)
+# 
+# 
+# 
+# 
+# 
+# 
+# write_csv(goodPerformingASQ, "Good_Performing_Systems_July_2018.csv" )
+# # 
+# write_csv(poorPerformingASQ, "Poor_Performing_Systems_July_2018.csv")
 
 #remove(dupes)
 
@@ -674,7 +665,7 @@ top5Q
 #write_csv(top5Q, "ValueTop5_Quals_to_July_2018_.csv")
 
 top5QSummary <- top5Q %>%
-  group_by() %>%
+  group_by(Rating_Rank) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             #Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -938,7 +929,7 @@ top5Q
 
 t5Summary <- top5Q %>% 
   filter(Value_Odds_Ratio > 1, Speed_Rank_Range != "Bottom_Third") %>% 
-  group_by(VOR_Range, Rating_Rank) %>%
+  group_by(Handicap) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
@@ -953,3 +944,26 @@ t5Summary <- top5Q %>%
 t5Summary
 
 View(t5Summary)  
+
+
+#################################
+
+ratingsSummary <- ukhr_master_BF %>%
+  #filter(AE_Ratio >= 1.4, Archie >= 4.0, Ratings_Range != "Bottom_Third") %>% 
+  group_by(Handicap, VOR_Range, Ratings_Range) %>%
+  summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+            Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+            AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), 
+            BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), 
+            Exp_Places = sum(Place_Expected, na.rm = T),
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+  filter(Runs >= 100, Archie > 3.5, Exp_Wins >= 5.0)%>%
+  arrange(desc(AE_Ratio, Archie))
+
+
+ratingsSummary
+
+View(ratingsSummary)
+

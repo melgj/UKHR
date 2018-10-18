@@ -102,7 +102,7 @@ dualQuals
 
 write_csv(dualQuals, paste0("Dual_Quals_", today$Date[1], ".csv"))
 
-top5QualsGD <- filter(top5Q, Horse %in% wellDrawnToday$Horse)
+top5QualsGD <- filter(top5Q, Horse %in% goodDrawToday$Horse)
 
 top5QualsBD <- filter(top5Q, Horse %in% badDrawToday$Horse)
 

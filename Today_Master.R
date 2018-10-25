@@ -4,15 +4,15 @@ library(tidyverse)
 library(stringr)
 library(stringi)
 library(lubridate)
-#library(doMC)
-library(doParallel)
-cl <- makePSOCKcluster(4) # number of cores to use
-registerDoParallel(cl)
+library(doMC)
+# library(doParallel)
+# cl <- makePSOCKcluster(4) # number of cores to use
+# registerDoParallel(cl)
 
 
 setwd("~/git_projects/UKHR_Project")
 
-#registerDoMC(4)
+registerDoMC(4)
 
 ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_09_30.csv", col_names = T)
 

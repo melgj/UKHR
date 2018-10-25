@@ -544,6 +544,72 @@ jockeyVOR <- ukhr_master_BF %>%
 
 jockeyVOR
 
+
+Tr3yoRouteHcpRR <- ukhr_master_BF %>% 
+  filter(Age == 3, Furlongs >= 10.0, Handicap == "HANDICAP") %>% 
+  group_by(Trainer, Ratings_Range, RaceType) %>% 
+  summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+            Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+            Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+            AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+  filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
+  arrange(desc(AE_Ratio, Archie))
+
+Tr3yoRouteHcpRR
+
+Tr3yoRouteHcp <- ukhr_master_BF %>% 
+  filter(Age == 3, Furlongs >= 10.0, Handicap == "HANDICAP") %>% 
+  group_by(Trainer, RaceType) %>% 
+  summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+            Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+            Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+            AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+  filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
+  arrange(desc(AE_Ratio, Archie))
+
+Tr3yoRouteHcp
+
+##################################################################################################
+
+
+Tr3yoRouteHcp_Quals <- Tr3yoRouteHcp %>% 
+  left_join(today, by = c("Trainer", "RaceType")) %>%
+  filter(Age == 3, Furlongs >= 10.0, Handicap == "HANDICAP", !is.na(Time24Hour)) %>%
+  # select(Time24Hour, Meeting, Horse, Trainer, Alarms, RaceType, Going_Range, Ratings_Range, Handicap, VOR_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
+  #        Runs, meanPL, totalPL, Avg_BFVSP_PL, Total_BFVSP_PL, Avg_VSP_Stake, Total_VSP_Stake,VSP_ROI, Places, Exp_Places, 
+  #        Placed_AE_Ratio, BF_Place_ROI, AE_Ratio, WinPercent, Winners, Exp_Wins, Archie) %>%
+  arrange(Time24Hour, Meeting, Horse)
+
+Tr3yoRouteHcp_Quals
+
+if(nrow(Tr3yoRouteHcp_Quals) > 0) {
+  Tr3yoRouteHcp_Quals$System_Name <- "Trainer_3yo_Hcp"
+}
+
+Tr3yoRouteHcpRR_Quals <- Tr3yoRouteHcpRR %>% 
+  left_join(today, by = c("Trainer", "Ratings_Range", "RaceType")) %>%
+  filter(Age == 3, Furlongs >= 10.0, Handicap == "HANDICAP", !is.na(Time24Hour)) %>%
+  # select(Time24Hour, Meeting, Horse, Trainer, Alarms, RaceType, Going_Range, Ratings_Range, Handicap, VOR_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
+  #        Runs, meanPL, totalPL, Avg_BFVSP_PL, Total_BFVSP_PL, Avg_VSP_Stake, Total_VSP_Stake,VSP_ROI, Places, Exp_Places, 
+  #        Placed_AE_Ratio, BF_Place_ROI, AE_Ratio, WinPercent, Winners, Exp_Wins, Archie) %>%
+  arrange(Time24Hour, Meeting, Horse)
+
+Tr3yoRouteHcpRR_Quals
+
+if(nrow(Tr3yoRouteHcpRR_Quals) > 0) {
+  Tr3yoRouteHcpRR_Quals$System_Name <- "Trainer_3yo_Hcp_Ratings_Range"
+}
+
 #View(jockeyVOR)
 
 # jockeyValue <- ukhr_master_BF %>%
@@ -1115,7 +1181,9 @@ todayExtra <- todaySupplement %>%
   full_join(newDistanceVOR_Quals) %>% 
   full_join(jockeyValueVOR_Quals) %>% 
   #full_join(jockeyValue_Quals) %>% 
-  full_join(jockeyVOR_Quals)
+  full_join(jockeyVOR_Quals) %>% 
+  full_join(Tr3yoRouteHcp_Quals) %>% 
+  full_join(Tr3yoRouteHcpRR_Quals)
 
 
 # todayExtraQuals <- select(todayExtra, Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, RaceType, Handicap, Value_Odds_Range, VOR_Range, Going_Range,
@@ -1129,3 +1197,67 @@ todayExtraQuals <- arrange(todayExtra, Time24Hour, Meeting, Horse)
 todayExtraQuals
 
 #View(todayExtraQuals)
+
+# 
+# Tr3yoRouteHcpRR <- ukhr_master_BF %>% 
+#   filter(Age == 3, Furlongs >= 10.0, Handicap == "HANDICAP") %>% 
+#   group_by(Trainer, Ratings_Range, RaceType) %>% 
+#   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+#             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+#             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+#             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+#             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+#             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+#             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+#             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+#             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+#   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
+#   arrange(desc(AE_Ratio, Archie))
+# 
+# Tr3yoRouteHcpRR
+# 
+# Tr3yoRouteHcp <- ukhr_master_BF %>% 
+#   filter(Age == 3, Furlongs >= 10.0, Handicap == "HANDICAP") %>% 
+#   group_by(Trainer, RaceType) %>% 
+#   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+#             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+#             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+#             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+#             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+#             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+#             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+#             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+#             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+#   filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0)%>%
+#   arrange(desc(AE_Ratio, Archie))
+# 
+# Tr3yoRouteHcp
+# 
+# 
+# Tr3yoRouteHcp_Quals <- Tr3yoRouteHcp %>% 
+#   left_join(today, by = c("Trainer", "RaceType")) %>%
+#   filter(Age == 3, Furlongs >= 10.0, Handicap == "HANDICAP", !is.na(Time24Hour)) %>%
+#   # select(Time24Hour, Meeting, Horse, Trainer, Alarms, RaceType, Going_Range, Ratings_Range, Handicap, VOR_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
+#   #        Runs, meanPL, totalPL, Avg_BFVSP_PL, Total_BFVSP_PL, Avg_VSP_Stake, Total_VSP_Stake,VSP_ROI, Places, Exp_Places, 
+#   #        Placed_AE_Ratio, BF_Place_ROI, AE_Ratio, WinPercent, Winners, Exp_Wins, Archie) %>%
+#   arrange(Time24Hour, Meeting, Horse)
+# 
+# Tr3yoRouteHcp_Quals
+# 
+# if(nrow(Tr3yoRouteHcp_Quals) > 0) {
+#   Tr3yoRouteHcp_Quals$System_Name <- "Trainer_3yo_Hcp"
+# }
+# 
+# Tr3yoRouteHcpRR_Quals <- Tr3yoRouteHcpRR %>% 
+#   left_join(today, by = c("Trainer", "Ratings_Range", "RaceType")) %>%
+#   filter(Age == 3, Furlongs >= 10.0, Handicap == "HANDICAP", !is.na(Time24Hour)) %>%
+#   # select(Time24Hour, Meeting, Horse, Trainer, Alarms, RaceType, Going_Range, Ratings_Range, Handicap, VOR_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
+#   #        Runs, meanPL, totalPL, Avg_BFVSP_PL, Total_BFVSP_PL, Avg_VSP_Stake, Total_VSP_Stake,VSP_ROI, Places, Exp_Places, 
+#   #        Placed_AE_Ratio, BF_Place_ROI, AE_Ratio, WinPercent, Winners, Exp_Wins, Archie) %>%
+#   arrange(Time24Hour, Meeting, Horse)
+# 
+# Tr3yoRouteHcpRR_Quals
+# 
+# if(nrow(Tr3yoRouteHcpRR_Quals) > 0) {
+#   Tr3yoRouteHcpRR_Quals$System_Name <- "Trainer_3yo_Hcp_Ratings_Range"
+# }

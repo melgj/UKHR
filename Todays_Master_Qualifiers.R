@@ -30,6 +30,7 @@ allSystemQualifiers$Val_Ratio <-allSystemQualifiers$BetFairSPForecastWinPrice / 
 
 head(allSystemQualifiers)
 
+goodHcpSystems <- read_csv("Good_Performing_Hcp_Systems.csv", col_names = T)
 goodSystems <- read_csv("Good_Performing_Systems.csv", col_names = T)
 poorSystems <- read_csv("Poor_Performing_Systems.csv", col_names = T)
 
@@ -87,7 +88,7 @@ allHcpQuals <- asq %>%
          Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, 
          totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, 
          Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age) %>% 
-  filter(Handicap == "HANDICAP", Ratings_Range != "Bottom_Third") %>% 
+  filter(Handicap != "NONHCP", Ratings_Range != "Bottom_Third") %>% 
   arrange(Time24Hour, Meeting, Horse)
 
 allHcpQuals
@@ -119,7 +120,16 @@ archieGoodSystems <- allArchie %>%
 # 
 archieGoodSystems
 
-#View(archieGoodSystems)
+View(archieGoodSystems)
+
+todayGoodHcpSystems <- allHcpQuals %>% 
+  filter(System_Name %in% goodHcpSystems$System_Name) %>% 
+  arrange(Time24Hour, Meeting, Horse)
+# 
+todayGoodHcpSystems
+
+View(todayGoodHcpSystems)
+
 # 
 # View(archieGoodSystems)
 # 
@@ -175,13 +185,17 @@ goodStatsQuals
 #valArchieQuals
 write_csv(asq, paste0("All_System_Quals_", today$Date[1], ".csv"))
 # 
-write_csv(highArchieQuals, paste0("High_Archie_Quals_", today$Date[1], ".csv"))
+#write_csv(highArchieQuals, paste0("High_Archie_Quals_", today$Date[1], ".csv"))
 # 
-write_csv(archieGoodSystems, paste0("Good_System_Quals_", today$Date[1], ".csv"))
+#write_csv(archieGoodSystems, paste0("Good_System_Quals_", today$Date[1], ".csv"))
 
-write_csv(allArchie, paste0("All_Archie_Quals_", today$Date[1], ".csv"))
+#write_csv(allArchie, paste0("All_Archie_Quals_", today$Date[1], ".csv"))
 
 write_csv(goodStatsQuals, paste0("Good_Stats_Quals_", today$Date[1], ".csv"))
+
+write_csv(allHcpQuals, paste0("Today_Hcp_Quals_", today$Date[1], ".csv"))
+
+write_csv(todayGoodHcpSystems, paste0("Today_Good_Hcp_Quals_", today$Date[1], ".csv"))
 # 
 #write_csv(highAERQuals, paste0("High_AER_Archie_Quals_", today$Date[1], ".csv"))
 

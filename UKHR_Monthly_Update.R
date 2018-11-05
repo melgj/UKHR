@@ -203,6 +203,34 @@ setdiff(ukhrCols, newMonthBFCols)
 
 ukhr_master_BF <- rbind(ukhr_master_BF, newMonthBF)
 
+# Remove Wolverhampton Polytrack data from pre Tapeta era
+
+wPoly1 <- which(ukhr_master_BF$Year < 2014 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
+
+wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
+
+wPolyAll <- c(wPoly1, wPoly2)
+
+ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
+
+
+ukhr_master_BF <- ukhr_master_BF %>% 
+  group_by(UKHR_RaceID) %>% 
+  mutate(Fin_Pos = min_rank(LengthsBehindTotal),
+         Exp_Btn = Actual.Runners - Fav_Rank,
+         Act_Btn = Actual.Runners - Fin_Pos)
+
+winter <- c(12,1,2)
+spring <- c(3,4,5)
+summer <- c(6,7,8)
+autumn <- c(9,10,11)
+
+ukhr_master_BF <- ukhr_master_BF %>% 
+  mutate(Season = if_else(Month %in% winter, "Winter",
+                          if_else(Month %in% spring, "Spring",
+                                  if_else(Month %in% summer,"Summer",
+                                          "Autumn"))))
+
 
 ukhr_master_BF <- ukhr_master_BF %>% 
   group_by(UKHR_RaceID) %>% 
@@ -291,7 +319,7 @@ ukhr_master_BF <- ukhr_master_BF %>%
 
 slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT") 
 
-fastGround <- c("GOOD", "GD-FM", "FIRM", "HARD")
+fastGround <- c("GD-FM", "FIRM", "HARD")
 
 syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
 

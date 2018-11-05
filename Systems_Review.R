@@ -22,6 +22,19 @@ ukhr_master_BF <- ukhr_master_BF %>%
          Exp_Btn = Actual.Runners - Fav_Rank,
          Act_Btn = Actual.Runners - Fin_Pos)
 
+winter <- c(12,1,2)
+spring <- c(3,4,5)
+summer <- c(6,7,8)
+autumn <- c(9,10,11)
+
+ukhr_master_BF <- ukhr_master_BF %>% 
+  mutate(Season = if_else(Month %in% winter, "Winter",
+                          if_else(Month %in% spring, "Spring",
+                                  if_else(Month %in% summer,"Summer",
+                                          "Autumn"))))
+
+
+
 colnames(ukhr_master_BF)
 
 
@@ -109,7 +122,7 @@ asq <- allSystemQualifiers %>%
   select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
          Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, 
          totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, 
-         Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, 
+         Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season,
          BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected, Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>% 
   filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5) %>% 
   arrange(Time24Hour, Meeting, Horse)
@@ -122,7 +135,7 @@ allArchie <- asq %>%
   select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
          Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, 
          totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, 
-         Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age,
+         Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season,
          BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected, Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>% 
   filter(Archie >= 4.0, Exp_Wins >= 5, AE_Ratio >= 1.20) %>% 
   arrange(Time24Hour, Meeting, Horse)
@@ -147,7 +160,7 @@ highArchieQuals <- filter(asq, Archie >= 8.5, AE_Ratio >= 1.20)
 highArchieQuals <- highArchieQuals %>%
   select(Time24Hour, Meeting, Horse, System_Name,Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
          BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
-         Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI, AE_Ratio, 
+         Age, Month, Season, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI, AE_Ratio, 
          WinPercent, Winners, Exp_Wins, Archie, Total_Exp_Btn, Total_Btn, Btn_AE_Ratio, Arch_Strength, Arch_Placed_Strength,
          BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected, Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   arrange(Time24Hour, Meeting, Horse)
@@ -161,7 +174,7 @@ goodStatsQuals <- filter(asq, Archie >= 4.0, AE_Ratio >= 1.40, Placed_AE_Ratio >
 goodStatsQuals <- goodStatsQuals %>%
   select(Time24Hour, Meeting, Horse, System_Name, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, 
          Ratings_Range, VOR_Range, BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, 
-         Rev_Weight_Rank, NumberOfResults, Alarms, Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie,
+         Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie,
          Place_Percent, BF_Place_ROI, AE_Ratio, WinPercent, Winners, Exp_Wins, Archie, Total_Exp_Btn, Total_Btn, Btn_AE_Ratio, Arch_Strength, 
          Arch_Placed_Strength, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected, Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   arrange(Time24Hour, Meeting, Horse)
@@ -291,7 +304,7 @@ systemsAnalysisHighArch_2018 <- systemsAnalysisHighArch_2018 %>%
 
 
 systemsSummaryHigh <- systemsAnalysisHighArch_2018 %>%
-  group_by(BFSP_Odds_Range) %>%
+  group_by(System_Name) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             #Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -360,7 +373,7 @@ systemsAnalysisGoodStats_2018
 
 
 systemsSummaryGoodStats <- systemsAnalysisGoodStats_2018 %>%
-  group_by(Placed_AER_Range) %>%
+  group_by(System_Name) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             #Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             #Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -402,6 +415,11 @@ goodPerformingGoodStats
 
 View(goodPerformingGoodStats)
 
+systemsSummaryGoodStats %>% 
+  summarise(Avg_Profit = sum(totalPL)/sum(Runs),
+            Total_Profit = sum(totalPL),
+            Total_Runners = sum(Runs))
+
 
 
 
@@ -434,7 +452,7 @@ poorPerformingHcp
 
 View(poorPerformingHcp)
 
-write_csv(goodPerformingHcp, "Good_Performing_Hcp_Systems.csv")
+write_csv(poorPerformingHcp, "Poor_Performing_Hcp_Systems.csv")
 
 
 goodPerformingHcp <- systemsSummaryAllHcp %>% 
@@ -444,6 +462,13 @@ goodPerformingHcp <- systemsSummaryAllHcp %>%
 goodPerformingHcp
 
 View(goodPerformingHcp)
+
+write_csv(goodPerformingHcp, "Good_Performing_Hcp_Systems.csv")
+
+systemsSummaryAllHcp %>% 
+  summarise(Avg_Profit = sum(totalPL)/sum(Runs),
+            Total_Profit = sum(totalPL),
+            Total_Runners = sum(Runs))
 
 
 systemsSummaryNonHcp <- systemsAnalysisASQ_2018 %>%
@@ -466,6 +491,11 @@ systemsSummaryNonHcp <- systemsAnalysisASQ_2018 %>%
 systemsSummaryNonHcp
 
 View(systemsSummaryNonHcp)
+
+systemsSummaryNonHcp %>% 
+  summarise(Avg_Profit = sum(totalPL)/sum(Runs),
+            Total_Profit = sum(totalPL),
+            Total_Runners = sum(Runs))
 
 
 ##############################################################

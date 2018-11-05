@@ -1,5 +1,3 @@
-#rename raw advantage and radj advantage columns to match ukhr_master
-
 library(tidyverse)
 library(stringr)
 library(stringi)

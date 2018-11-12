@@ -1,8 +1,4 @@
-#setwd("~/git_projects/UKHR_Project")
-
-#ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_03_31.csv",col_names = T)
-
-#ukhr_master_1217 <- read_csv("ukhr_all_12_17_master.csv", col_names = T)
+# Filter NH Codes only
 
 ukChase <- filter(ukhr_master_BF, RaceType == "CHASE")
 ukHurdle <- filter(ukhr_master_BF, RaceType == "HURDLE")
@@ -54,7 +50,7 @@ if(nrow(trTFCQuals) > 0) {
   trTFCQuals$System_Name <- "NH_TFC"
 }
 
-#write_csv(trTFCQuals, "NH_TFC_Quals_041117")
+write_csv(trTFCQuals, "NH_TFC_Quals_041117")
 
 ####################################################################
 
@@ -120,7 +116,7 @@ hdlStayTrainers<- ukHurdle%>%
 
 hdlStayTrainers
 
-write_csv(hdlStayTrainers, "HdlStayTrainers.csv")
+#write_csv(hdlStayTrainers, "HdlStayTrainers.csv")
 
 # todays qualifiers
 
@@ -146,25 +142,7 @@ if(nrow(trHLDQuals) > 0) {
 
 #######################################################
 
-#Combine all qualifiers and write to file
-
-# printNHCols <- rbind(trHLDQuals,NHSireQuals,trTFCQuals)
-# printNHCols <- select(printNHCols, Time24Hour, Meeting, Horse, BetFairSPForecastWinPrice ,Rating_Rank, Trainer, Sire, everything())
-# 
-# 
-# printNHCols <- printNHCols%>%
-#   arrange(Time24Hour, Meeting, Horse, Rating_Rank)
-# 
-# NHQuals <- printNHCols
-
-#NHQuals <- rbind(trHLDQuals, trTFCQuals)
-
-
-#####################################################################################################################
-
 # Soft/Heavy Ground Sires
-
-#slowGround <- c("SOFT","SFT-HVY","HEAVY") 
 
 softGroundNH <- filter(ukNH, Going %in% softGround)
 

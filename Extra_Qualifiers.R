@@ -1,15 +1,12 @@
-#setwd("~/git_projects/UKHR_Project")
-
-#ukhr_master_BF$Dist_Range <- as.factor(ifelse(ukhr_master_BF$Furlongs < 8, "Sprint", 
-                                              #ifelse(ukhr_master_BF$Furlongs < 14,"Middle", "Long")))
-
-wPoly1 <- which(ukhr_master_BF$Year < 2014 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
-
-wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
-
-wPolyAll <- c(wPoly1, wPoly2)
-
-ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
+# # Remove Wolverhampton Polytrack data from pre Tapeta era
+# 
+# wPoly1 <- which(ukhr_master_BF$Year < 2014 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
+# 
+# wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
+# 
+# wPolyAll <- c(wPoly1, wPoly2)
+# 
+# ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
 
 
 #hcpTr3 <- filter(ukhr_master_BF, Age == 3, Handicap == "HANDICAP", RaceType == "AW" | RaceType == "FLAT")
@@ -579,7 +576,66 @@ Tr3yoRouteHcp <- ukhr_master_BF %>%
 
 Tr3yoRouteHcp
 
+
+trSeason <- ukhr_master_BF %>%
+  group_by(Trainer, RaceType, Handicap, Season) %>%
+  summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+            Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+            Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+            AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+  filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
+  arrange(desc(AE_Ratio, Archie))
+
+trSeason
+
+#View(trSeason)
+
+trMonth <- ukhr_master_BF %>%
+  group_by(Trainer, RaceType, Handicap, Month) %>%
+  summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+            Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+            Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+            AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+  filter(Runs >= 50, AE_Ratio >= 1.20, meanPL >= 0.1, WinPercent >= 0.15, Horses >= 5, Archie > 3.5, Exp_Wins >= 5.0, !is.na(Trainer))%>%
+  arrange(desc(AE_Ratio, Archie))
+
+trMonth
+
+
+
 ##################################################################################################
+
+trSeason_Quals <- trSeason %>% 
+  left_join(today, by = c("Trainer", "RaceType", "Handicap", "Season")) %>% 
+  filter(!is.na(Time24Hour)) %>% 
+  arrange(Time24Hour, Meeting, Horse)
+
+trSeason_Quals
+
+if(nrow(trSeason_Quals) > 0) {
+  trSeason_Quals$System_Name <- "Trainer_Season"
+}
+
+trMonth_Quals <- trMonth %>% 
+  left_join(today, by = c("Trainer", "RaceType", "Handicap", "Month")) %>% 
+  filter(!is.na(Time24Hour)) %>% 
+  arrange(Time24Hour, Meeting, Horse)
+
+trMonth_Quals
+
+if(nrow(trMonth_Quals) > 0) {
+  trMonth_Quals$System_Name <- "Trainer_Month"
+}
 
 
 Tr3yoRouteHcp_Quals <- Tr3yoRouteHcp %>% 
@@ -1183,7 +1239,9 @@ todayExtra <- todaySupplement %>%
   #full_join(jockeyValue_Quals) %>% 
   full_join(jockeyVOR_Quals) %>% 
   full_join(Tr3yoRouteHcp_Quals) %>% 
-  full_join(Tr3yoRouteHcpRR_Quals)
+  full_join(Tr3yoRouteHcpRR_Quals) %>% 
+  full_join(trSeason_Quals)
+  #full_join(trMonth_Quals)
 
 
 # todayExtraQuals <- select(todayExtra, Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, RaceType, Handicap, Value_Odds_Range, VOR_Range, Going_Range,
@@ -1261,3 +1319,5 @@ todayExtraQuals
 # if(nrow(Tr3yoRouteHcpRR_Quals) > 0) {
 #   Tr3yoRouteHcpRR_Quals$System_Name <- "Trainer_3yo_Hcp_Ratings_Range"
 # }
+
+

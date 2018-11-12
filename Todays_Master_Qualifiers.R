@@ -55,33 +55,12 @@ asq <- allSystemQualifiers %>%
   filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5, !(System_Name %in% poorSystems$System_Name)) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
-# asq <- asq %>% 
-#   mutate(Placed_Archie = ifelse(Exp_Places >= 5.0, round(((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),2),0),
-#          Place_Percent = Places/Runs) %>% 
-#   filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5, !(AE_Ratio < 1.3 & Archie < 4.0)) %>% 
-#   arrange(Time24Hour, Meeting, Horse)
-
-#View(asq)
 
 length(unique(asq$Horse))
 
-#systemSummaryTables <- read_csv("Summary_System_Results_Tables_July_2018.csv", col_names = T)
 
 
 #####################################################################################
-
-# Archie Score Calculation  
-# Formula: (Runners * (Winners - Expected Winners) ^ 2) / Expected Winners * (Runners - Expected Winners)
-
-# allArchie <- asq %>% 
-#   mutate(Winners = round(Runs * WinPercent), Exp_Wins = Winners/AE_Ratio, 
-#          Archie = ifelse(Exp_Wins >= 5,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0),
-#          Placed_Archie = ifelse(Exp_Places >= 5.0, round(((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),2),0),
-#          Arch_Strength = cut(Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
-#                              labels = c("-", "*", "**", "***", "****", "*****")),
-#          Arch_Placed_Strength = cut(Placed_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
-#                              labels = c("-", "*", "**", "***", "****", "*****")),
-#          Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat)
 
 allHcpQuals <- asq %>% 
   select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
@@ -109,15 +88,11 @@ allArchie
 
 length(unique(allArchie$Horse))
 
-#todayArchie <- allArchie %>% 
-  #left_join(systemSummaryTables, by = "System_Name")
  
-# todayArchie
-# 
 archieGoodSystems <- allArchie %>% 
  filter(System_Name %in% goodSystems$System_Name) %>% 
  arrange(Time24Hour, Meeting, Horse)
-# 
+ 
 archieGoodSystems
 
 View(archieGoodSystems)
@@ -130,10 +105,6 @@ todayGoodHcpSystems
 
 View(todayGoodHcpSystems)
 
-# 
-# View(archieGoodSystems)
-# 
-# 
 highArchieQuals <- filter(asq, Archie >= 8.5, AE_Ratio >= 1.20)
 
 highArchieQuals <- highArchieQuals %>%
@@ -158,52 +129,16 @@ goodStatsQuals <- goodStatsQuals %>%
 
 goodStatsQuals
 
-#View(goodStatsQuals)
 
-# 
-# eliteArchieQuals <- filter(allArchie, Archie >= 8.5, AE_Ratio >= 1.20)
-# 
-# eliteArchieQuals <- eliteArchieQuals %>% 
-#   # select(Time24Hour, Meeting, Horse, Trainer, Jockey, Sire, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, VOR_Range,
-#   #        BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms, 
-#   #        Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI ,AE_Ratio, WinPercent, Winners, Exp_Wins, Archie, 
-#   #        Arch_Strength, Arch_Placed_Strength) %>% 
-#   arrange(Time24Hour, Meeting, Horse)
-# 
-# eliteArchieQuals
-# 
-# View(eliteArchieQuals)
-# 
-# # highAERQuals <- filter(allArchie, AE_Ratio >= 1.40) %>% 
-# #   arrange(Time24Hour, Meeting, Horse)
-# # 
-# # highAERQuals
-# 
+# Write qualifiers to file
 
-#valArchieQuals <- filter(archieQuals, Val_Ratio >= 1.0)
-
-#valArchieQuals
 write_csv(asq, paste0("All_System_Quals_", today$Date[1], ".csv"))
-# 
-#write_csv(highArchieQuals, paste0("High_Archie_Quals_", today$Date[1], ".csv"))
-# 
-#write_csv(archieGoodSystems, paste0("Good_System_Quals_", today$Date[1], ".csv"))
-
-#write_csv(allArchie, paste0("All_Archie_Quals_", today$Date[1], ".csv"))
 
 write_csv(goodStatsQuals, paste0("Good_Stats_Quals_", today$Date[1], ".csv"))
 
 write_csv(allHcpQuals, paste0("Today_Hcp_Quals_", today$Date[1], ".csv"))
 
 write_csv(todayGoodHcpSystems, paste0("Today_Good_Hcp_Quals_", today$Date[1], ".csv"))
-# 
-#write_csv(highAERQuals, paste0("High_AER_Archie_Quals_", today$Date[1], ".csv"))
-
-
-
-# write_csv(bestQualsToday, "Best_Bets_2018_07_20.csv")
-
-#write_csv(valArchieQuals, "Value_Archie_2018_06_16.csv")
 
 
 #   Archie Likelihood Of Chance

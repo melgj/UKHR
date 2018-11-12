@@ -1,7 +1,3 @@
-#setwd("~/git_projects/UKHR_Project")
-
-#ukhr_master_BF <- read_csv("UKHR_Master_BF.csv",col_names = T)
-
 # filter Flat turf races only
 
 ukFlat <- filter(ukhr_master_BF, RaceType == "FLAT") 
@@ -14,7 +10,7 @@ ukFlat$Dist_Range <- as.factor(ifelse(ukFlat$Furlongs < 8, "Sprint",
 ukFlat <- select(ukFlat, -c(ChaseJumpingAbility, HunterChase, Beginner))
 
 
-colnames(ukFlat)
+#colnames(ukFlat)
 
 # Analyse profitable trainers 
 
@@ -62,17 +58,19 @@ if(nrow(trQuals) > 0) {
 
 ################################################################################
 
-#softGround <- c("SOFT","SFT-HVY","HEAVY") 
+#softGround 
 
 ukFlat$Dist_Range <- as.factor(ifelse(ukFlat$Furlongs < 8, "Sprint", "Route"))
 
 levels(ukFlat$Dist_Range)
                                     
 
-softGroundFlat <- filter(ukFlat, Going %in% softGround)
+#softGroundFlat <- filter(ukFlat, Going %in% softGround)
 
-softSiresFlat <- softGroundFlat %>%
-  filter(NumberOfResults >= 1) %>% 
+
+
+softSiresFlat <- ukFlat %>%
+  filter(NumberOfResults >= 1, Going %in% softGround) %>% 
   group_by(Sire, Dist_Range)%>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected), 
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),

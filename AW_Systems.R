@@ -1,5 +1,4 @@
-#setwd("~/git_projects/UKHR_Project")
-
+# Filter AW Races 
 
 ukAW <- filter(ukhr_master_BF, RaceType == "AW")
 

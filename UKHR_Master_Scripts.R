@@ -19,7 +19,7 @@ ukhr_all <- rbind(ukhr17,ukhr16,ukhr15,ukhr14,ukhr13,ukhr12)
 
 #write combined data files for years 12-17 to csv file
 
-write.csv(ukhr_all, "/home/mel/UKHR/UKHR_data/UKHR_Master_Data/ukhr_all_12_17_master.csv", row.names = F)
+write_csv(ukhr_all, "/home/mel/UKHR/UKHR_data/UKHR_Master_Data/ukhr_all_12_17_master.csv")
 
 
 ################################################################################################

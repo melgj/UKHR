@@ -30,11 +30,20 @@ quals$Going_Range <- as.factor(quals$Going_Range)
 quals$RaceType <- as.factor(quals$RaceType)
 quals$Dist_Range <- as.factor(quals$Dist_Range)
 
+quals <- quals %>% 
+  mutate(Result = if_else(Actual == 1, 
+                          "WON",
+                          "LOST"))
+
 
 qualsData <- quals %>% 
   select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
          Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
-         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, BFSP_PL)
+         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, Result)
+
+qualsData$Result <- as.factor(qualsData$Result)
+
+
 
 ##############################################
 
@@ -46,11 +55,14 @@ registerDoMC(4)
 
 set.seed(100)
 
-ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.7, list = FALSE)
+ukTrainRows <- createDataPartition(qualsData$Result, p = 0.6, list = FALSE)
 
 ukTrainSet <- qualsData[ukTrainRows,]
 
 ukTestSet <- qualsData[-ukTrainRows,]
+
+summary(ukTrainSet)
+str(ukTrainSet)
 
 marsGrid <- expand.grid(.degree = 1:2, .nprune = 2:25)
 
@@ -222,3 +234,88 @@ ukTestSet %>%
             Total_PL = sum(BFSP_PL))
 
 saveRDS(ukNN, "Systems_NN_BFSPPL_Model.RDS")
+
+#########################
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData$Result, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData[ukTrainRows,]
+
+ukTestSet <- qualsData[-ukTrainRows,]
+
+
+library(xgboost)
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              verboseIter = T,
+                              classProbs = TRUE, 
+                              summaryFunction = mnLogLoss)
+
+
+tune.grid <- expand.grid(eta = c(0.01, 0.05, 0.10),
+                         nrounds = c(150, 200, 250),
+                         max_depth = 6:8,
+                         min_child_weight = c(2.0, 2.5, 3.0),
+                         colsample_bytree = c(0.50, 0.75),
+                         gamma = 1,
+                         subsample = c(0.5,1.0))
+View(tune.grid)
+
+xgbTreeModUK <- train(Result ~ .,
+                       data = ukTrainSet,
+                       method = "xgbTree",
+                       metric = "logLoss",
+                       tuneGrid = tune.grid,
+                       trControl = train.control)
+
+print(xgbTreeModUK)
+
+varImp(xgbTreeModUK)
+
+xgbTreeModUK <- readRDS("XGB_Systems_Model_Prob")
+
+predOutcomeXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "raw")
+
+head(predOutcomeXGB)
+
+table(ukTestSet$Result, predOutcomeXGB)
+
+
+confusionMatrix(ukTestSet$Result, predOutcomeXGB)
+
+
+
+
+
+predOutcomeProbXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "prob")
+
+head(predOutcomeProbXGB)
+
+
+summary(predOutcomeProbXGB)
+
+#xgbTreeModUK$bestTune
+
+#saveRDS(xgbTreeModUK, "XGB_Systems_Model_Prob")
+
+head(predOutcomeProbXGB[2], 20)
+
+
+t2 <- cbind(ukTestSet, predOutcomeProbXGB)
+
+head(t2)
+
+sum(t2$Actual)
+sum(t2$WON)
+
+t2 <- t2 %>% 
+  mutate(VOdds_Prob = 1/ValueOdds_BetfairFormat)
+
+head(t2)
+
+sum(t2$VOdds_Prob)
+

@@ -820,20 +820,24 @@ View(systemsSummary)
 ###########################################################
 
 # Model 
-
+library(tidyverse)
+library(stringi)
+library(stringr)
 library(caret)
 library(earth)
 library(broom)
 library(xgboost)
 
-systemsAnalysisASQ_2018 <- read_csv("All_System_Qualifiers_to_2018_08.csv", col_names = T)
+systemsAnalysisASQ_2018 <- read_csv("All_System_Qualifiers_to_2018_09.csv", col_names = T)
 
 head(systemsAnalysisASQ_2018)
 
 colSums(is.na(systemsAnalysisASQ_2018))
 
 uk <- systemsAnalysisASQ_2018 %>% 
-  select(Meeting:Exp_Wins, Runners, Placed_Archie, Archie, BFSP_PL ,VSP_PL, -c(Age, Rev_Weight_Rank, Alarms))
+  select(Meeting:Exp_Wins, Placed_Archie, Archie, BFSP_PL ,VSP_PL, -c(Age, Rev_Weight_Rank, Alarms))
+
+colnames(uk)
 
 ukNum <- uk %>% 
   select_if(is.numeric)
@@ -845,7 +849,7 @@ summary(uk)
 colSums(is.na(ukNum))
 
 ukNum <- ukNum %>% 
-  drop_na(Val_Ratio)
+  drop_na(Val_Ratio, BetFairSPForecastWinPrice)
 
 head(ukNum)
 
@@ -859,7 +863,7 @@ ukNum <- select(ukNum, -c(Avg_BFVSP_PL, Total_BFVSP_PL, Avg_VSP_Stake, Total_VSP
 # Build Model
 # 
 # Load Model
-#knnTune <- readRDS("KNN_Systems_VSP_PL_Model.RDS")
+#xgbTune <- readRDS("xgb_Systems_VSP_PL_Model.RDS")
 
 set.seed(100)
 
@@ -869,29 +873,39 @@ ukTrainSet <- ukNum[ukTrainRows,]
 
 ukTestSet <- ukNum[-ukTrainRows,]
 
-knnTune <- train(VSP_PL ~ .,
-                 data = ukTrainSet,
-                 method = "knn",
-                 preProc = c("center", "scale"),
-                 tuneGrid = data.frame(.k = 50:100),
-                 metric = "RMSE",
-                 trControl = trainControl(method = "repeatedcv", 
-                                          number = 10,
-                                          repeats = 3))
+set.seed(100)
+
+tune.grid <- expand.grid(eta = c(0.1, 0.2),
+                         nrounds = c(100,150),
+                         lambda = c(0.1,0.2),
+                         alpha = c(0.5,1.0))
 
 
 
-print(knnTune)
 
-saveRDS(knnTune, "KNN_Systems_VSP_PL_Model.RDS")
+xgbModUKHR <- train(VSP_PL ~ ., 
+                    data = ukNum,
+                    method = "xgbLinear",
+                    metric = "RMSE",
+                    tuneGrid = tune.grid,
+                    trControl = trainControl(method = "cv",
+                                             number = 10,
+                                             repeats = 3,
+                                             verboseIter = T))
 
-knnPreds <- predict(knnTune, newdata = ukTestSet, type = "raw")
+print(xgbModUKHR)
+varImp(xgbModUKHR)
 
-head(knnPreds)
+
+saveRDS(xgbModUKHR, "xgb_Systems_VSP_PL_Model.RDS")
+
+xgbPreds <- predict(xgbModUKHR, newdata = ukTestSet, type = "raw")
+
+head(xgbPreds)
 head(ukTestSet$VSP_PL)
 
 df <- tibble(actual = ukTestSet$VSP_PL,
-             preds = knnPreds)
+             preds = xgbPreds)
 
 
 #View(head(df, 50))
@@ -910,10 +924,10 @@ today <- read_csv(file.choose(), col_names = T)
 
 # Load Model
 
-knnTune <- readRDS("KNN_Systems_VSP_PL_Model.RDS")
+xgbModUKHR <- readRDS("xgb_Systems_VSP_PL_Model.RDS")
 
 
-todayPreds <- predict(knnTune, newdata = today, type = "raw")
+todayPreds <- predict(xgbModUKHR, newdata = today, type = "raw")
 
 x = ukTrainSet[!(colnames(ukTrainSet) %in% colnames(today))]
 

@@ -114,3 +114,49 @@ df <- df %>%
 
 ukdf <- df[3:20,]
 ukdf
+
+######
+
+
+set.seed(100)
+
+tune.grid <- expand.grid(eta = c(0.1, 0.2),
+                         nrounds = c(100,150),
+                         lambda = c(0.1,0.2),
+                         alpha = c(0.5,1.0))
+
+
+
+
+xgbModUKHR <- train(Betfair.Win.S.P. ~ (ValueOdds_Probability + Runners + RatingAdvantage + Handicap +
+                                          ConnAdvantage + ConnRanking + RatingsPosition)^2, 
+                    data = ukTrainSet,
+                    method = "xgbLinear",
+                    metric = "RMSE",
+                    tuneGrid = tune.grid,
+                    trControl = trainControl(method = "cv",
+                                             number = 10,
+                                             verboseIter = T))
+#repeats = 3))
+
+#stopCluster(cl)
+#registerDoSEQ()
+
+
+print(xgbModUKHR)
+
+predBFSPxgb <- predict(xgbModUKHR, newdata = ukTestSet, type = "raw")
+
+head(predBFSPxgb)
+head(ukTestSet$Betfair.Win.S.P.)
+
+
+R2(predBFSPxgb, ukTestSet$Betfair.Win.S.P.)
+RMSE(predBFSPxgb, ukTestSet$Betfair.Win.S.P.)
+cor(predBFSPxgb, ukTestSet$Betfair.Win.S.P.)
+
+saveRDS(xgbModUKHR, "UKHR_XGB_Model.RDS")
+
+summary(xgbModUKHR)
+
+varImp(xgbModUKHR)

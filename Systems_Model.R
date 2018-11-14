@@ -6,7 +6,7 @@ library(stringr)
 library(nnet)
 
 
-quals <- read_csv("All_System_Qualifiers_to_2018_09.csv", col_names = T)
+quals <- read_csv("All_System_Qualifiers_to_2018_10.csv", col_names = T)
 
 colSums(is.na(quals))
 
@@ -29,21 +29,15 @@ quals$Ratings_Range <- as.factor(quals$Ratings_Range)
 quals$Going_Range <- as.factor(quals$Going_Range)
 quals$RaceType <- as.factor(quals$RaceType)
 quals$Dist_Range <- as.factor(quals$Dist_Range)
-
-quals <- quals %>% 
-  mutate(Result = if_else(Actual == 1, 
-                          "WON",
-                          "LOST"))
+quals$System_Name <- as.factor(quals$System_Name)
 
 
 qualsData <- quals %>% 
-  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, System_Name, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
          Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
-         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, Result)
+         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, BFSP_PL)
 
-qualsData$Result <- as.factor(qualsData$Result)
-
-
+colSums(is.na(qualsData))
 
 ##############################################
 
@@ -55,7 +49,7 @@ registerDoMC(4)
 
 set.seed(100)
 
-ukTrainRows <- createDataPartition(qualsData$Result, p = 0.6, list = FALSE)
+ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.6, list = FALSE)
 
 ukTrainSet <- qualsData[ukTrainRows,]
 
@@ -160,6 +154,27 @@ ukPos %>%
 
 
 #####################################################################
+qualsData <- quals %>% 
+  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, System_Name, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+         Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
+         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, BFSP_PL)
+
+library(doMC)
+
+registerDoMC(4)
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData[ukTrainRows,]
+
+ukTestSet <- qualsData[-ukTrainRows,]
+
+colnames(ukTrainSet)
+
+colSums(is.na(ukTrainSet))
+
 
 numUKTrain <- ukTrainSet %>% 
   select_if(is.numeric)
@@ -183,14 +198,15 @@ colnames(ukTrainSet)
 
 #############################################################
 train.control <- trainControl(method = "repeatedcv",
-                              number = 5,
-                              repeats = 6,
+                              number = 10,
+                              repeats = 3,
                               #summaryFunction = RMSE,
                               verboseIter = T)
 
-nnetGrid <- expand.grid(.decay = c(0, 0.01, 0.10),
+nnetGrid <- expand.grid(.decay = c(0.01, 0.05, 0.10),
                         .size = c(1:10),
                         .bag = F)
+                        
 
 set.seed(100)
 
@@ -203,7 +219,7 @@ ukNN <- train(BFSP_PL ~ .,
               linout = T,
               trace = F,
               MaxNWts = 10 * (ncol(ukTrainSet) + 1) +10 +1,
-              maxit = 500)
+              maxit = 1000)
 
 print(ukNN)
 
@@ -218,6 +234,7 @@ cor(predBFPL, ukTestSet$BFSP_PL)
 
 ukTestSet$PredPL <- predBFPL
 
+
 ukPos <- filter(ukTestSet, PredPL > 0)
 mean(ukPos$BFSP_PL)
 
@@ -228,14 +245,180 @@ mean(ukTestSet$BFSP_PL)
 
 ukTestSet %>% 
   group_by(Handicap) %>% 
-  filter(PredPL <= 0) %>% 
+  filter(PredPL >= 0.00) %>% 
   summarise(Runs = n(),
             Avg_PL = mean(BFSP_PL),
             Total_PL = sum(BFSP_PL))
 
-saveRDS(ukNN, "Systems_NN_BFSPPL_Model.RDS")
+#saveRDS(ukNN, "Systems_NN_BFSPPL_Model.RDS")
 
 #########################
+
+#################################################################
+
+# XGB Tree Algorithm to predict BFSP Profit/Loss
+
+library(xgboost)
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData[ukTrainRows,]
+
+ukTestSet <- qualsData[-ukTrainRows,]
+
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              verboseIter = T)
+                              #classProbs = TRUE, 
+                              #summaryFunction = RMSE)
+
+
+tune.grid <- expand.grid(eta = c(0.01),
+                         nrounds = c(150, 300),
+                         lambda = c(0.05),
+                         alpha = c(1.0))
+                         
+                         
+View(tune.grid)
+
+set.seed(100)
+
+xgbLinModUK <- train(BFSP_PL ~ .,
+                      data = ukTrainSet,
+                      method = "xgbLinear",
+                      preProc = c("center", "scale"),
+                      metric = "RMSE",
+                      tuneGrid = tune.grid,
+                      trControl = train.control)
+
+print(xgbLinModUK)
+
+varImp(xgbLinModUK)
+
+
+
+
+
+predXGBbfpl <- predict(xgbLinModUK, newdata = ukTestSet, type = "raw")
+
+head(predXGBbfpl)
+
+
+summary(predXGBbfpl)
+
+
+R2(predXGBbfpl, ukTestSet$BFSP_PL)
+RMSE(predXGBbfpl, ukTestSet$BFSP_PL)
+cor(predXGBbfpl, ukTestSet$BFSP_PL)
+
+ukTestSet$XGBPL <- predXGBbfpl
+
+
+ukPos <- filter(ukTestSet, XGBPL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, XGBPL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(XGBPL <= 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+
+saveRDS(xgbLinModUK, "XGB_Linear_Systems_BFPL_Model.RDS")
+
+#xgbLinModUK <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
+
+
+print(xgbLinModUK)
+
+
+###############################################################
+
+
+
+library(randomForest)
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData[ukTrainRows,]
+
+ukTestSet <- qualsData[-ukTrainRows,]
+
+colSums(is.na(ukTrainSet))
+
+set.seed(100)
+
+rfMod <- train(BFSP_PL ~ .,
+               data = ukTrainSet,
+               method = "rf",
+               ntrees = 1500,
+               PreProc = c("center", "scale"),
+               importance = T)
+
+print(rfMod)
+
+varImp(rfMod)
+
+predRF <- predict(rfMod, newdata = ukTestSet, type = "raw")
+
+head(predRF)
+
+ukTestSet$RF_PL <- predRF
+
+
+ukPos <- filter(ukTestSet, RF_PL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, RF_PL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(RF_PL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+
+saveRDS(rfMod, "RF_BFPL_Model.RDS")
+
+
+
+################################################################
+
+
+
+# XGB Tree Algorithm to predict Win Probability
+
+
+quals <- quals %>% 
+  mutate(Result = if_else(Actual == 1, 
+                          "WON",
+                          "LOST"))
+
+qualsData <- quals %>% 
+  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, System_Name, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+         Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
+         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, Actual)
+
+qualsData$Result <- as.factor(qualsData$Result)
+
 
 set.seed(100)
 
@@ -266,11 +449,11 @@ tune.grid <- expand.grid(eta = c(0.01, 0.05, 0.10),
 View(tune.grid)
 
 xgbTreeModUK <- train(Result ~ .,
-                       data = ukTrainSet,
-                       method = "xgbTree",
-                       metric = "logLoss",
-                       tuneGrid = tune.grid,
-                       trControl = train.control)
+                      data = ukTrainSet,
+                      method = "xgbTree",
+                      metric = "logLoss",
+                      tuneGrid = tune.grid,
+                      trControl = train.control)
 
 print(xgbTreeModUK)
 
@@ -287,35 +470,4 @@ table(ukTestSet$Result, predOutcomeXGB)
 
 confusionMatrix(ukTestSet$Result, predOutcomeXGB)
 
-
-
-
-
-predOutcomeProbXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "prob")
-
-head(predOutcomeProbXGB)
-
-
-summary(predOutcomeProbXGB)
-
-#xgbTreeModUK$bestTune
-
-#saveRDS(xgbTreeModUK, "XGB_Systems_Model_Prob")
-
-head(predOutcomeProbXGB[2], 20)
-
-
-t2 <- cbind(ukTestSet, predOutcomeProbXGB)
-
-head(t2)
-
-sum(t2$Actual)
-sum(t2$WON)
-
-t2 <- t2 %>% 
-  mutate(VOdds_Prob = 1/ValueOdds_BetfairFormat)
-
-head(t2)
-
-sum(t2$VOdds_Prob)
 

@@ -8,36 +8,36 @@ setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_09_30.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_10_31.csv", col_names = T)
 
 # Remove Wolverhampton Polytrack data from pre Tapeta era
 
-wPoly1 <- which(ukhr_master_BF$Year < 2014 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
-
-wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
-
-wPolyAll <- c(wPoly1, wPoly2)
-
-ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
-
-unique(ukhr_master_BF$Year)
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Fin_Pos = min_rank(LengthsBehindTotal),
-         Exp_Btn = Actual.Runners - Fav_Rank,
-         Act_Btn = Actual.Runners - Fin_Pos)
-
+# wPoly1 <- which(ukhr_master_BF$Year < 2014 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
+# 
+# wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
+# 
+# wPolyAll <- c(wPoly1, wPoly2)
+# 
+# ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
+# 
+# unique(ukhr_master_BF$Year)
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   group_by(UKHR_RaceID) %>% 
+#   mutate(Fin_Pos = min_rank(LengthsBehindTotal),
+#          Exp_Btn = Actual.Runners - Fav_Rank,
+#          Act_Btn = Actual.Runners - Fin_Pos)
+# 
 winter <- c(12,1,2)
 spring <- c(3,4,5)
 summer <- c(6,7,8)
 autumn <- c(9,10,11)
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Season = if_else(Month %in% winter, "Winter",
-                          if_else(Month %in% spring, "Spring",
-                                  if_else(Month %in% summer,"Summer",
-                                          "Autumn"))))
+# 
+# ukhr_master_BF <- ukhr_master_BF %>% 
+#   mutate(Season = if_else(Month %in% winter, "Winter",
+#                           if_else(Month %in% spring, "Spring",
+#                                   if_else(Month %in% summer,"Summer",
+#                                           "Autumn"))))
 
 # Create Going Range Vars
 
@@ -57,6 +57,22 @@ today <- read_csv(file.choose(),col_names = T)
 # Amend Odds after removing non runners from CSV file
 
 today$BetFairSPForecastWinPrice[today$BetFairSPForecastWinPrice <= 0] <- NA
+
+sum(is.na(today$BetFairSPForecastWinPrice))
+
+if (sum(is.na(today$BetFairSPForecastWinPrice) > 0)) {
+  
+  library(caret)
+  
+  bfspToday <- today %>% 
+    select(RatingsPosition, RatingAdvantage, ConnRanking, ClassPosition, Runners, BetFairSPForecastWinPrice)
+  
+  bfspImpute <- preProcess(bfspToday, method = "bagImpute")
+  imputedBFSP <- predict(bfspImpute, bfspToday)
+  #View(imputedBFSP)
+  
+  today$BetFairSPForecastWinPrice <- imputedBFSP$BetFairSPForecastWinPrice
+}  
 
 sum(is.na(today$BetFairSPForecastWinPrice))
 

@@ -96,7 +96,8 @@ write_csv(top5Q, paste0("ValueTop5_",today$Date[1],".csv"))
 
 
 dualQuals <- top5Q %>% 
-  inner_join(asq, by = "Horse")
+  inner_join(asq, by = c("Horse", "Time24Hour", "Meeting", "ValueOdds_BetfairFormat")) %>% 
+  filter(Handicap.x == "HANDICAP", Ratings_Range.x == "Top_Third")
 
 dualQuals
 

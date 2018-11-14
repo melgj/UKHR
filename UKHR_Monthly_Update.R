@@ -4,7 +4,7 @@ library(stringr)
 library(lubridate)
 
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_08_31.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_09_30.csv", col_names = T)
 
 length(which(ukhr_master_BF$BetFairSPForecastWinPrice <= 0))
 
@@ -198,10 +198,17 @@ ukhrCols <- colnames(ukhr_master_BF)
 setdiff(newMonthBFCols, ukhrCols)
 setdiff(ukhrCols, newMonthBFCols)
 
+summary(newMonthBF$Month)
+
 
 ###################################################################
 
-ukhr_master_BF <- rbind(ukhr_master_BF, newMonthBF)
+ukhr_master_BF <- select(ukhr_master_BF, newMonthBFCols)
+
+ukhr_master_BF <- rbind(ukhr_master_BF, newMonthBF) 
+  
+
+table(ukhr_master_BF$Year, ukhr_master_BF$Month)
 
 # Remove Wolverhampton Polytrack data from pre Tapeta era
 
@@ -212,24 +219,6 @@ wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_ma
 wPolyAll <- c(wPoly1, wPoly2)
 
 ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
-
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  group_by(UKHR_RaceID) %>% 
-  mutate(Fin_Pos = min_rank(LengthsBehindTotal),
-         Exp_Btn = Actual.Runners - Fav_Rank,
-         Act_Btn = Actual.Runners - Fin_Pos)
-
-winter <- c(12,1,2)
-spring <- c(3,4,5)
-summer <- c(6,7,8)
-autumn <- c(9,10,11)
-
-ukhr_master_BF <- ukhr_master_BF %>% 
-  mutate(Season = if_else(Month %in% winter, "Winter",
-                          if_else(Month %in% spring, "Spring",
-                                  if_else(Month %in% summer,"Summer",
-                                          "Autumn"))))
 
 
 ukhr_master_BF <- ukhr_master_BF %>% 
@@ -359,6 +348,24 @@ ukhr_master_BF <- ukhr_master_BF %>%
                                 labels = c("<= 1.5",">1.5 to 2",">2 to 4", ">4 to 6", ">6 to 11", ">11"),
                                 ordered_result = T))
 
+ukhr_master_BF <- ukhr_master_BF %>% 
+  group_by(UKHR_RaceID) %>% 
+  mutate(Fin_Pos = min_rank(LengthsBehindTotal),
+         Exp_Btn = Actual.Runners - Fav_Rank,
+         Act_Btn = Actual.Runners - Fin_Pos)
+
+winter <- c(12,1,2)
+spring <- c(3,4,5)
+summer <- c(6,7,8)
+autumn <- c(9,10,11)
+
+ukhr_master_BF <- ukhr_master_BF %>% 
+  mutate(Season = if_else(Month %in% winter, "Winter",
+                          if_else(Month %in% spring, "Spring",
+                                  if_else(Month %in% summer,"Summer",
+                                          "Autumn"))))
+
+
 
 ukhrOdds <- ukhr_master_BF %>% 
   group_by(UKHR_RaceID) %>% 
@@ -387,4 +394,4 @@ ukhr_master_BF$ValueOdds_BetfairFormat <- ukhrOdds$Adj_Val_Odds
 #ukhr_master_BF2 <- ukhr_master_BF2 %>% 
  # filter(Year >= 2013)
 
-write_csv(ukhr_master_BF, "UKHR_Master_BF_2018_09_30.csv")
+write_csv(ukhr_master_BF, "UKHR_Master_BF_2018_10_31.csv")

@@ -12,6 +12,8 @@ bfNNPLMod <- readRDS("Systems_NN_BFSPPL_Model.RDS")
 
 bfXGBMod <- readRDS("XGB_Systems_Model_Prob")
 
+bfXGB_PL_Mod <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
+
 todaySQ <- read_csv(file.choose(), col_names = T)
 
 summary(todaySQ)
@@ -30,6 +32,7 @@ todaySQ$Dist_Range <- as.factor(todaySQ$Dist_Range)
 
 predMARSBFPL <- predict(bfPLMod, newdata = todaySQ, type = "raw")
 predNNBFPL <- predict(bfNNPLMod, newdata = todaySQ, type = "raw")
+predXGBL_BFPL <- predict(bfXGB_PL_Mod, newdata = todaySQ, type = "raw")
 predXGBBFPL <- predict(bfXGBMod, newdata = todaySQ, type = "prob")
 
 #View(predBFPL)
@@ -39,7 +42,14 @@ todaySQ$PredMARSPL <- predMARSBFPL
 
 todaySQ$PredNNPL <- predNNBFPL
 
+todaySQ$PredXGBL_PL <- predXGBL_BFPL
+
 todaySQ2 <- cbind(todaySQ, predXGBBFPL)
+
+todaySQ2 <- todaySQ2 %>% 
+  rename(Model_Win_Prob = WON, Model_Lose_Prob = LOST) %>% 
+  select(Time24Hour, Meeting, Horse, PredXGBL_PL, System_Name, everything())
+  
 
 #head(todaySQ$PredMARSPL)
 #head(todaySQ$PredNNPL)

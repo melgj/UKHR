@@ -30,6 +30,7 @@ allSystemQualifiers$Val_Ratio <-allSystemQualifiers$BetFairSPForecastWinPrice / 
 
 head(allSystemQualifiers)
 
+poorHcpSystems <- read_csv("Poor_Performing_Hcp_Systems.csv", col_names = T)
 goodHcpSystems <- read_csv("Good_Performing_Hcp_Systems.csv", col_names = T)
 goodSystems <- read_csv("Good_Performing_Systems.csv", col_names = T)
 poorSystems <- read_csv("Poor_Performing_Systems.csv", col_names = T)
@@ -62,12 +63,24 @@ length(unique(asq$Horse))
 
 #####################################################################################
 
-allHcpQuals <- asq %>% 
+allHcpQuals <- allSystemQualifiers %>% 
+  mutate(Winners = round(Runs * WinPercent), Exp_Wins = Winners/AE_Ratio, 
+         Archie = ifelse(Exp_Wins >= 5,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0),
+         Placed_Archie = ifelse(Exp_Places >= 5.0, round(((Places * ((Places - Exp_Places) ^ 2)) / (Exp_Places * (Runs - Exp_Places))),2),0),
+         #Btn_Archie = ifelse(Total_Exp_Btn >= 5,((Runs * ((Total_Btn - Total_Exp_Btn) ^ 2)) / (Total_Exp_Btn * (Runs - Total_Exp_Btn))),0),
+         Place_Percent = Places/Runs,
+         Arch_Strength = cut(Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
+                             labels = c("-", "*", "**", "***", "****", "*****")),
+         Arch_Placed_Strength = cut(Placed_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
+                                    labels = c("-", "*", "**", "***", "****", "*****")),
+         #Arch_Btn_Strength = cut(Btn_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100), 
+         #labels = c("-", "*", "**", "***", "****", "*****")),
+         Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat) %>% 
   select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
          Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, 
          totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, 
          Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age) %>% 
-  filter(Handicap != "NONHCP", Ratings_Range != "Bottom_Third") %>% 
+  filter(Handicap != "NONHCP", Ratings_Range != "Bottom_Third", !(System_Name %in% poorHcpSystems)) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
 allHcpQuals

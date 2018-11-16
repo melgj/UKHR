@@ -4,6 +4,9 @@ library(caret)
 library(stringi)
 library(stringr)
 library(nnet)
+library(xgboost)
+library(randomForest)
+library(earth)
 
 
 quals <- read_csv("All_System_Qualifiers_to_2018_10.csv", col_names = T)
@@ -41,7 +44,7 @@ colSums(is.na(qualsData))
 
 ##############################################
 
-library(earth)
+#library(earth)
 
 library(doMC)
 
@@ -58,18 +61,20 @@ ukTestSet <- qualsData[-ukTrainRows,]
 summary(ukTrainSet)
 str(ukTrainSet)
 
-marsGrid <- expand.grid(.degree = 1:2, .nprune = 2:25)
+#########################################################################################
+
+marsGrid <- expand.grid(.degree = 1:2, .nprune = 2:20)
 
 train.control <- trainControl(method = "repeatedcv",
                               number = 10,
-                              repeats = 6,
+                              repeats = 3,
                               #summaryFunction = RMSE,
                               verboseIter = T)
 
 set.seed(100)                              
 
 bfPLMod <- train(BFSP_PL ~ ., 
-                   data = qualsData,
+                   data = ukTrainSet,
                    method = "earth",
                    tuneGrid = marsGrid,
                    metric = "RMSE",
@@ -109,12 +114,6 @@ ukTestSet %>%
             Avg_PL = mean(BFSP_PL),
             Total_PL = sum(BFSP_PL))
 
-ukPos %>% 
-  group_by(Handicap) %>% 
-  filter(PredPL > 0) %>% 
-  summarise(Runs = n(),
-            Avg_PL = mean(BFSP_PL),
-            Total_PL = sum(BFSP_PL))
 
 ###############################################################
 
@@ -179,7 +178,7 @@ colSums(is.na(ukTrainSet))
 numUKTrain <- ukTrainSet %>% 
   select_if(is.numeric)
 
-highCorrs <- findCorrelation(cor(numUKTrain), cutoff = 0.7)
+highCorrs <- findCorrelation(cor(numUKTrain), cutoff = 0.75)
 
 colnames(numUKTrain[,highCorrs])
 
@@ -196,7 +195,8 @@ ukTestSet <- ukTestSet[, -highCorrs]
 
 colnames(ukTrainSet)
 
-#############################################################
+############################################################
+
 train.control <- trainControl(method = "repeatedcv",
                               number = 10,
                               repeats = 3,
@@ -204,7 +204,7 @@ train.control <- trainControl(method = "repeatedcv",
                               verboseIter = T)
 
 nnetGrid <- expand.grid(.decay = c(0.01, 0.05, 0.10),
-                        .size = c(1:10),
+                        .size = c(1:5),
                         .bag = F)
                         
 
@@ -219,9 +219,11 @@ ukNN <- train(BFSP_PL ~ .,
               linout = T,
               trace = F,
               MaxNWts = 10 * (ncol(ukTrainSet) + 1) +10 +1,
-              maxit = 1000)
+              maxit = 500)
 
 print(ukNN)
+
+#ukNN <- readRDS("Systems_NN_BFSPPL_Model.RDS")
 
 predBFPL <- predict(ukNN, newdata = ukTestSet, type = "raw")
 
@@ -397,6 +399,175 @@ ukTestSet %>%
 
 
 saveRDS(rfMod, "RF_BFPL_Model.RDS")
+
+##############################################################
+
+numUKTrain <- ukTrainSet %>% 
+  select_if(is.numeric)
+
+highCorrs <- findCorrelation(cor(numUKTrain), cutoff = 0.75)
+
+colnames(numUKTrain[,highCorrs])
+
+library(corrplot)
+
+correlations <- cor(numUKTrain)
+
+correlations
+
+corrplot(correlations, order = "hclust")
+
+ukTrainSet <- ukTrainSet[,-highCorrs]
+ukTestSet <- ukTestSet[, -highCorrs]
+
+colnames(ukTrainSet)
+
+
+knnMod <- train(BFSP_PL ~ .,
+                data = ukTrainSet,
+                method = "knn",
+                preProc = c("center", "scale"),
+                tune.grid = data.frame(.k = 1:30),
+                trControl = trainControl(method = "repeatedcv",
+                                         number = 10,
+                                         repeats = 3,
+                                         verboseIter = T))
+
+print(knnMod)
+
+varImp(knnMod)
+
+predKNN <- predict(knnMod, newdata = ukTestSet, type = "raw")
+
+head(predKNN)
+
+ukTestSet$KNN_PL <- predKNN
+
+ukPos <- filter(ukTestSet, KNN_PL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, KNN_PL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(KNN_PL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+
+
+##############################################################
+
+nn <- readRDS("Systems_NN_BFSPPL_Model.RDS")
+xgb <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
+rf <- readRDS("RF_BFPL_Model.RDS")
+
+nnPred <- predict(nn, newdata = qualsData, type = "raw")
+xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
+rfPred <- predict(rf, newdata = qualsData, type = "raw")
+
+qualsData2 <- qualsData %>% 
+  mutate(NN_Pred = nnPred,
+         XGB_Pred = xgbPred,
+         RF_Pred = rfPred)
+
+head(qualsData2[,24:27])
+
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData2$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData2[ukTrainRows,]
+
+ukTestSet <- qualsData2[-ukTrainRows,]
+
+# ukTrainSet2 <- ukTrainSet %>% 
+#   select(-c(XGB_Pred, System_Name))
+# 
+# ukTestSet2 <- ukTestSet %>% 
+#   select(-c(XGB_Pred, System_Name))
+  
+
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 5,
+                              verboseIter = T)
+#classProbs = TRUE, 
+#summaryFunction = RMSE)
+
+
+tune.grid <- expand.grid(eta = c(0.01, 0.05, 0.10),
+                         nrounds = c(150, 200, 250),
+                         lambda = c(0.01, 0.05, 0.10, 0.15),
+                         alpha = c(1.0))
+
+
+set.seed(100)
+
+xgbPredModUK <- train(BFSP_PL ~ .,
+                     data = ukTrainSet,
+                     method = "xgbLinear",
+                     preProc = c("center", "scale"),
+                     metric = "RMSE",
+                     tuneGrid = tune.grid,
+                     trControl = train.control)
+
+print(xgbPredModUK)
+
+varImp(xgbPredModUK)
+
+
+
+
+
+predMod <- predict(xgbPredModUK, newdata = ukTestSet, type = "raw")
+
+head(predMod)
+
+
+summary(predMod)
+
+
+R2(predMod, ukTestSet$BFSP_PL)
+RMSE(predMod, ukTestSet$BFSP_PL)
+cor(predMod, ukTestSet$BFSP_PL)
+
+ukTestSet$ModelPL <- predMod
+
+
+ukPos <- filter(ukTestSet, ModelPL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, ModelPL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(ModelPL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(ModelPL <= 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+
+saveRDS(xgbPredModUK, "Final_BFPL_Model.RDS")
 
 
 

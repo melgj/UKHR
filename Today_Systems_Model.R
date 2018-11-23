@@ -1,12 +1,13 @@
-#library(tidyverse)
-#library(lubridate)
+# library(tidyverse)
+# library(lubridate)
+# library(stringi)
+# library(stringr)
 library(caret)
 library(earth)
 library(nnet)
 library(xgboost)
 library(randomForest)
-# library(stringi)
-# library(stringr)
+
 
 #bfPLMod <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
 
@@ -56,7 +57,7 @@ todaySQ$RF_Pred <- predRF_BFPL
 todaySQ2 <- cbind(todaySQ, predXGBBFPL)
 
 
-Final_Mod <- readRDS("Final_BFPL_Model.RDS")
+Final_Mod <- readRDS("Final_BFPL_Model_V10.RDS")
 
 Mod_Preds <- predict(Final_Mod, newdata = todaySQ2, type = "raw")
 
@@ -74,6 +75,8 @@ todaySQ2All <- todaySQ2 %>%
 
 write_csv(todaySQ2All, paste0("Today_Model_Sys_Quals_", today$Date[1], ".csv"))
 
+#write_csv(todaySQ2All, "Today_Model_Sys_Quals.csv")
+
 
 todaySQ2Hcp <- todaySQ2 %>% 
   rename(Model_Win_Prob = WON, Model_Lose_Prob = LOST) %>% 
@@ -87,6 +90,8 @@ todaySQ2Hcp <- todaySQ2 %>%
 
 
 write_csv(todaySQ2Hcp, paste0("Today_Model_Hcp_Quals_", today$Date[1], ".csv"))
+
+#write_csv(todaySQ2Hcp, "Today_Model_Hcp_Quals.csv")
 
 todaySQ2Elite <- todaySQ2 %>% 
   filter(Model_Preds > 0, XGB_Pred > 0, NN_Pred > 0, RF_Pred > 0) %>% 
@@ -102,4 +107,8 @@ todaySQ2Elite <- todaySQ2 %>%
 todaySQ2Elite
 
 View(todaySQ2Elite)
+
+write_csv(todaySQ2Elite, paste0("Today_Elite_Model_Quals_", today$Date[1], ".csv"))
+
+#write_csv(todaySQ2Elite, "Today_Elite_Model_Quals.csv")
   

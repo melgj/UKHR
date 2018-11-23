@@ -7,6 +7,7 @@ library(nnet)
 library(xgboost)
 library(randomForest)
 library(earth)
+library(kernlab)
 
 
 quals <- read_csv("All_System_Qualifiers_to_2018_10.csv", col_names = T)
@@ -36,7 +37,7 @@ quals$System_Name <- as.factor(quals$System_Name)
 
 
 qualsData <- quals %>% 
-  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, System_Name, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+  select(BetFairSPForecastWinPrice, System_Name, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
          Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
          Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, BFSP_PL)
 
@@ -63,7 +64,7 @@ str(ukTrainSet)
 
 #########################################################################################
 
-marsGrid <- expand.grid(.degree = 1:2, .nprune = 2:20)
+marsGrid <- expand.grid(.degree = 1:2, .nprune = 2:50)
 
 train.control <- trainControl(method = "repeatedcv",
                               number = 10,
@@ -153,14 +154,14 @@ ukPos %>%
 
 
 #####################################################################
-qualsData <- quals %>% 
-  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, System_Name, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
-         Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
-         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, BFSP_PL)
-
-library(doMC)
-
-registerDoMC(4)
+# qualsData <- quals %>% 
+#   select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, System_Name, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+#          Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
+#          Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, BFSP_PL)
+# 
+# library(doMC)
+# 
+# registerDoMC(4)
 
 set.seed(100)
 
@@ -459,27 +460,88 @@ ukTestSet %>%
             Total_PL = sum(BFSP_PL)) %>% 
   arrange(desc(Avg_PL))
 
+############################################################
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData[ukTrainRows,]
+
+ukTestSet <- qualsData[-ukTrainRows,]
+
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              verboseIter = T)
+
+set.seed(100)
+
+svmLinModUK <- train(BFSP_PL ~ .,
+                     data = ukTrainSet,
+                     method = "svmRadial",
+                     preProc = c("center", "scale"),
+                     metric = "RMSE",
+                     tuneLength = 14,
+                     trControl = train.control)
+
+print(svmLinModUK)
+
+varImp(svmLinModUK)
+
+predSVM <- predict(svmLinModUK, newdata = ukTestSet, type = "raw")
+
+head(predSVM)
+
+ukTestSet$SVM_PL <- predSVM
+
+ukPos <- filter(ukTestSet, SVM_PL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, SVM_PL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(SVM_PL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+saveRDS(svmLinModUK, "SVM_Systems_Model.RDS")
 
 
 ##############################################################
 
+# Build Final Model using XGBoost Linear
+
 nn <- readRDS("Systems_NN_BFSPPL_Model.RDS")
-xgb <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
+#xgb <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
 rf <- readRDS("RF_BFPL_Model.RDS")
+mars <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
 
 nnPred <- predict(nn, newdata = qualsData, type = "raw")
-xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
+#xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
 rfPred <- predict(rf, newdata = qualsData, type = "raw")
+marsPred <- predict(mars, newdata = qualsData, type = "raw")
 
 qualsData2 <- qualsData %>% 
   mutate(NN_Pred = nnPred,
-         XGB_Pred = xgbPred,
-         RF_Pred = rfPred)
+         #XGB_Pred = xgbPred,
+         RF_Pred = rfPred,
+         MARS_Pred = marsPred) %>% 
+  select(-c(System_Name, MARS_Pred))
 
-head(qualsData2[,24:27])
+head(qualsData2[,23:25])
+
+colnames(qualsData2)
 
 
-set.seed(100)
+set.seed(200)
 
 ukTrainRows <- createDataPartition(qualsData2$BFSP_PL, p = 0.6, list = FALSE)
 
@@ -567,7 +629,42 @@ ukTestSet %>%
   arrange(desc(Avg_PL))
 
 
-saveRDS(xgbPredModUK, "Final_BFPL_Model.RDS")
+saveRDS(xgbPredModUK, "Final_BFPL_Model_V10.RDS")
+
+# Test XGBoost Final Preds against all qualsData2
+
+#xgbPredModUK <- readRDS("Final_BFPL_Model_V10.RDS")
+
+predModAll <- predict(xgbPredModUK, newdata = qualsData2, type = "raw")
+
+head(predModAll)
+
+qualsData2$ModelPL <- predModAll
+
+ukPos <- filter(qualsData2, ModelPL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(qualsData2, ModelPL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(qualsData2$BFSP_PL)
+
+qualsData2 %>% 
+  group_by(Handicap) %>% 
+  filter(ModelPL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+qualsData2 %>% 
+  group_by(Handicap) %>% 
+  filter(ModelPL <= 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
 
 
 
@@ -584,7 +681,7 @@ quals <- quals %>%
                           "LOST"))
 
 qualsData <- quals %>% 
-  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, System_Name, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
          Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
          Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, Actual)
 

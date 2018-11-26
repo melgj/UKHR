@@ -110,5 +110,22 @@ View(todaySQ2Elite)
 
 write_csv(todaySQ2Elite, paste0("Today_Elite_Model_Quals_", today$Date[1], ".csv"))
 
-#write_csv(todaySQ2Elite, "Today_Elite_Model_Quals.csv")
+
+todaySQ2Trips <- todaySQ2 %>% 
+  filter(Model_Preds <= 0, XGB_Pred > 0, NN_Pred > 0, RF_Pred > 0) %>% 
+  rename(Model_Win_Prob = WON, Model_Lose_Prob = LOST) %>% 
+  mutate(Model_Value_Odds = 1/Model_Win_Prob,
+         Model_Val_Ratio = BetFairSPForecastWinPrice/Model_Value_Odds,
+         Models_Avg = (XGB_Pred + NN_Pred + RF_Pred)/3) %>% 
+  select(Time24Hour, Meeting, Horse, System_Name, Model_Preds, XGB_Pred, NN_Pred, RF_Pred, Models_Avg, Model_Value_Odds, Model_Val_Ratio,
+         Handicap, Ratings_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio,
+         Placed_Archie, Btn_AE_Ratio) %>% 
+  arrange(Time24Hour, Meeting, Horse)
+
+todaySQ2Trips
+
+write_csv(todaySQ2Trips, paste0("Today_TriplePos_Model_Quals_", today$Date[1], ".csv"))
+
+
+#write_csv(todaySQ2Trips, "Today_TriplePos_Model_Quals.csv")
   

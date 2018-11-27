@@ -11,11 +11,11 @@ library(randomForest)
 
 #bfPLMod <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
 
-bfNNPLMod <- readRDS("Systems_NN_BFSPPL_Model.RDS")
+bfNNPLMod <- readRDS("Systems_NN_BFSPPL_Model_v20.RDS")
 
-bfRFMod <- readRDS("RF_BFPL_Model.RDS")
+bfRFMod <- readRDS("RF_BFPL_Model_v20.RDS")
 
-bfXGB_PL_Mod <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
+bfXGB_PL_Mod <- readRDS("XGB_Linear_Systems_BFPL_Model_v20.RDS")
 
 bfXGBMod <- readRDS("XGB_Systems_Model_Prob")
 
@@ -57,7 +57,7 @@ todaySQ$RF_Pred <- predRF_BFPL
 todaySQ2 <- cbind(todaySQ, predXGBBFPL)
 
 
-Final_Mod <- readRDS("Final_BFPL_Model_V10.RDS")
+Final_Mod <- readRDS("Final_BFPL_Model_V20.RDS")
 
 Mod_Preds <- predict(Final_Mod, newdata = todaySQ2, type = "raw")
 

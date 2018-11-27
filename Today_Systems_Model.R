@@ -15,7 +15,7 @@ bfNNPLMod <- readRDS("Systems_NN_BFSPPL_Model_v20.RDS")
 
 bfRFMod <- readRDS("RF_BFPL_Model_v20.RDS")
 
-bfXGB_PL_Mod <- readRDS("XGB_Linear_Systems_BFPL_Model_v20.RDS.RDS")
+bfXGB_PL_Mod <- readRDS("XGB_Linear_Systems_BFPL_Model_v20.RDS")
 
 bfXGBMod <- readRDS("XGB_Systems_Model_Prob")
 

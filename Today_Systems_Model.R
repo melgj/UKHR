@@ -63,7 +63,7 @@ todaySQ2 <-  todaySQ2 %>%
 todaySQ2
 
 
-Final_Mod <- readRDS("Final_BFPL_Model_V30.RDS")
+Final_Mod <- readRDS("Final_BFPL_Model_V20.RDS")
 
 Mod_Preds <- predict(Final_Mod, newdata = todaySQ2, type = "raw")
 

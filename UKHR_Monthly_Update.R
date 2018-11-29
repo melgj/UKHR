@@ -393,7 +393,7 @@ ukhr_master_BF$ValueOdds_BetfairFormat <- ukhrOdds$Adj_Val_Odds
 
 x <- max(ukhr_master_BF$ElapsedDays) - (365.25 * 6)
 
-ukhr_master_BF_2 <- ukhr_master_BF %>% 
+ukhr_master_BF <- ukhr_master_BF %>% 
   filter(ElapsedDays > x)
 
 #ukhr_master_BF2 <- ukhr_master_BF2 %>% 

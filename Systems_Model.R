@@ -587,8 +587,9 @@ predOutcomeXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "prob")
 
 head(predOutcomeXGB)
 
-table(ukTestSet$Result, predOutcomeXGB)
+predOutcomeXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "raw")
 
+table(ukTestSet$Result, predOutcomeXGB)
 
 confusionMatrix(ukTestSet$Result, predOutcomeXGB)
 

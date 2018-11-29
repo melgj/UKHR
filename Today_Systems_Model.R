@@ -57,7 +57,8 @@ todaySQ$RF_Pred <- predRF_BFPL
 todaySQ2 <- cbind(todaySQ, predXGBBFProb)
 
 todaySQ2 <-  todaySQ2 %>% 
-  rename(Win_Prob = WON)
+  rename(Win_Prob = WON,
+         Lose_Prob = LOST)
 
 todaySQ2
 

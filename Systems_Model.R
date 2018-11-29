@@ -581,9 +581,9 @@ print(xgbTreeModUK)
 
 varImp(xgbTreeModUK)
 
-xgbTreeModUK <- readRDS("XGB_Systems_Model_Prob")
+xgbTreeModUK
 
-predOutcomeXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "raw")
+predOutcomeXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "prob")
 
 head(predOutcomeXGB)
 
@@ -592,6 +592,9 @@ table(ukTestSet$Result, predOutcomeXGB)
 
 confusionMatrix(ukTestSet$Result, predOutcomeXGB)
 
+#saveRDS(xgbTreeModUK, "XGB_Systems_Model_Prob")
+
+#xgbTreeModUK <- readRDS("XGB_Systems_Model_Prob")
 
 
 ##############################################################

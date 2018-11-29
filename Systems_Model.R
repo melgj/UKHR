@@ -8,6 +8,7 @@ library(xgboost)
 library(randomForest)
 library(earth)
 library(kernlab)
+library(e1071)
 
 
 quals <- read_csv("All_System_Qualifiers_to_2018_10.csv", col_names = T)
@@ -523,6 +524,75 @@ ukTestSet %>%
 
 saveRDS(svmLinModUK, "SVM_Systems_Model.RDS")
 
+#############################################################
+
+# XGB Tree Algorithm to predict Win Probability
+
+
+quals3 <- quals %>% 
+  mutate(Result = if_else(Actual == 1, 
+                          "WON",
+                          "LOST"))
+
+qualsData3 <- quals3 %>% 
+  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+         Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
+         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, Result)
+
+qualsData3$Result <- as.factor(qualsData3$Result)
+
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData3$Result, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData3[ukTrainRows,]
+
+ukTestSet <- qualsData3[-ukTrainRows,]
+
+
+library(xgboost)
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              verboseIter = T,
+                              classProbs = TRUE, 
+                              summaryFunction = mnLogLoss)
+
+
+tune.grid <- expand.grid(eta = c(0.01, 0.05, 0.10),
+                         nrounds = c(150, 200, 250),
+                         max_depth = 6:8,
+                         min_child_weight = c(2.0, 2.5, 3.0),
+                         colsample_bytree = c(0.50, 0.75),
+                         gamma = 1,
+                         subsample = c(0.5,1.0))
+View(tune.grid)
+
+xgbTreeModUK <- train(Result ~ .,
+                      data = ukTrainSet,
+                      method = "xgbTree",
+                      metric = "logLoss",
+                      tuneGrid = tune.grid,
+                      trControl = train.control)
+
+print(xgbTreeModUK)
+
+varImp(xgbTreeModUK)
+
+xgbTreeModUK <- readRDS("XGB_Systems_Model_Prob")
+
+predOutcomeXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "raw")
+
+head(predOutcomeXGB)
+
+table(ukTestSet$Result, predOutcomeXGB)
+
+
+confusionMatrix(ukTestSet$Result, predOutcomeXGB)
+
+
 
 ##############################################################
 
@@ -534,17 +604,20 @@ rf <- readRDS("RF_BFPL_Model_v20.RDS")
 #mars <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
 
 nnPred <- predict(nn, newdata = qualsData, type = "raw")
+xgbProb <- predict(xgbTreeModUK, newdata = qualsData, type = "prob")
 #xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
 rfPred <- predict(rf, newdata = qualsData, type = "raw")
 #marsPred <- predict(mars, newdata = qualsData, type = "raw")
 
 qualsData2 <- qualsData %>% 
   mutate(NN_Pred = nnPred,
-         #XGB_Pred = xgbPred,
-         RF_Pred = rfPred) %>% 
+         RF_Pred = rfPred,
+         Win_Prob = xgbProb[,2]) %>% 
   select(-c(System_Name))
 
-head(qualsData2[,23:25])
+head(qualsData2[,14:26])
+
+#View(qualsData2)
 
 colnames(qualsData2)
 
@@ -556,6 +629,8 @@ ukTrainRows <- createDataPartition(qualsData2$BFSP_PL, p = 0.6, list = FALSE)
 ukTrainSet <- qualsData2[ukTrainRows,]
 
 ukTestSet <- qualsData2[-ukTrainRows,]
+
+colnames(ukTrainSet)
 
 # ukTrainSet2 <- ukTrainSet %>% 
 #   select(-c(XGB_Pred, System_Name))
@@ -637,7 +712,7 @@ ukTestSet %>%
   arrange(desc(Avg_PL))
 
 
-saveRDS(xgbPredModUK, "Final_BFPL_Model_V20.RDS")
+saveRDS(xgbPredModUK, "Final_BFPL_Model_V30.RDS")
 
 # Test XGBoost Final Preds against all qualsData2
 
@@ -678,72 +753,121 @@ qualsData2 %>%
 
 ################################################################
 
+# 
+# 
+# # XGB Tree Algorithm to predict Win Probability
+# 
+# 
+# quals <- quals %>% 
+#   mutate(Result = if_else(Actual == 1, 
+#                           "WON",
+#                           "LOST"))
+# 
+# qualsData <- quals %>% 
+#   select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+#          Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
+#          Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, Actual)
+# 
+# qualsData$Result <- as.factor(qualsData$Result)
+# 
+# 
+# set.seed(100)
+# 
+# ukTrainRows <- createDataPartition(qualsData$Result, p = 0.6, list = FALSE)
+# 
+# ukTrainSet <- qualsData[ukTrainRows,]
+# 
+# ukTestSet <- qualsData[-ukTrainRows,]
+# 
+# 
+# library(xgboost)
+# 
+# train.control <- trainControl(method = "repeatedcv",
+#                               number = 10,
+#                               repeats = 3,
+#                               verboseIter = T,
+#                               classProbs = TRUE, 
+#                               summaryFunction = mnLogLoss)
+# 
+# 
+# tune.grid <- expand.grid(eta = c(0.01, 0.05, 0.10),
+#                          nrounds = c(150, 200, 250),
+#                          max_depth = 6:8,
+#                          min_child_weight = c(2.0, 2.5, 3.0),
+#                          colsample_bytree = c(0.50, 0.75),
+#                          gamma = 1,
+#                          subsample = c(0.5,1.0))
+# View(tune.grid)
+# 
+# xgbTreeModUK <- train(Result ~ .,
+#                       data = ukTrainSet,
+#                       method = "xgbTree",
+#                       metric = "logLoss",
+#                       tuneGrid = tune.grid,
+#                       trControl = train.control)
+# 
+# print(xgbTreeModUK)
+# 
+# varImp(xgbTreeModUK)
+# 
+# xgbTreeModUK <- readRDS("XGB_Systems_Model_Prob")
+# 
+# predOutcomeXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "raw")
+# 
+# head(predOutcomeXGB)
+# 
+# table(ukTestSet$Result, predOutcomeXGB)
+# 
+# 
+# confusionMatrix(ukTestSet$Result, predOutcomeXGB)
 
 
-# XGB Tree Algorithm to predict Win Probability
-
-
-quals <- quals %>% 
-  mutate(Result = if_else(Actual == 1, 
-                          "WON",
-                          "LOST"))
-
-qualsData <- quals %>% 
-  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
-         Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
-         Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, Actual)
-
-qualsData$Result <- as.factor(qualsData$Result)
-
-
-set.seed(100)
-
-ukTrainRows <- createDataPartition(qualsData$Result, p = 0.6, list = FALSE)
-
-ukTrainSet <- qualsData[ukTrainRows,]
-
-ukTestSet <- qualsData[-ukTrainRows,]
-
-
-library(xgboost)
-
-train.control <- trainControl(method = "repeatedcv",
-                              number = 10,
-                              repeats = 3,
-                              verboseIter = T,
-                              classProbs = TRUE, 
-                              summaryFunction = mnLogLoss)
-
-
-tune.grid <- expand.grid(eta = c(0.01, 0.05, 0.10),
-                         nrounds = c(150, 200, 250),
-                         max_depth = 6:8,
-                         min_child_weight = c(2.0, 2.5, 3.0),
-                         colsample_bytree = c(0.50, 0.75),
-                         gamma = 1,
-                         subsample = c(0.5,1.0))
-View(tune.grid)
-
-xgbTreeModUK <- train(Result ~ .,
-                      data = ukTrainSet,
-                      method = "xgbTree",
-                      metric = "logLoss",
-                      tuneGrid = tune.grid,
-                      trControl = train.control)
-
-print(xgbTreeModUK)
-
-varImp(xgbTreeModUK)
-
-xgbTreeModUK <- readRDS("XGB_Systems_Model_Prob")
-
-predOutcomeXGB <- predict(xgbTreeModUK, newdata = ukTestSet, type = "raw")
-
-head(predOutcomeXGB)
-
-table(ukTestSet$Result, predOutcomeXGB)
-
-
-confusionMatrix(ukTestSet$Result, predOutcomeXGB)
-
-
+####################################################################
+# 
+# # SVM Model using e1071
+# 
+# library(doMC)
+# # 
+# registerDoMC(4)
+# 
+# 
+# 
+# set.seed(100)
+# 
+# ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.6, list = FALSE)
+# 
+# ukTrainSet <- qualsData[ukTrainRows, ]
+# #ukTrainSetY <- qualsData[ukTrainRows, ]
+# 
+# ukTestSet <- qualsData[-ukTrainRows, ]
+# # ukTestSet <- qualsData[-ukTrainRows, 24]
+# 
+# # Tune Parameters
+# 
+# 
+# svmTune <- tune.svm(BFSP_PL ~.,
+#                     data = ukTrainSet,
+#                     gamma = 2^(-1:1), cost = 2^(-2:6),
+#                     tunecontrol = tune.control(nrepeat = 3,
+#                                                repeat.aggregate = mean,
+#                                                sampling = "cross",
+#                                                best.model = T))
+#                                                
+# set.seed(100)
+# 
+# svmModel <- svm(BFSP_PL ~.,
+#                 data = ukTrainSet,
+#                 scale = 1,
+#                 kernel = "radial",
+#                 type = "eps-regression",
+#                 cost = 4,
+#                 gamma = 0.1,
+#                 epsilon = 0.1,
+#                 cross = 10,
+#                 verbose = T)
+# 
+# 
+# 
+# 
+# colnames(ukTrainSet)
+# 

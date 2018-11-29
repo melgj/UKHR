@@ -1,12 +1,12 @@
-.Rproj.user
-.Rhistory
-.RData
-.Ruserdata
-.csv
-.pdf
-.jpeg
-.png
-.txt
-.ods
+*.Rproj.user
+*.Rhistory
+*.RData
+*.Ruserdata
+*.csv
+*.pdf
+*.jpeg
+*.png
+*.txt
+*.ods
 
 

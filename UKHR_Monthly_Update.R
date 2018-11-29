@@ -396,7 +396,16 @@ x <- max(ukhr_master_BF$ElapsedDays) - (365.25 * 6)
 ukhr_master_BF <- ukhr_master_BF %>% 
   filter(ElapsedDays > x)
 
+ukhr_master_BF <- ukhr_master_BF %>% 
+  arrange(desc(Year, Month, DayOfMonth, UKHR_RaceID, Rating_Rank))
+
+summary(ukhr_master_BF$Year)
+
+table(ukhr_master_BF$Year, ukhr_master_BF$Month)
+
 #ukhr_master_BF2 <- ukhr_master_BF2 %>% 
  # filter(Year >= 2013)
 
 write_csv(ukhr_master_BF, "UKHR_Master_BF_2018_10_31.csv")
+
+ukhr_master_BF$Year[1]

@@ -85,7 +85,7 @@ allHcpQuals <- allSystemQualifiers %>%
 
 allHcpQuals
 
-View(allHcpQuals)
+#View(allHcpQuals)
 
 allArchie <- asq %>% 
   select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength, 
@@ -108,7 +108,7 @@ archieGoodSystems <- allArchie %>%
  
 archieGoodSystems
 
-View(archieGoodSystems)
+#View(archieGoodSystems)
 
 todayGoodHcpSystems <- allHcpQuals %>% 
   filter(System_Name %in% goodHcpSystems$System_Name) %>% 
@@ -116,7 +116,7 @@ todayGoodHcpSystems <- allHcpQuals %>%
 # 
 todayGoodHcpSystems
 
-View(todayGoodHcpSystems)
+#View(todayGoodHcpSystems)
 
 highArchieQuals <- filter(asq, Archie >= 8.5, AE_Ratio >= 1.20)
 
@@ -145,13 +145,13 @@ goodStatsQuals
 
 # Write qualifiers to file
 
-write_csv(asq, paste0("All_System_Quals_", today$Date[1], ".csv"))
+#write_csv(asq, paste0("All_System_Quals_", today$Date[1], ".csv"))
 
-write_csv(goodStatsQuals, paste0("Good_Stats_Quals_", today$Date[1], ".csv"))
+#write_csv(goodStatsQuals, paste0("Good_Stats_Quals_", today$Date[1], ".csv"))
 
-write_csv(allHcpQuals, paste0("Today_Hcp_Quals_", today$Date[1], ".csv"))
+#write_csv(allHcpQuals, paste0("Today_Hcp_Quals_", today$Date[1], ".csv"))
 
-write_csv(todayGoodHcpSystems, paste0("Today_Good_Hcp_Quals_", today$Date[1], ".csv"))
+#write_csv(todayGoodHcpSystems, paste0("Today_Good_Hcp_Quals_", today$Date[1], ".csv"))
 
 
 #   Archie Likelihood Of Chance

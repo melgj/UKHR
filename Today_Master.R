@@ -230,10 +230,11 @@ today <- today %>%
                                 ordered_result = T))
 
 today <- today %>% 
-  mutate(Runners_Range = cut(Runners, breaks = c(0, 8, 16, 100),
+  rename(Declared = Runners) %>% 
+  mutate(Runners = length(unique(Horse)),
+         Runners_Range = cut(Runners, breaks = c(0, 8, 16, 100),
                              labels = c("<=8", "9-16", "17+"),
                              ordered_result = T)) 
-
 
 #######################################################
 

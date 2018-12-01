@@ -59,6 +59,8 @@ asq <- allSystemQualifiers %>%
 
 length(unique(asq$Horse))
 
+write_csv(asq, "Today_All_System_Qualifiers.csv")
+
 
 
 #####################################################################################

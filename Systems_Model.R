@@ -340,7 +340,7 @@ ukTestSet %>%
   arrange(desc(Avg_PL))
 
 
-saveRDS(xgbLinModUK, "XGB_Linear_Systems_BFPL_Model_v20.RDS")
+#saveRDS(xgbLinModUK, "XGB_Linear_Systems_BFPL_Model_v20.RDS")
 
 #xgbLinModUK <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
 
@@ -402,7 +402,7 @@ ukTestSet %>%
   arrange(desc(Avg_PL))
 
 
-saveRDS(rfMod, "RF_BFPL_Model_v20.RDS")
+#saveRDS(rfMod, "RF_BFPL_Model_v20.RDS")
 
 ##############################################################
 
@@ -716,7 +716,7 @@ ukTestSet %>%
   arrange(desc(Avg_PL))
 
 
-saveRDS(xgbPredModUK, "Final_BFPL_Model_V30.RDS")
+#saveRDS(xgbPredModUK, "Final_BFPL_Model_V30.RDS")
 
 # Test XGBoost Final Preds against all qualsData2
 
@@ -847,13 +847,115 @@ ukTestSet %>%
             Total_PL = sum(BFSP_PL)) %>% 
   arrange(desc(Avg_PL))
 
-saveRDS(svmFinalMod, "SVM_Final_Model_v10.RDS")
+#saveRDS(svmFinalMod, "SVM_Final_Model_v10.RDS")
 
 
 
 
 
 ################################################################
+
+# Build Final Model using MARS
+
+library(doMC)
+
+registerDoMC(8)
+
+nn <- readRDS("Systems_NN_BFSPPL_Model_v20.RDS")
+xgb <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
+rf <- readRDS("RF_BFPL_Model_v20.RDS")
+xgbProb <- readRDS("XGB_Systems_Model_Prob")
+#mars <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
+
+nnPred <- predict(nn, newdata = qualsData, type = "raw")
+xgbProb <- predict(xgbProb, newdata = qualsData, type = "prob")
+xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
+rfPred <- predict(rf, newdata = qualsData, type = "raw")
+#marsPred <- predict(mars, newdata = qualsData, type = "raw")
+
+qualsData2 <- qualsData %>% 
+  mutate(NN_Pred = nnPred,
+         RF_Pred = rfPred,
+         XGB_Pred = xgbPred,
+         Win_Prob = xgbProb[,2]) %>% 
+  select(-c(System_Name))
+
+head(qualsData2[,14:27])
+
+#View(qualsData2)
+
+colnames(qualsData2)
+
+
+set.seed(200)
+
+ukTrainRows <- createDataPartition(qualsData2$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData2[ukTrainRows, ]
+
+ukTestSet <- qualsData2[-ukTrainRows, ]
+
+
+marsGrid <- expand.grid(.degree = 1:2, .nprune = 2:50)
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              #summaryFunction = RMSE,
+                              verboseIter = T)
+
+set.seed(100)                              
+
+marsFinalMod <- train(BFSP_PL ~ ((XGB_Pred + RF_Pred + NN_Pred + Win_Prob)^2), 
+                 data = ukTrainSet,
+                 method = "earth",
+                 preProc = c("center", "scale"),
+                 tuneGrid = marsGrid,
+                 metric = "RMSE",
+                 trControl = train.control)
+
+marsFinalMod
+
+print(marsFinalMod)
+
+varImp(marsFinalMod)
+
+predMars <- predict(marsFinalMod, newdata = ukTestSet, type = "raw")
+
+ukTestSet$MARS_Pred <- predMars[,1]
+
+summary(ukTestSet$MARS_Pred)
+
+ukPos <- filter(ukTestSet, MARS_Pred > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, MARS_Pred <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(MARS_Pred >= 0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(MARS_Pred <= 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+
+#saveRDS(marsFinalMod, "MARS_Final_Model_v10.RDS")
+
+#marsFinalMod <- readRDS("MARS_Final_Model_v10.RDS")
+
+########################################################################
 
 # 
 # 

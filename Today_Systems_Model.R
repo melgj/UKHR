@@ -7,6 +7,7 @@ library(earth)
 library(nnet)
 library(xgboost)
 library(randomForest)
+library(kernlab)
 
 
 #bfPLMod <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
@@ -79,9 +80,14 @@ SVM_Mod <- readRDS("SVM_Final_Model_v10.RDS")
 
 SVM_Mod_Preds <- predict(SVM_Mod, newdata = todaySQ2, type = "raw")
 
+MARS_Mod <- readRDS("MARS_Final_Model_v10.RDS")
+
+MARS_Mod_Preds <- predict(MARS_Mod, newdata = todaySQ2, type = "raw")
+
 todaySQ2$Model_Preds_V20 <- V20_Mod_Preds
 todaySQ2$Model_Preds_V30 <- V30_Mod_Preds
 todaySQ2$SVM_Model_Preds <- SVM_Mod_Preds
+todaySQ2$MARS_Model_Preds <- MARS_Mod_Preds[,1]
 
 todaySQ2ModelQuals <- todaySQ2 %>% 
   rename(Model_Win_Prob = Win_Prob) %>% 
@@ -89,9 +95,9 @@ todaySQ2ModelQuals <- todaySQ2 %>%
          Model_Val_Ratio = BetFairSPForecastWinPrice/Model_Value_Odds,
          Models_Avg = (XGB_Pred + NN_Pred + RF_Pred)/3,
          V_Models_Avg = (Model_Preds_V20 + Model_Preds_V30)/2) %>% 
-  select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, Model_Preds_V30, Model_Preds_V20, V_Models_Avg, XGB_Pred, NN_Pred, RF_Pred, 
+  select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, MARS_Model_Preds, Model_Preds_V30, Model_Preds_V20, V_Models_Avg, XGB_Pred, NN_Pred, RF_Pred, 
          Models_Avg, Model_Value_Odds, Model_Val_Ratio, Handicap, Ratings_Range, everything()) %>% 
-  filter(SVM_Model_Preds > 0) %>% 
+  filter(MARS_Model_Preds > 0) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
 todaySQ2ModelQuals
@@ -107,7 +113,7 @@ todaySQ2All <- todaySQ2 %>%
          Model_Val_Ratio = BetFairSPForecastWinPrice/Model_Value_Odds,
          Models_Avg = (XGB_Pred + NN_Pred + RF_Pred)/3,
          V_Models_Avg = (Model_Preds_V20 + Model_Preds_V30)/2) %>% 
-  select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, Model_Preds_V20, Model_Preds_V30, V_Models_Avg,XGB_Pred, NN_Pred, RF_Pred, 
+  select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, MARS_Model_Preds, Model_Preds_V30, Model_Preds_V20, V_Models_Avg,XGB_Pred, NN_Pred, RF_Pred, 
          Models_Avg, Model_Value_Odds, Model_Val_Ratio, Handicap, Ratings_Range, everything()) %>% 
   arrange(Time24Hour, Meeting, Horse)
   
@@ -132,13 +138,13 @@ write_csv(todaySQ2All, paste0("Today_Model_Sys_Ratings_", today$Date[1], ".csv")
 # write_csv(todaySQ2Hcp, paste0("Today_Model_Hcp_Ratings_", today$Date[1], ".csv"))
 
 todaySQ2Elite <- todaySQ2 %>% 
-  filter(SVM_Model_Preds > 0, XGB_Pred > 0, NN_Pred > 0, RF_Pred > 0, Model_Preds_V20 > 0, Model_Preds_V30 > 0) %>% 
+  filter(SVM_Model_Preds > 0, MARS_Model_Preds > 0, XGB_Pred > 0, NN_Pred > 0, RF_Pred > 0, Model_Preds_V20 > 0, Model_Preds_V30 > 0) %>% 
   rename(Model_Win_Prob = Win_Prob) %>% 
   mutate(Model_Value_Odds = 1/Model_Win_Prob,
          Model_Val_Ratio = BetFairSPForecastWinPrice/Model_Value_Odds,
          Models_Avg = (XGB_Pred + NN_Pred + RF_Pred)/3,
          V_Models_Avg = (Model_Preds_V20 + Model_Preds_V30)/2) %>% 
-  select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, Model_Preds_V20, Model_Preds_V30, V_Models_Avg,XGB_Pred, NN_Pred, RF_Pred, 
+  select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, MARS_Model_Preds, Model_Preds_V30, Model_Preds_V20, V_Models_Avg,XGB_Pred, NN_Pred, RF_Pred, 
          Models_Avg, Model_Value_Odds, Model_Val_Ratio, Handicap, Ratings_Range, everything()) %>% 
   arrange(Time24Hour, Meeting, Horse)
 
@@ -150,13 +156,13 @@ write_csv(todaySQ2Elite, paste0("Today_Elite_Model_Quals_", today$Date[1], ".csv
 
 
 todaySQ2Trips <- todaySQ2 %>% 
-  filter(SVM_Model_Preds <= 0, Model_Preds_V20 <= 0, Model_Preds_V30 <= 0, XGB_Pred > 0, NN_Pred > 0, RF_Pred > 0) %>% 
+  filter(SVM_Model_Preds <= 0, MARS_Model_Preds <= 0, Model_Preds_V20 <= 0, Model_Preds_V30 <= 0, XGB_Pred > 0, NN_Pred > 0, RF_Pred > 0) %>% 
   rename(Model_Win_Prob = Win_Prob) %>% 
   mutate(Model_Value_Odds = 1/Model_Win_Prob,
          Model_Val_Ratio = BetFairSPForecastWinPrice/Model_Value_Odds,
          Models_Avg = (XGB_Pred + NN_Pred + RF_Pred)/3,
          V_Models_Avg = (Model_Preds_V20 + Model_Preds_V30)/2) %>% 
-  select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, Model_Preds_V20, Model_Preds_V30, V_Models_Avg,XGB_Pred, NN_Pred, RF_Pred, 
+  select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, MARS_Model_Preds, Model_Preds_V30, Model_Preds_V20, V_Models_Avg,XGB_Pred, NN_Pred, RF_Pred, 
          Models_Avg, Model_Value_Odds, Model_Val_Ratio, Handicap, Ratings_Range, everything()) %>% 
   arrange(Time24Hour, Meeting, Horse)
 

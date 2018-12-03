@@ -752,6 +752,94 @@ qualsData2 %>%
             Total_PL = sum(BFSP_PL)) %>% 
   arrange(desc(Avg_PL))
 
+###################################################################
+
+# Build Final Model using SVM
+
+library(doMC)
+
+registerDoMC(4)
+
+nn <- readRDS("Systems_NN_BFSPPL_Model_v20.RDS")
+xgb <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
+rf <- readRDS("RF_BFPL_Model_v20.RDS")
+xgbProb <- readRDS("XGB_Systems_Model_Prob")
+#mars <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
+
+nnPred <- predict(nn, newdata = qualsData, type = "raw")
+xgbProb <- predict(xgbProb, newdata = qualsData, type = "prob")
+xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
+rfPred <- predict(rf, newdata = qualsData, type = "raw")
+#marsPred <- predict(mars, newdata = qualsData, type = "raw")
+
+qualsData2 <- qualsData %>% 
+  mutate(NN_Pred = nnPred,
+         RF_Pred = rfPred,
+         XGB_Pred = xgbPred,
+         Win_Prob = xgbProb[,2]) %>% 
+  select(-c(System_Name))
+
+head(qualsData2[,14:27])
+
+#View(qualsData2)
+
+colnames(qualsData2)
+
+
+set.seed(200)
+
+ukTrainRows <- createDataPartition(qualsData2$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData2[ukTrainRows, ]
+
+ukTestSet <- qualsData2[-ukTrainRows, ]
+
+colnames(ukTrainSet)
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              verboseIter = T)
+
+set.seed(200)
+
+svmFinalMod <- train(BFSP_PL ~ ((XGB_Pred + RF_Pred + NN_Pred + Win_Prob)^2),
+                     data = ukTrainSet,
+                     method = "svmRadial",
+                     preProc = c("center", "scale"),
+                     metric = "RMSE",
+                     tuneLength = 10,
+                     trControl = train.control)
+
+print(svmFinalMod)
+
+varImp(svmFinalMod)
+
+predSVM <- predict(svmFinalMod, newdata = ukTestSet, type = "raw")
+
+head(predSVM)
+
+ukTestSet$SVM_Model <- predSVM
+
+ukPos <- filter(ukTestSet, SVM_PL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, SVM_PL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(SVM_PL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+saveRDS(svmLinModUK, "SVM_Systems_Model.RDS")
+
+
 
 
 

@@ -758,7 +758,7 @@ qualsData2 %>%
 
 library(doMC)
 
-registerDoMC(4)
+registerDoMC(8)
 
 nn <- readRDS("Systems_NN_BFSPPL_Model_v20.RDS")
 xgb <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
@@ -813,31 +813,41 @@ svmFinalMod <- train(BFSP_PL ~ ((XGB_Pred + RF_Pred + NN_Pred + Win_Prob)^2),
 
 print(svmFinalMod)
 
-varImp(svmFinalMod)
+svmFinalMod
 
 predSVM <- predict(svmFinalMod, newdata = ukTestSet, type = "raw")
 
 head(predSVM)
 
-ukTestSet$SVM_Model <- predSVM
+ukTestSet$SVM_Pred <- predSVM
 
-ukPos <- filter(ukTestSet, SVM_PL > 0)
+summary(ukTestSet$SVM_Pred)
+
+ukPos <- filter(ukTestSet, SVM_Pred > 0)
 mean(ukPos$BFSP_PL)
 
-ukNeg <- filter(ukTestSet, SVM_PL <= 0)
+ukNeg <- filter(ukTestSet, SVM_Pred <= 0)
 mean(ukNeg$BFSP_PL)
 
 mean(ukTestSet$BFSP_PL)
 
 ukTestSet %>% 
   group_by(Handicap) %>% 
-  filter(SVM_PL > 0.0) %>% 
+  filter(SVM_Pred >= 0) %>% 
   summarise(Runs = n(),
             Avg_PL = mean(BFSP_PL),
             Total_PL = sum(BFSP_PL)) %>% 
   arrange(desc(Avg_PL))
 
-saveRDS(svmLinModUK, "SVM_Systems_Model.RDS")
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(SVM_Pred <= 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+saveRDS(svmFinalMod, "SVM_Final_Model_v10.RDS")
 
 
 

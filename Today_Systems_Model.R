@@ -138,7 +138,6 @@ write_csv(todaySQ2All, paste0("Today_Model_Sys_Ratings_", today$Date[1], ".csv")
 # write_csv(todaySQ2Hcp, paste0("Today_Model_Hcp_Ratings_", today$Date[1], ".csv"))
 
 todaySQ2Elite <- todaySQ2 %>% 
-  filter(MARS_Model_Preds > 0, V_Models_Avg > 0, Models_Avg > 0) %>% 
   rename(Model_Win_Prob = Win_Prob) %>% 
   mutate(Model_Value_Odds = 1/Model_Win_Prob,
          Model_Val_Ratio = BetFairSPForecastWinPrice/Model_Value_Odds,
@@ -146,6 +145,7 @@ todaySQ2Elite <- todaySQ2 %>%
          V_Models_Avg = (Model_Preds_V20 + Model_Preds_V30)/2) %>% 
   select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, MARS_Model_Preds, Model_Preds_V30, Model_Preds_V20, V_Models_Avg, 
          Models_Avg, XGB_Pred, NN_Pred, RF_Pred, Model_Value_Odds, Model_Val_Ratio, Handicap, Ratings_Range, everything()) %>% 
+  filter(MARS_Model_Preds > 0, V_Models_Avg > 0, Models_Avg > 0) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 todaySQ2Elite
@@ -156,7 +156,6 @@ write_csv(todaySQ2Elite, paste0("Today_Elite_Model_Quals_", today$Date[1], ".csv
 
 
 todaySQ2DualAvg <- todaySQ2 %>% 
-  filter(V_Models_Avg > 0, Models_Avg > 0) %>% 
   rename(Model_Win_Prob = Win_Prob) %>% 
   mutate(Model_Value_Odds = 1/Model_Win_Prob,
          Model_Val_Ratio = BetFairSPForecastWinPrice/Model_Value_Odds,
@@ -164,6 +163,7 @@ todaySQ2DualAvg <- todaySQ2 %>%
          V_Models_Avg = (Model_Preds_V20 + Model_Preds_V30)/2) %>% 
   select(Time24Hour, Meeting, Horse, System_Name, SVM_Model_Preds, MARS_Model_Preds, Model_Preds_V30, Model_Preds_V20, V_Models_Avg, 
          Models_Avg, XGB_Pred, NN_Pred, RF_Pred, Model_Value_Odds, Model_Val_Ratio, Handicap, Ratings_Range, everything()) %>% 
+  filter(V_Models_Avg > 0, Models_Avg > 0) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 todaySQ2DualAvg

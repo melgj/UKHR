@@ -4,7 +4,7 @@ library(stringr)
 library(lubridate)
 
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_09_30.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_10_31.csv", col_names = T)
 
 length(which(ukhr_master_BF$BetFairSPForecastWinPrice <= 0))
 
@@ -212,13 +212,13 @@ table(ukhr_master_BF$Year, ukhr_master_BF$Month)
 
 # Remove Wolverhampton Polytrack data from pre Tapeta era
 
-wPoly1 <- which(ukhr_master_BF$Year < 2014 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
-
-wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
-
-wPolyAll <- c(wPoly1, wPoly2)
-
-ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
+# wPoly1 <- which(ukhr_master_BF$Year < 2014 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
+# 
+# wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
+# 
+# wPolyAll <- c(wPoly1, wPoly2)
+# 
+# ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
 
 
 ukhr_master_BF <- ukhr_master_BF %>% 
@@ -406,6 +406,6 @@ table(ukhr_master_BF$Year, ukhr_master_BF$Month)
 #ukhr_master_BF2 <- ukhr_master_BF2 %>% 
  # filter(Year >= 2013)
 
-write_csv(ukhr_master_BF, "UKHR_Master_BF_2018_10_31.csv")
+write_csv(ukhr_master_BF, "UKHR_Master_BF_2018_11_30.csv")
 
 ukhr_master_BF$Year[1]

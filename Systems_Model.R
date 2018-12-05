@@ -1,3 +1,4 @@
+#library(MASS)
 library(tidyverse)
 library(lubridate)
 library(caret)
@@ -9,6 +10,8 @@ library(randomForest)
 library(earth)
 library(kernlab)
 library(e1071)
+library(elasticnet)
+
 
 
 quals <- read_csv("All_System_Qualifiers_to_2018_10.csv", col_names = T)
@@ -522,7 +525,129 @@ ukTestSet %>%
             Total_PL = sum(BFSP_PL)) %>% 
   arrange(desc(Avg_PL))
 
-saveRDS(svmLinModUK, "SVM_Systems_Model.RDS")
+#saveRDS(svmLinModUK, "SVM_Systems_Model.RDS")
+
+#########################################################################
+
+# Build Ridge Regression Model
+
+library(doMC)
+registerDoMC(4)
+
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData[ukTrainRows, -2]
+
+ukTestSet <- qualsData[-ukTrainRows, -2]
+
+colnames(ukTestSet)
+
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              #summaryFunction = RMSE,
+                              verboseIter = T)
+
+ridgeGrid <- data.frame(.lambda = seq(0, .2, length = 30))
+
+ridgeGrid
+
+set.seed(100)                              
+
+ridgeMod <- train(BFSP_PL ~ ., 
+                     data = ukTrainSet,
+                     method = "ridge",
+                     preProc = c("center", "scale"),
+                     tuneLength = 20,
+                     metric = "RMSE",
+                     trControl = train.control)
+
+ridgeMod
+
+predRIDGE <- predict(ridgeMod, newdata = ukTestSet, type = "raw")
+
+head(predRIDGE)
+
+ukTestSet$Ridge_PL <- predRIDGE
+
+ukPos <- filter(ukTestSet, Ridge_PL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, Ridge_PL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(Ridge_PL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+saveRDS(ridgeMod, "Ridge_BFPL_Model.RDS")
+
+#############################################################
+# Build PLS Model
+
+set.seed(100)
+
+ukTrainRows <- createDataPartition(qualsData$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData[ukTrainRows, -2]
+
+ukTestSet <- qualsData[-ukTrainRows, -2]
+
+colnames(ukTestSet)
+
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              #summaryFunction = RMSE,
+                              verboseIter = T)
+
+set.seed(100)                              
+
+plsMod <- train(BFSP_PL ~ ., 
+                data = ukTrainSet,
+                method = "simpls",
+                preProc = c("center", "scale"),
+                tuneLength = 20,
+                metric = "RMSE",
+                trControl = train.control)
+
+plsMod
+
+predPLS <- predict(plsMod, newdata = ukTestSet, type = "raw")
+
+head(predPLS)
+
+ukTestSet$PLS_PL <- predPLS
+
+ukPos <- filter(ukTestSet, PLS_PL > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, PLS_PL <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(PLS_PL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+saveRDS(plsMod, "PLS_BFPL_Model.RDS")
+
 
 #############################################################
 
@@ -904,7 +1029,7 @@ train.control <- trainControl(method = "repeatedcv",
                               #summaryFunction = RMSE,
                               verboseIter = T)
 
-set.seed(100)                              
+set.seed(200)                              
 
 marsFinalMod <- train(BFSP_PL ~ ((XGB_Pred + RF_Pred + NN_Pred + Win_Prob)^2), 
                  data = ukTrainSet,
@@ -957,7 +1082,107 @@ ukTestSet %>%
 
 ########################################################################
 
-# 
+
+# Build Final Model using PLS simpls kernel
+
+library(doMC)
+
+registerDoMC(4)
+
+nn <- readRDS("Systems_NN_BFSPPL_Model_v20.RDS")
+xgb <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
+rf <- readRDS("RF_BFPL_Model_v20.RDS")
+xgbProb <- readRDS("XGB_Systems_Model_Prob")
+#mars <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
+
+nnPred <- predict(nn, newdata = qualsData, type = "raw")
+xgbProb <- predict(xgbProb, newdata = qualsData, type = "prob")
+xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
+rfPred <- predict(rf, newdata = qualsData, type = "raw")
+#marsPred <- predict(mars, newdata = qualsData, type = "raw")
+
+qualsData2 <- qualsData %>% 
+  mutate(NN_Pred = nnPred,
+         RF_Pred = rfPred,
+         XGB_Pred = xgbPred,
+         Win_Prob = xgbProb[,2]) %>% 
+  select(-c(System_Name))
+
+head(qualsData2[,14:27])
+
+#View(qualsData2)
+
+colnames(qualsData2)
+
+
+set.seed(200)
+
+ukTrainRows <- createDataPartition(qualsData2$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData2[ukTrainRows, ]
+
+ukTestSet <- qualsData2[-ukTrainRows, ]
+
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              #summaryFunction = RMSE,
+                              verboseIter = T)
+
+set.seed(100)                              
+
+plsFinalMod <- train(BFSP_PL ~ ((XGB_Pred + RF_Pred + NN_Pred + Win_Prob)^2), 
+                      data = ukTrainSet,
+                      method = "simpls",
+                      preProc = c("center", "scale"),
+                      tuneLength = 20,
+                      metric = "RMSE",
+                      trControl = train.control)
+
+plsFinalMod
+
+print(plsFinalMod)
+
+#varImp(plsFinalMod)
+
+predPLS <- predict(plsFinalMod, newdata = ukTestSet, type = "raw")
+
+ukTestSet$PLS_Pred <- predPLS
+
+summary(ukTestSet$PLS_Pred)
+
+ukPos <- filter(ukTestSet, PLS_Pred > 0)
+mean(ukPos$BFSP_PL)
+
+ukNeg <- filter(ukTestSet, PLS_Pred <= 0)
+mean(ukNeg$BFSP_PL)
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(PLS_Pred >= 0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(PLS_Pred <= 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+saveRDS(plsFinalMod, "PLS_Final_Model.RDS")
+
+
+plsFinalMod <- readRDS("PLS_Final_Model.RDS")
+
+
+###############################################################################
 # 
 # # XGB Tree Algorithm to predict Win Probability
 # 

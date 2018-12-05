@@ -13,7 +13,7 @@ setwd("~/git_projects/UKHR_Project")
 
 registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_10_31.csv",col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv",col_names = T)
 
 #colnames(ukhr_master_BF)
 
@@ -33,13 +33,31 @@ ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_10_31.csv",col_names = T)
 #   filter(Year == 2018) %>% 
 #   write_csv("uk2018_07.csv")
 
-today <- ukhr_master_BF %>% 
-  filter(Year >= 2018)
+q1 <- which(ukhr_master_BF$Month <= 3 & ukhr_master_BF$Year == 2018)
+q2 <- which(ukhr_master_BF$Month > 3 & ukhr_master_BF$Month <= 6 & ukhr_master_BF$Year == 2018)
+q3 <- which(ukhr_master_BF$Month >6 & ukhr_master_BF$Month <= 9 & ukhr_master_BF$Year == 2018)
+q4 <- which(ukhr_master_BF$Month >9 & ukhr_master_BF$Year == 2018)
 
-ukhr_master_BF <-  ukhr_master_BF %>% 
-  filter(Year != 2018)
+mid <- c(q1,q2)
+threeQtr <- c(q1,q2,q3)
+
+
+today <- ukhr_master_BF[q4,]
+
+ukhr_master_BF <- ukhr_master_BF[-q4,]
+
+# uk1 <- ukhr_master_BF[q1,]
+# uk2 <- ukhr_master_BF[mid,]
+# 
+# 
+# ukhr_master_BF <-  ukhr_master_BF %>% 
+#   filter(Year <= 2017) 
+# 
+# ukhr_master_BF <- rbind(ukhr_master_BF, uk2)
 
 summary(today$Month)
+table(today$Month, today$Year)
+table(ukhr_master_BF$Month, ukhr_master_BF$Year)
 
 if (sum(is.na(today$BetFairSPForecastWinPrice) > 0)) {
   
@@ -181,13 +199,13 @@ goodStatsQuals
 
 #View(goodStatsQuals)
 
-write_csv(asq, "All_System_Qualifiers_to_2018_10.csv")
+write_csv(asq, "All_System_Qualifiers_Q4_2018.csv")
 # #
-write_csv(allArchie, "All_Archie_Quals_to_2018_10.csv")
+write_csv(allArchie, "All_Archie_Quals_Q4_2018.csv")
 # #
-write_csv(highArchieQuals, "All_High_Archie_Quals_to_2018_10.csv")
+write_csv(highArchieQuals, "All_High_Archie_Quals_Q4_2018.csv")
 # #
-write_csv(goodStatsQuals, "All_Good_Stats_Quals_to_2018_10.csv")
+write_csv(goodStatsQuals, "All_Good_Stats_Quals_Q4_2018.csv")
 
 source("Draw_Range_Analysis.R")
 source("Min_Rank_Val_Bet.R")
@@ -195,7 +213,16 @@ source("Today_Systems_Model.R")
 # #
 # write_csv(highAERQuals, "All_High_AER_Archie_Quals_to_2018_08.csv")
 
-systemsAnalysisASQ_2018 <- read_csv("All_System_Qualifiers_to_2018_10.csv", col_names = T)
+qtr1 <- read_csv("All_System_Qualifiers_Q1_2018.csv", col_names = T)
+qtr2 <- read_csv("All_System_Qualifiers_Q2_2018.csv", col_names = T)
+qtr3 <- read_csv("All_System_Qualifiers_Q3_2018.csv", col_names = T)
+qtr4 <- read_csv("All_System_Qualifiers_Q4_2018.csv", col_names = T)
+
+asq2018 <- rbind(qtr1, qtr2, qtr3, qtr4)
+
+write_csv(asq2018, "All_System_Qualifiers_Yr_2018.csv")
+
+systemsAnalysisASQ_2018 <- read_csv("All_System_Qualifiers_Yr_2018.csv", col_names = T)
 
 systemsAnalysisArchie_2018 <- read_csv("All_Archie_Quals_to_2018_10.csv", col_names = T)
 

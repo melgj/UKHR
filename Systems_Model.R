@@ -729,9 +729,9 @@ saveRDS(xgbTreeModUK, "XGB_Systems_Model_Prob_V50.RDS")
 
 # Build Final Model using XGBoost Linear
 
-nn <- readRDS("Systems_NN_BFSPPL_Model_v20.RDS")
-#xgb <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
-rf <- readRDS("RF_BFPL_Model_v20.RDS")
+nn <- readRDS("Systems_NN_BFSPPL_Model_v50.RDS")
+xgbTreeModUK <- readRDS("XGB_Systems_Model_Prob_V50.RDS")
+rf <- readRDS("RF_BFPL_Model_v50.RDS")
 #mars <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
 
 nnPred <- predict(nn, newdata = qualsData, type = "raw")
@@ -775,8 +775,7 @@ train.control <- trainControl(method = "repeatedcv",
                               number = 10,
                               repeats = 5,
                               verboseIter = T)
-#classProbs = TRUE, 
-#summaryFunction = RMSE)
+
 
 
 tune.grid <- expand.grid(eta = c(0.01, 0.025, 0.05, 0.075, 0.1),

@@ -14,7 +14,7 @@ library(elasticnet)
 
 
 
-quals <- read_csv("All_System_Qualifiers_to_2018_10.csv", col_names = T)
+quals <- read_csv("All_System_Qualifiers_Yr_2018.csv", col_names = T)
 
 colSums(is.na(quals))
 
@@ -194,6 +194,8 @@ correlations <- cor(numUKTrain)
 
 correlations
 
+library(cor)
+
 corrplot(correlations, order = "hclust")
 
 ukTrainSet <- ukTrainSet[,-highCorrs]
@@ -209,7 +211,7 @@ train.control <- trainControl(method = "repeatedcv",
                               #summaryFunction = RMSE,
                               verboseIter = T)
 
-nnetGrid <- expand.grid(.decay = c(0.01, 0.05, 0.10),
+nnetGrid <- expand.grid(.decay = c(0.01, 0.025, 0.05, 0.075, 0.10),
                         .size = c(1:5),
                         .bag = F)
                         
@@ -253,12 +255,12 @@ mean(ukTestSet$BFSP_PL)
 
 ukTestSet %>% 
   group_by(Handicap) %>% 
-  filter(PredPL >= 0.00) %>% 
+  filter(PredPL >= 0.20) %>% 
   summarise(Runs = n(),
             Avg_PL = mean(BFSP_PL),
             Total_PL = sum(BFSP_PL))
 
-# saveRDS(ukNN, "Systems_NN_BFSPPL_Model_v20.RDS")
+saveRDS(ukNN, "Systems_NN_BFSPPL_Model_v50.RDS")
 
 #########################
 
@@ -343,7 +345,7 @@ ukTestSet %>%
   arrange(desc(Avg_PL))
 
 
-#saveRDS(xgbLinModUK, "XGB_Linear_Systems_BFPL_Model_v20.RDS")
+saveRDS(xgbLinModUK, "XGB_Linear_Systems_BFPL_Model_v50.RDS")
 
 #xgbLinModUK <- readRDS("XGB_Linear_Systems_BFPL_Model.RDS")
 
@@ -405,7 +407,7 @@ ukTestSet %>%
   arrange(desc(Avg_PL))
 
 
-#saveRDS(rfMod, "RF_BFPL_Model_v20.RDS")
+saveRDS(rfMod, "RF_BFPL_Model_v50.RDS")
 
 ##############################################################
 
@@ -687,7 +689,7 @@ train.control <- trainControl(method = "repeatedcv",
 
 
 tune.grid <- expand.grid(eta = c(0.01, 0.05, 0.10),
-                         nrounds = c(150, 200, 250),
+                         nrounds = c(100, 150, 200),
                          max_depth = 6:8,
                          min_child_weight = c(2.0, 2.5, 3.0),
                          colsample_bytree = c(0.50, 0.75),
@@ -718,7 +720,7 @@ table(ukTestSet$Result, predOutcomeXGB)
 
 confusionMatrix(ukTestSet$Result, predOutcomeXGB)
 
-#saveRDS(xgbTreeModUK, "XGB_Systems_Model_Prob")
+saveRDS(xgbTreeModUK, "XGB_Systems_Model_Prob_V50.RDS")
 
 #xgbTreeModUK <- readRDS("XGB_Systems_Model_Prob")
 

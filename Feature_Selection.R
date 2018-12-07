@@ -2,7 +2,8 @@ library(tidyverse)
 library(stringr)
 library(stringi)
 library(lubridate)
-#library(doMC)
+library(doMC)
+library(caret)
 
 setwd("~/git_projects/UKHR_Project")
 
@@ -103,7 +104,7 @@ ukdataNH <- ukNH %>%
 
 
 
-library(caret)
+#library(caret)
 
 nzv <- nearZeroVar(ukdataNH)
 nzv
@@ -136,13 +137,30 @@ write_csv(ukDataNH, "UKHR_NH_Data_2017.csv")
 
 ###############################################################################
 
-library(caret)
+#library(caret)
 
-library(doMC)
+#library(doMC)
 
-registerDoMC(4)
+registerDoMC(8)
 
 nhData <- read_csv("UKHR_NH_Data_2017.csv", col_names = T)
+
+correlations <- cor(nhData)
+
+highCorr <- findCorrelation(correlations, cutoff = .75)
+
+colnames(nhData[, highCorr])
+
+colnames(nhData[, -highCorr])
+
+nhData <- nhData[, -highCorr]
+
+colnames(nhData)
+
+nhData <- nhData %>% 
+  select(-(65:68))
+
+colnames(nhData)
 
 set.seed(100)
 
@@ -153,7 +171,7 @@ nhTest <- nhData[-dataSplit,]
 
 index <- createMultiFolds(nhTrain$LengthsBehindTotal, times = 5)
 
-varsRF <- var_seq(100, len = 6)
+varsRF <- var_seq(100, len = 5)
 
 ctrl <- rfeControl(method = "repeatedcv",
                    repeats = 5,
@@ -169,4 +187,6 @@ rfRFE <- rfe(LengthsBehindTotal ~ .,
              metric = "RMSE",
              rfeControl = ctrl,
              ntree = 1000)
+
+rfRFE
 

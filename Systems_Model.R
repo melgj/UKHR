@@ -16,6 +16,9 @@ library(elasticnet)
 
 quals <- read_csv("All_System_Qualifiers_Yr_2018.csv", col_names = T)
 
+quals <- quals %>% 
+  filter(Month != 11)
+
 colSums(is.na(quals))
 
 quals$Dist_Range[is.na(quals$Dist_Range)] <- "NH"
@@ -842,7 +845,7 @@ ukTestSet %>%
   arrange(desc(Avg_PL))
 
 
-#saveRDS(xgbPredModUK, "Final_BFPL_Model_V30.RDS")
+saveRDS(xgbPredModUK, "Final_BFPL_Model_V50.RDS")
 
 # Test XGBoost Final Preds against all qualsData2
 

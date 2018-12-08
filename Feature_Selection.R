@@ -5,9 +5,10 @@ library(lubridate)
 library(doMC)
 library(caret)
 
-setwd("~/git_projects/UKHR_Project")
 
-#registerDoMC(4)
+#registerDoMC(8)
+
+setwd("~/git_projects/UKHR_Project")
 
 ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv", col_names = T)
 
@@ -190,3 +191,8 @@ rfRFE <- rfe(LengthsBehindTotal ~ .,
 
 rfRFE
 
+saveRDS(rfRFE, "NH_Features_RFE.RDS")
+
+vImp <- varImp(rfRFE)
+
+write_csv(vImp, "NH_Feature_Scores.csv")

@@ -95,7 +95,7 @@ levels(todayFlat$Dist_Range)
 todaySoftSiresFlat <- softSiresFlat %>% 
   left_join(todayFlat, by = c("Sire", "Dist_Range")) %>% 
   arrange(Time24Hour, Meeting, Horse) %>% 
-  filter(Going %in% softGround, NumberOfResults >= 1, !is.na(Time24Hour)) 
+  filter(Going %in% softGround, NumberOfResults >= 1, !is.na(Time24Hour), RaceType == "FLAT") 
 
 unique(todaySoftSiresFlat$Dist_Range)
   

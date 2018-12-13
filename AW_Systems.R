@@ -67,8 +67,8 @@ write_csv(tapSiresT, "TapetaSires.csv")
 
 
 tapSiresT_Quals <- tapSiresT %>% 
-  left_join(today, by = c("Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting %in% tapeta) 
+  left_join(todayAW, by = c("Sire")) %>% 
+  filter(!is.na(Time24Hour), Meeting %in% tapeta, RaceType == "AW") 
 
 tapSiresT_Quals
 # 
@@ -112,8 +112,8 @@ polSiresT
 write_csv(polSiresT, "PolytrackSires.csv")
 
 polSiresT_Quals <- polSiresT %>% 
-  left_join(today, by = c("Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting %in% polytrack)
+  left_join(todayAW, by = c("Sire")) %>% 
+  filter(!is.na(Time24Hour), Meeting %in% polytrack, RaceType == "AW")
 
 polSiresT_Quals
 # 
@@ -158,8 +158,8 @@ fibSiresT
 write_csv(fibSiresT, "FibresandSires.csv")
 
 fibSiresT_Quals <- fibSiresT %>% 
-  left_join(today, by = c("Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting %in% fibresand)
+  left_join(todayAW, by = c("Sire")) %>% 
+  filter(!is.na(Time24Hour), Meeting %in% fibresand, RaceType == "AW")
 
 fibSiresT_Quals
 # 
@@ -211,8 +211,8 @@ wt
 write_csv(wt, "wt.csv")
 
 wolvesSires_Quals <- wolvesSires %>% 
-  left_join(today, by = c("Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting == "WOLVERHAMPTON")
+  left_join(todayAW, by = c("Sire")) %>% 
+  filter(!is.na(Time24Hour), Meeting == "WOLVERHAMPTON", RaceType == "AW")
 
 wolvesSires_Quals
 # 
@@ -258,8 +258,8 @@ nt
 write_csv(nt, "nt.csv")
 
 newcastleSires_Quals <- newcastleSires %>% 
-  left_join(today, by = c("Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting == "NEWCASTLE")
+  left_join(todayAW, by = c("Sire")) %>% 
+  filter(!is.na(Time24Hour), Meeting == "NEWCASTLE", RaceType == "AW")
 
 newcastleSires_Quals
 
@@ -308,8 +308,8 @@ write_csv(st, "st.csv")
 
 
 southwellSires_Quals <- southwellSires %>% 
-  left_join(today, by = c("Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting == "SOUTHWELL")
+  left_join(todayAW, by = c("Sire")) %>% 
+  filter(!is.na(Time24Hour), Meeting == "SOUTHWELL", RaceType == "AW")
 
 southwellSires_Quals
 # 
@@ -349,8 +349,8 @@ polyMeetingSires
 
 
 polyMeetingSires_Quals <- polyMeetingSires %>% 
-  left_join(today, by = c("Meeting", "Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting %in% polytrack)
+  left_join(todayAW, by = c("Meeting", "Sire")) %>% 
+  filter(!is.na(Time24Hour), Meeting %in% polytrack, RaceType == "AW")
 
 polyMeetingSires_Quals
 
@@ -385,8 +385,8 @@ newcastleTrainers
 #write_csv(nt, "nt.csv")
 
 newcastleTrainers_Quals <- newcastleTrainers %>% 
-  left_join(today, by = c("Trainer")) %>% 
-  filter(!is.na(Time24Hour), Meeting == "NEWCASTLE")
+  left_join(todayAW, by = c("Trainer")) %>% 
+  filter(!is.na(Time24Hour), Meeting == "NEWCASTLE", RaceType == "AW")
 
 newcastleTrainers_Quals
 
@@ -417,8 +417,8 @@ wolvesTrainers
 #write_csv(nt, "nt.csv")
 
 wolvesTrainers_Quals <- wolvesTrainers %>% 
-  left_join(today, by = c("Trainer")) %>% 
-  filter(!is.na(Time24Hour), Meeting == "WOLVERHAMPTON")
+  left_join(todayAW, by = c("Trainer")) %>% 
+  filter(!is.na(Time24Hour), Meeting == "WOLVERHAMPTON", RaceType == "AW")
 
 wolvesTrainers_Quals
 
@@ -472,8 +472,8 @@ southwellTrainers
 
 
 southwellTrainers_Quals <- southwellTrainers %>% 
-  left_join(today, by = c("Trainer")) %>% 
-  filter(!is.na(Time24Hour), Meeting == "SOUTHWELL")
+  left_join(todayAW, by = c("Trainer")) %>% 
+  filter(!is.na(Time24Hour), Meeting == "SOUTHWELL", RaceType == "AW")
 
 southwellTrainers_Quals
 
@@ -512,8 +512,8 @@ polyMeetingTrainers
 
 
 polyMeetingTrainers_Quals <- polyMeetingTrainers %>% 
-  left_join(today, by = c("Meeting", "Trainer")) %>% 
-  filter(!is.na(Time24Hour), Meeting %in% polytrack)
+  left_join(todayAW, by = c("Meeting", "Trainer")) %>% 
+  filter(!is.na(Time24Hour), Meeting %in% polytrack, RaceType == "AW")
 
 polyMeetingTrainers_Quals
 
@@ -574,7 +574,7 @@ write_csv(trJkComboAW, "TopTrJkCombos_AW.csv")
 
 todayAWTJQ <- trJkComboAW %>% 
   left_join(todayAW, by = c("Trainer", "Jockey")) %>% 
-  filter(!is.na(Time24Hour))
+  filter(!is.na(Time24Hour), RaceType == "AW")
 
 todayAWTJQ
 

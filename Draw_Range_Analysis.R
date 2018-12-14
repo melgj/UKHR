@@ -264,7 +264,11 @@ t3gdAll
 
 #View(t3gdAll)
 
+if(nrow(t3gdAll) > 0) {
+
 write_csv(t3gdAll, "Top_3_Rated_Good_Draw.csv")
+  
+}
 
 # All Good Draws
 
@@ -293,7 +297,11 @@ goodDrawToday
 # 
 # tgdAll
 
+if(nrow(goodDrawToday) > 0) {
+
 write_csv(goodDrawToday, "Today_Good_Draw.csv")
+  
+}
 
 
 # All Bad Draws
@@ -321,8 +329,11 @@ badDrawToday
 # 
 # tbdAll
 
+if(nrow(badDrawToday) > 0) {
+
 write_csv(badDrawToday, "Today_Bad_Draw.csv")
 
+}
 ###############################################################################################
 
 qualsGD <- filter(asq, Horse %in% goodDrawToday$Horse)
@@ -332,8 +343,13 @@ qualsBD <- filter(asq, Horse %in% badDrawToday$Horse)
 qualsGD
 qualsBD
 
+if(nrow(qualsBD) > 0) {
 write_csv(qualsBD, "Archie_Quals_Bad_Draw.csv")
+}
+
+if(nrow(qualsGD) > 0) {
 write_csv(qualsGD, "Archie_Quals_Good_Draw.csv")
+}
 
 #View(qualsBD)
 #View(qualsGD)

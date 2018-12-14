@@ -384,7 +384,7 @@ set.seed(100)
 rfMod <- train(BFSP_PL ~ .,
                data = ukTrainSet,
                method = "rf",
-               ntrees = 1500,
+               ntrees = 1000,
                trControl = train.control,
                PreProc = c("center", "scale"),
                importance = T)
@@ -418,6 +418,7 @@ ukTestSet %>%
 
 
 saveRDS(rfMod, "RF_BFPL_Model_v50.RDS")
+
 
 ##############################################################
 

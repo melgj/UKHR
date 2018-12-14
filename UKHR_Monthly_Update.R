@@ -10,7 +10,16 @@ length(which(ukhr_master_BF$BetFairSPForecastWinPrice <= 0))
 
 ukhr_master_BF$BetFairSPForecastWinPrice[ukhr_master_BF$BetFairSPForecastWinPrice <= 0] <- NA
 
-#summary(ukhr_master_BF$BetFairSPForecastWinPrice)
+summary(ukhr_master_BF$BetFairSPForecastWinPrice)
+
+ukhr_master_BF$BetFairSPForecastWinPrice <- if_else(is.na(ukhr_master_BF$BetFairSPForecastWinPrice), 
+        ukhr_master_BF$Betfair.Win.S.P., ukhr_master_BF$BetFairSPForecastWinPrice)
+
+head(ukhr_master_BF$BetFairSPForecastWinPrice[x])
+  
+
+sum(is.na(ukhr_master_BF$Betfair.Win.S.P.))
+sum(is.na(ukhr_master_BF$BFSP_PL))
 
 #summary(ukhr_master_BF$Year)
 
@@ -23,6 +32,11 @@ newMonth <- read_csv(file.choose(), col_names = T)
 newMonth$BetFairSPForecastWinPrice[newMonth$BetFairSPForecastWinPrice <= 0] <- NA
 
 summary(newMonth$BetFairSPForecastWinPrice)
+
+newMonth$BetFairSPForecastWinPrice <- if_else(is.na(newMonth$BetFairSPForecastWinPrice),
+                                              newMonth$`Betfair Win S.P.`, newMonth$BetFairSPForecastWinPrice)
+
+
 
 newMonthCols <- colnames(newMonth)
 
@@ -51,6 +65,9 @@ duped <- which(duplicated(temp))
 duped
 
 ###############################################################
+newMonth$BetFairSPForecastWinPrice <- if_else(is.na(newMonth$BetFairSPForecastWinPrice),
+                                              newMonth$Betfair.Win.S.P., newMonth$BetFairSPForecastWinPrice)
+
 
 newMonth$Code_Change <- ifelse(newMonth$DaysSinceLastRun < 0, 1, 0)
 
@@ -129,11 +146,15 @@ head(newMonthBF$Act_Minus_Exp)
 
 newMonthBF$Betfair.Win.S.P.[newMonthBF$Betfair.Win.S.P. <= 0] <- NA
 
-newMonthBFtemp <- newMonthBF[!is.na(newMonthBF$Betfair.Win.S.P.),]
+sum(is.na(newMonthBF$Betfair.Win.S.P.))
+
+#newMonthBFtemp <- newMonthBF[!is.na(newMonthBF$Betfair.Win.S.P.),]
 
 #remove observations with BFSP == 0 if necessary
 
 #enter filter code to remove missing BFSP here
+
+
 
 #add PL for Betfair Place SP
 
@@ -402,9 +423,6 @@ ukhr_master_BF <- ukhr_master_BF %>%
 summary(ukhr_master_BF$Year)
 
 table(ukhr_master_BF$Year, ukhr_master_BF$Month)
-
-#ukhr_master_BF2 <- ukhr_master_BF2 %>% 
- # filter(Year >= 2013)
 
 write_csv(ukhr_master_BF, "UKHR_Master_BF_2018_11_30.csv")
 

@@ -286,36 +286,36 @@ if(nrow(newcastleSires_Quals) > 0) {
 
 #fibresand and polytrack from 2012
 
-southwellSires <- ukAW%>%
-  filter(Meeting == "SOUTHWELL")%>%
-  group_by(Sire)%>%
-  summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
-            Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
-            Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
-            AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
-            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
-            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
-            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
-            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
-  filter(Runs >= 30 & AE_Ratio >= 1.20 & meanPL >= 0.2 & WinPercent >= 0.10 & Horses >= 5, Archie > 2.50, Exp_Wins >= 5.0)%>%
-  arrange(desc(AE_Ratio, meanPL))
-
-st <- southwellSires
-st
-write_csv(st, "st.csv")
-
-
-
-southwellSires_Quals <- southwellSires %>% 
-  left_join(todayAW, by = c("Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting == "SOUTHWELL", RaceType == "AW")
-
-southwellSires_Quals
+# southwellSires <- ukAW%>%
+#   filter(Meeting == "SOUTHWELL")%>%
+#   group_by(Sire)%>%
+#   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
+#             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+#             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+#             AE_Ratio = round(sum(Actual)/sum(Expected),2),WinPercent = round(sum((Actual)/Runs),2),
+#             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+#             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+#             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+#             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+#             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
+#   filter(Runs >= 30 & AE_Ratio >= 1.20 & meanPL >= 0.2 & WinPercent >= 0.10 & Horses >= 5, Archie > 2.50, Exp_Wins >= 5.0)%>%
+#   arrange(desc(AE_Ratio, meanPL))
 # 
-if(nrow(southwellSires_Quals) > 0) {
-  southwellSires_Quals$System_Name <- "Southwell_Sires"
-}
+# st <- southwellSires
+# st
+# write_csv(st, "st.csv")
+
+
+
+# southwellSires_Quals <- southwellSires %>% 
+#   left_join(todayAW, by = c("Sire")) %>% 
+#   filter(!is.na(Time24Hour), Meeting == "SOUTHWELL", RaceType == "AW")
+# 
+# southwellSires_Quals
+# # 
+# if(nrow(southwellSires_Quals) > 0) {
+#   southwellSires_Quals$System_Name <- "Southwell_Sires"
+# }
 
 
 # 
@@ -705,7 +705,7 @@ todayAllAW_Qualifiers <- tapSiresT_Quals %>%
   full_join(fibSiresT_Quals) %>% 
   full_join(wolvesSires_Quals) %>% 
   full_join(newcastleSires_Quals) %>% 
-  full_join(southwellSires_Quals) %>% 
+  #full_join(southwellSires_Quals) %>% 
   full_join(polyMeetingSires_Quals) %>% 
   full_join(wolvesTrainers_Quals) %>% 
   full_join(newcastleTrainers_Quals) %>% 

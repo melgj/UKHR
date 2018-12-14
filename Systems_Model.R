@@ -14,7 +14,7 @@ library(elasticnet)
 
 
 
-quals <- read_csv("All_System_Qualifiers_Yr_2018.csv", col_names = T)
+quals <- read_csv("All_System_Qualifiers_Yr_2018_Cleaned.csv", col_names = T)
 
 quals <- quals %>% 
   filter(Month != 11)
@@ -23,11 +23,11 @@ colSums(is.na(quals))
 
 quals$Dist_Range[is.na(quals$Dist_Range)] <- "NH"
 
-quals <- quals %>% 
-  drop_na(Betfair.Placed)
+#quals <- quals %>% 
+  #drop_na(Betfair.Placed)
 
-quals <- quals %>% 
-  select(-c(Trainer, Jockey, Sire, Alarms))
+#quals <- quals %>% 
+  #select(-c(Trainer, Jockey, Sire, Alarms))
 
 colSums(is.na(quals))
 
@@ -47,6 +47,7 @@ qualsData <- quals %>%
   select(BetFairSPForecastWinPrice, System_Name, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
          Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceType, Handicap, Going_Range,
          Ratings_Range, Dist_Range, Rev_Weight_Rank, NumberOfResults, Age, BFSP_PL)
+
 
 colSums(is.na(qualsData))
 
@@ -373,12 +374,18 @@ ukTestSet <- qualsData[-ukTrainRows, -2]
 
 colSums(is.na(ukTrainSet))
 
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              verboseIter = T)
+
 set.seed(100)
 
 rfMod <- train(BFSP_PL ~ .,
                data = ukTrainSet,
                method = "rf",
                ntrees = 1500,
+               trControl = train.control,
                PreProc = c("center", "scale"),
                importance = T)
 
@@ -883,6 +890,137 @@ qualsData2 %>%
 
 ###################################################################
 
+# Build Final Model using Random Forest 
+
+nn <- readRDS("Systems_NN_BFSPPL_Model_v50.RDS")
+xgbClass <- readRDS("XGB_Systems_Model_Prob_V50.RDS")
+xgb <- readRDS("XGB_Linear_Systems_BFPL_Model_v50.RDS")
+#rf <- readRDS("RF_BFPL_Model_v50.RDS")
+#mars <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
+
+nnPred <- predict(nn, newdata = qualsData, type = "raw")
+xgbProb <- predict(xgbClass, newdata = qualsData, type = "prob")
+xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
+#xgbPred <- predict(xgb, newdata = qualsData, type = "raw")
+#rfPred <- predict(rf, newdata = qualsData, type = "raw")
+#marsPred <- predict(mars, newdata = qualsData, type = "raw")
+
+qualsData2 <- qualsData %>% 
+  mutate(NN_Pred = nnPred,
+         XGB_Pred = xgbPred,
+         Win_Prob = xgbProb[,2]) %>% 
+  select(-c(System_Name))
+
+head(qualsData2[,14:26])
+
+#View(qualsData2)
+
+colnames(qualsData2)
+
+set.seed(200)
+
+ukTrainRows <- createDataPartition(qualsData2$BFSP_PL, p = 0.6, list = FALSE)
+
+ukTrainSet <- qualsData2[ukTrainRows, ]
+
+ukTestSet <- qualsData2[-ukTrainRows, ]
+
+colSums(is.na(ukTrainSet))
+
+library(doMC)
+registerDoMC(8)
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              verboseIter = T)
+
+set.seed(200)
+
+rfFinalMod <- train(BFSP_PL ~ .,
+               data = ukTrainSet,
+               method = "rf",
+               ntrees = 1000,
+               trControl = train.control,
+               PreProc = c("center", "scale"),
+               importance = T)
+
+print(rfFinalMod)
+
+varImp(rfFinalMod)
+
+
+
+
+
+predMod <- predict(rfFinalMod, newdata = ukTestSet, type = "raw")
+
+head(predMod)
+
+
+summary(predMod)
+
+
+R2(predMod, ukTestSet$BFSP_PL)
+RMSE(predMod, ukTestSet$BFSP_PL)
+cor(predMod, ukTestSet$BFSP_PL)
+
+ukTestSet$ModelPL <- predMod
+
+mean(ukTestSet$BFSP_PL)
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(ModelPL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+ukTestSet %>% 
+  group_by(Handicap) %>% 
+  filter(ModelPL <= 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+# Predict All Quals Data, after rejoining all columns to quals2 and including month 11
+
+qualsDataAll <- quals %>% 
+  left_join(qualsData2)
+
+predModAll <- predict(rfFinalMod, newdata = qualsDataAll, type = "raw")
+
+head(predModAll)
+
+qualsDataAll$ModelPL <- predModAll
+
+mean(qualsDataAll$BFSP_PL)
+
+qualsDataAll %>% 
+  group_by(Handicap) %>% 
+  filter(ModelPL > 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+qualsDataAll %>% 
+  group_by(Handicap) %>% 
+  filter(ModelPL <= 0.0) %>% 
+  summarise(Runs = n(),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>% 
+  arrange(desc(Avg_PL))
+
+
+
+saveRDS(rfFinalMod, "RF_Final_Model.RDS")
+
+
+
+####################################################################
 # Build Final Model using SVM
 
 library(doMC)

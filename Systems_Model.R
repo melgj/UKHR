@@ -23,8 +23,8 @@ colSums(is.na(quals))
 
 quals$Dist_Range[is.na(quals$Dist_Range)] <- "NH"
 
-#quals <- quals %>% 
-  #drop_na(Betfair.Placed)
+quals <- quals %>% 
+  drop_na(Betfair.Placed)
 
 #quals <- quals %>% 
   #select(-c(Trainer, Jockey, Sire, Alarms))
@@ -34,6 +34,10 @@ colSums(is.na(quals))
 quals <- na.omit(quals)
 
 str(quals)
+
+summary(quals)
+
+
 
 quals$Handicap <- as.factor(quals$Handicap)
 quals$Ratings_Range <- as.factor(quals$Ratings_Range)
@@ -50,6 +54,43 @@ qualsData <- quals %>%
 
 
 colSums(is.na(qualsData))
+
+set.seed(100)
+
+dataSplit <- createDataPartition(qualsData$BFSP_PL, p = 0.60, list = FALSE)
+
+rfTrain <- qualsData[dataSplit, ]
+rfTest <- qualsData[-dataSplit, ]
+
+set.seed(100)
+
+index <- createMultiFolds(rfTrain$BFSP_PL, times = 5)
+
+varsRF <- var_seq(23, len = 5)
+
+ctrl <- rfeControl(method = "repeatedcv",
+                   repeats = 5,
+                   verbose = T,
+                   functions = rfFuncs,
+                   index = index)
+
+library(doMC)
+registerDoMC(8)
+
+set.seed(100)
+
+rfRFE <- rfe(BFSP_PL ~ .,
+             data = rfTrain,
+             sizes = varsRF,
+             metric = "RMSE",
+             rfeControl = ctrl,
+             ntree = 1000)
+
+rfRFE
+
+varImp(rfRFE)
+
+saveRDS(rfRFE, "Systems_Features.RDS")
 
 ##############################################
 
@@ -358,6 +399,8 @@ saveRDS(xgbLinModUK, "XGB_Linear_Systems_BFPL_Model_v50.RDS")
 
 # Build RF Model
 
+colnames(qualsData)
+
 library(doMC)
 
 registerDoMC(8)
@@ -374,9 +417,14 @@ ukTestSet <- qualsData[-ukTrainRows, -2]
 
 colSums(is.na(ukTrainSet))
 
+mtry <- c(2,4,6)
+
+mtryGrid <- expand.grid(mtry = mtry)
+print(mtryGrid)
+
 train.control <- trainControl(method = "repeatedcv",
                               number = 10,
-                              repeats = 3,
+                              repeats = 5,
                               verboseIter = T)
 
 set.seed(100)
@@ -386,6 +434,7 @@ rfMod <- train(BFSP_PL ~ .,
                method = "rf",
                ntrees = 1000,
                trControl = train.control,
+               tuneGrid = mtryGrid,
                PreProc = c("center", "scale"),
                importance = T)
 

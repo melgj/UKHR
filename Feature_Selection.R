@@ -191,8 +191,20 @@ rfRFE <- rfe(LengthsBehindTotal ~ .,
 
 rfRFE
 
-saveRDS(rfRFE, "NH_Features_RFE.RDS")
+#saveRDS(rfRFE, "NH_Features_RFE.RDS")
+
+#rfRFE <- readRDS("NH_Features_RFE.RDS")
 
 vImp <- varImp(rfRFE)
 
+vImp
+
 write_csv(vImp, "NH_Feature_Scores.csv")
+
+scores <- rfRFE$variables[1:189, 1:2]
+
+scores
+
+write_csv(scores, "NH_Feature_Scores.csv")
+
+rfRFE$optVariables

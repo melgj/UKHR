@@ -10,34 +10,14 @@ setwd("~/git_projects/UKHR_Project")
 
 ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv", col_names = T)
 
-# Remove Wolverhampton Polytrack data from pre Tapeta era
 
-# wPoly1 <- which(ukhr_master_BF$Year < 2014 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
-# 
-# wPoly2 <- which(ukhr_master_BF$Year == 2014 & ukhr_master_BF$Month < 8 & ukhr_master_BF$Meeting == "WOLVERHAMPTON")
-# 
-# wPolyAll <- c(wPoly1, wPoly2)
-# 
-# ukhr_master_BF <- ukhr_master_BF[-wPolyAll,]
-# 
-# unique(ukhr_master_BF$Year)
-# 
-# ukhr_master_BF <- ukhr_master_BF %>% 
-#   group_by(UKHR_RaceID) %>% 
-#   mutate(Fin_Pos = min_rank(LengthsBehindTotal),
-#          Exp_Btn = Actual.Runners - Fav_Rank,
-#          Act_Btn = Actual.Runners - Fin_Pos)
-# 
+# create season vars
+
 winter <- c(12,1,2)
 spring <- c(3,4,5)
 summer <- c(6,7,8)
 autumn <- c(9,10,11)
-# 
-# ukhr_master_BF <- ukhr_master_BF %>% 
-#   mutate(Season = if_else(Month %in% winter, "Winter",
-#                           if_else(Month %in% spring, "Spring",
-#                                   if_else(Month %in% summer,"Summer",
-#                                           "Autumn"))))
+
 
 # Create Going Range Vars
 
@@ -61,32 +41,32 @@ today$BetFairSPForecastWinPrice[today$BetFairSPForecastWinPrice <= 0] <- NA
 sum(is.na(today$BetFairSPForecastWinPrice))
 
 if (sum(is.na(today$BetFairSPForecastWinPrice) > 0)) {
-  
+
   library(caret)
-  
-  bfspToday <- today %>% 
+
+  bfspToday <- today %>%
     select(RatingsPosition, RatingAdvantage, ConnRanking, ClassPosition, Runners, BetFairSPForecastWinPrice)
-  
+
   bfspImpute <- preProcess(bfspToday, method = "bagImpute")
   imputedBFSP <- predict(bfspImpute, bfspToday)
   #View(imputedBFSP)
-  
+
   today$BetFairSPForecastWinPrice <- imputedBFSP$BetFairSPForecastWinPrice
-}  
+}
 
 sum(is.na(today$BetFairSPForecastWinPrice))
 
-todayOdds <- today %>% 
-  group_by(UKHRCardRaceID) %>% 
-  mutate(Book = sum(ValueOdds_Probability), 
+todayOdds <- today %>%
+  group_by(UKHRCardRaceID) %>%
+  mutate(Book = sum(ValueOdds_Probability),
          Adj_Val_Prob = ValueOdds_Probability/Book,
          Adj_Val_Odds = 1/Adj_Val_Prob,
          BFSPFC_Book = sum((1/BetFairSPForecastWinPrice),na.rm = T),
          Adj_BFSPFC_Prob = (1/BetFairSPForecastWinPrice)/BFSPFC_Book,
          Adj_BFSPFC_Odds = 1/Adj_BFSPFC_Prob,
          New_Book = sum(Adj_Val_Prob),
-         New_BFSPFC_Book = sum(1/Adj_BFSPFC_Odds)) %>% 
-  select(UKHRCardRaceID, Book, ValueOdds_Probability, ValueOdds_BetfairFormat, Adj_Val_Prob, Adj_Val_Odds,  BFSPFC_Book, 
+         New_BFSPFC_Book = sum(1/Adj_BFSPFC_Odds)) %>%
+  select(UKHRCardRaceID, Book, ValueOdds_Probability, ValueOdds_BetfairFormat, Adj_Val_Prob, Adj_Val_Odds,  BFSPFC_Book,
          BetFairSPForecastWinPrice, Adj_BFSPFC_Prob, Adj_BFSPFC_Odds, New_Book, New_BFSPFC_Book)
 
 todayOdds
@@ -115,7 +95,7 @@ today$Handicap[is.na(today$Handicap)] <- "NONHCP"
 
 today <- mutate_if(today, is.character, toupper)
 
-today$Date <- dmy(today$Date) 
+today$Date <- dmy(today$Date)
 today$DayOfMonth <- mday(today$Date)
 today$Month <- month(today$Date)
 today$Year <- year(today$Date)
@@ -132,35 +112,35 @@ todayNH <- filter(today, RaceType == "CHASE" | RaceType == "HURDLE" | RaceType =
 todayAW <- filter(today, RaceType == "AW")
 todayFlat <- filter(today, RaceType == "FLAT")
 
-today <- today %>% 
-  group_by(UKHRCardRaceID) %>% 
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
   mutate(Stall = min_rank(StallNumber))
 
-today <- today %>% 
-  group_by(UKHRCardRaceID) %>% 
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
   mutate(Rating_Rank = min_rank(RatingsPosition))
 
-today <- today %>% 
-  group_by(UKHRCardRaceID) %>% 
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
   mutate(Class_Rank = min_rank(ClassPosition))
 
-today <- today %>% 
-  group_by(UKHRCardRaceID) %>% 
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
   mutate(Class_Rank_Range = cut(Class_Rank, 3,
-                                labels = c("Top_Third", "Middle_Third", "Bottom_Third"), 
+                                labels = c("Top_Third", "Middle_Third", "Bottom_Third"),
                                 ordered_result = T))
 
-today <- today %>% 
-  group_by(UKHRCardRaceID) %>% 
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
   mutate(Spd_Rank = min_rank(SpeedRatingRank))
 
-today <- today %>% 
-  group_by(UKHRCardRaceID) %>% 
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
   mutate(Speed_Rank_Range = cut(Spd_Rank, 3,
-                                labels = c("Top_Third", "Middle_Third", "Bottom_Third"), 
+                                labels = c("Top_Third", "Middle_Third", "Bottom_Third"),
                                 ordered_result = T))
 
-today <- today %>% 
+today <- today %>%
   mutate(Season = if_else(Month %in% winter, "Winter",
                           if_else(Month %in% spring, "Spring",
                                   if_else(Month %in% summer,"Summer",
@@ -168,37 +148,37 @@ today <- today %>%
 
 
 
-today <- today %>% 
-  group_by(UKHRCardRaceID) %>% 
+today <- today %>%
+  group_by(UKHRCardRaceID) %>%
   mutate(Ratings_Range = cut(Rating_Rank, 3,
-                             labels = c("Top_Third", "Middle_Third" ,"Bottom_Third"), 
+                             labels = c("Top_Third", "Middle_Third" ,"Bottom_Third"),
                              ordered_result = T))
 
-today <- today %>% 
+today <- today %>%
   mutate(LTO_Days_Range = cut(DaysSinceLastRun, breaks = c(0, 4, 7, 35, 91, 182, 365, 1000),
-                              labels = c("<=4", "<=7", "<=35", "<=91", "<=182", "<=365", "<=1000"), 
+                              labels = c("<=4", "<=7", "<=35", "<=91", "<=182", "<=365", "<=1000"),
                               ordered_result = T))
 
-today <- today %>% 
+today <- today %>%
   mutate(BFSPFC_Odds_Range = cut(BetFairSPForecastWinPrice, breaks = c(0, 6, 11, 21, 51, 1000),
                                  labels = c("<=6", ">6 to 11", ">11 to 21" ,">21 to 51", ">51"),
                                  ordered_result = T))
 
-today <- today %>% 
+today <- today %>%
   mutate(Value_Odds_Range = cut(ValueOdds_BetfairFormat, breaks = c(0, 6, 11, 21, 51, 1000),
                                 labels = c("<=6", ">6 to 11", ">11 to 21",">21 to 51", ">51"),
                                 ordered_result = T))
 
-today <- today %>% 
+today <- today %>%
   mutate(Value_Odds_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat,
          VOR_Range = cut(Value_Odds_Ratio, breaks = c(0, 0.5, 1.0, 2.5, 5.0, 10, 100),
                          labels = c("<=0.5", ">0.5 to 1.0", ">1 to 2.50", ">2.50 to 5.0", ">5 to 10", ">10"),
-                         ordered_result = T)) 
+                         ordered_result = T))
 
 today$Going_Range <- ifelse(today$Going %in% slowGround, "SLOW",
                             ifelse(today$Going %in% fastGround,"FAST", "SYNTHETIC"))
 
-today <- today %>% 
+today <- today %>%
   mutate(Weight_Range = cut(desc(Weight_Pounds), 3,
                             labels = c("High", "Middle", "Low"),
                             ordered_result = T))
@@ -208,8 +188,6 @@ today <- today %>%
   group_by(UKHRCardRaceID) %>%
   mutate(Weight_Rank = min_rank(desc(Weight_Pounds)))
 
-#head(today$Weight_Rank, 30)   
-#head(today$Weight_Pounds, 30)
 
 today <- today %>%
   group_by(UKHRCardRaceID) %>%
@@ -229,12 +207,12 @@ today <- today %>%
                                 labels = c("<= 1.5",">1.5 to 2",">2 to 4", ">4 to 6", ">6 to 11", ">11"),
                                 ordered_result = T))
 
-today <- today %>% 
-  rename(Declared = Runners) %>% 
+today <- today %>%
+  rename(Declared = Runners) %>%
   mutate(Runners = length(unique(Horse)),
          Runners_Range = cut(Runners, breaks = c(0, 8, 16, 100),
                              labels = c("<=8", "9-16", "17+"),
-                             ordered_result = T)) 
+                             ordered_result = T))
 
 #######################################################
 
@@ -242,10 +220,10 @@ table(today$Meeting, today$Going)
 table(today$Meeting, today$RaceType)
 
 
-source("AW_Systems.R")
-source("Flat_Systems.R")
-source("NH_Systems.R")
-source("Extra_Qualifiers.R")
+source("Today_AW_Systems.R")
+source("Today_Flat_Systems.R")
+source("Today_NH_Systems.R")
+source("Today_Extra_Qualifiers.R")
 source("Todays_Master_Qualifiers.R")
 source("Draw_Range_Analysis.R")
 source("Min_Rank_Val_Bet.R")

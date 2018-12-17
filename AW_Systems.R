@@ -1,4 +1,4 @@
-# Filter AW Races 
+# Filter AW Races
 
 ukAW <- filter(ukhr_master_BF, RaceType == "AW")
 
@@ -6,7 +6,7 @@ ukAW <- filter(ukhr_master_BF, RaceType == "AW")
 
 ukAW <- select(ukAW, -c(ChaseJumpingAbility, HunterChase, Beginner))
 
-ukAW$Dist_Range <- as.factor(ifelse(ukAW$Furlongs < 8, "Sprint", 
+ukAW$Dist_Range <- as.factor(ifelse(ukAW$Furlongs < 8, "Sprint",
                                               ifelse(ukAW$Furlongs < 14,"Middle", "Long")))
 
 # AW data models
@@ -32,7 +32,7 @@ fibresand <- str_to_upper(fibresand)
 
 tap <- filter(ukAW2, Meeting %in% tapeta)
 pol <- filter(ukAW, Meeting %in% polytrack)
-fib <- filter(ukAW, Meeting %in% fibresand)# 
+fib <- filter(ukAW, Meeting %in% fibresand)#
 
 unique(pol$Meeting)
 
@@ -55,8 +55,8 @@ tapSiresT <- tap%>%
             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
   filter(Runs >= 30 & AE_Ratio >= 1.20 & meanPL >= 0.2 & WinPercent >= 0.10 & Horses >= 5, Archie > 2.50, Exp_Wins >= 5.0)%>%
-  arrange(desc(AE_Ratio, meanPL)) 
-  
+  arrange(desc(AE_Ratio, meanPL))
+
 tapSiresT
 
 
@@ -66,20 +66,20 @@ tapSiresT
 write_csv(tapSiresT, "TapetaSires.csv")
 
 
-tapSiresT_Quals <- tapSiresT %>% 
-  left_join(todayAW, by = c("Sire")) %>% 
-  filter(!is.na(Time24Hour), Meeting %in% tapeta, RaceType == "AW") 
+tapSiresT_Quals <- tapSiresT %>%
+  left_join(todayAW, by = c("Sire")) %>%
+  filter(!is.na(Time24Hour), Meeting %in% tapeta, RaceType == "AW")
 
 tapSiresT_Quals
-# 
+#
 if(nrow(tapSiresT_Quals) > 0) {
   tapSiresT_Quals$System_Name <- "Tapeta_Sires"
 }
 
 
 
-#plot tapeta sires 
-# 
+#plot tapeta sires
+#
 # tapetaPlot <- ggplot(tapSiresT)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -87,14 +87,14 @@ if(nrow(tapSiresT_Quals) > 0) {
 #   geom_label(aes(Sire, AE_Ratio,label = round(AE_Ratio,2)), nudge_y = -0.25)+
 #   coord_flip()+
 #   labs(title = paste("Tapeta (Newcastle and Wolverhampton) Sires AE_Ratio"))
-# 
+#
 # tapetaPlot
 
 #ggsave("tapPlot.png")
 
 #polytrack sires
 polSiresT <- pol%>%
-  group_by(Sire) %>% 
+  group_by(Sire) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -111,20 +111,20 @@ polSiresT
 
 write_csv(polSiresT, "PolytrackSires.csv")
 
-polSiresT_Quals <- polSiresT %>% 
-  left_join(todayAW, by = c("Sire")) %>% 
+polSiresT_Quals <- polSiresT %>%
+  left_join(todayAW, by = c("Sire")) %>%
   filter(!is.na(Time24Hour), Meeting %in% polytrack, RaceType == "AW")
 
 polSiresT_Quals
-# 
+#
 if(nrow(polSiresT_Quals) > 0) {
   polSiresT_Quals$System_Name <- "Polytrack_Sires"
 }
 
 
 
-#plot polytrack sires 
-# 
+#plot polytrack sires
+#
 # polPlot <- ggplot(polSiresT)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -133,7 +133,7 @@ if(nrow(polSiresT_Quals) > 0) {
 #   coord_flip()+
 #   labs(title = paste("Polytrack Sires AE_Ratio"))
 # polPlot
-# 
+#
 # ggsave("polPlot.png")
 
 
@@ -157,20 +157,20 @@ fibSiresT
 
 write_csv(fibSiresT, "FibresandSires.csv")
 
-fibSiresT_Quals <- fibSiresT %>% 
-  left_join(todayAW, by = c("Sire")) %>% 
+fibSiresT_Quals <- fibSiresT %>%
+  left_join(todayAW, by = c("Sire")) %>%
   filter(!is.na(Time24Hour), Meeting %in% fibresand, RaceType == "AW")
 
 fibSiresT_Quals
-# 
+#
 if(nrow(fibSiresT_Quals) > 0) {
   fibSiresT_Quals$System_Name <- "Fibresand_Sires"
 }
 
 
 
-#plot tapeta sires 
-# 
+#plot tapeta sires
+#
 # fibPlot <- ggplot(fibSiresT)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -178,7 +178,7 @@ if(nrow(fibSiresT_Quals) > 0) {
 #   geom_label(aes(Sire, AE_Ratio,label = round(AE_Ratio,2)), nudge_y = -0.25)+
 #   coord_flip()+
 #   labs(title = paste("Fibresand Sires AE_Ratio"))
-# 
+#
 # fibPlot
 
 #ggsave("fibPlot.png")
@@ -205,24 +205,23 @@ wolvesSires <- ukAW2 %>%
   filter(Runs >= 30 & AE_Ratio >= 1.20 & meanPL >= 0.2 & WinPercent >= 0.10 & Horses >= 5, Archie > 2.50, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, meanPL))
 
-wt <- wolvesSires
-wt
 
-write_csv(wt, "wt.csv")
 
-wolvesSires_Quals <- wolvesSires %>% 
-  left_join(todayAW, by = c("Sire")) %>% 
+write_csv(wolvesSires, "wSires.csv")
+
+wolvesSires_Quals <- wolvesSires %>%
+  left_join(todayAW, by = c("Sire")) %>%
   filter(!is.na(Time24Hour), Meeting == "WOLVERHAMPTON", RaceType == "AW")
 
 wolvesSires_Quals
-# 
+#
 if(nrow(wolvesSires_Quals) > 0) {
   wolvesSires_Quals$System_Name <- "Wolves_Sires"
 }
 
 
 
-# 
+#
 # wlvPlot <- ggplot(wolvesSires) +
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire)) +
 #   xlab("Sire") +
@@ -230,8 +229,8 @@ if(nrow(wolvesSires_Quals) > 0) {
 #   geom_label(aes(Sire, AE_Ratio,label = round(AE_Ratio,2)), nudge_y = -0.25) +
 #   coord_flip() +
 #   labs(title = paste("Top Wolverhampton Sires by Actual v Expected Winner Ratio"))
-# 
-# 
+#
+#
 # wlvPlot
 # ggsave("wlvPlot.png")
 
@@ -252,13 +251,11 @@ newcastleSires <- ukAW%>%
   filter(Runs >= 30 & AE_Ratio >= 1.20 & meanPL >= 0.2 & WinPercent >= 0.10 & Horses >= 5, Archie > 2.50, Exp_Wins >= 5.0)%>%
   arrange(desc(AE_Ratio, meanPL))
 
-nt <- newcastleSires
-nt
 
-write_csv(nt, "nt.csv")
+write_csv(newcastleSires, "nSires.csv")
 
-newcastleSires_Quals <- newcastleSires %>% 
-  left_join(todayAW, by = c("Sire")) %>% 
+newcastleSires_Quals <- newcastleSires %>%
+  left_join(todayAW, by = c("Sire")) %>%
   filter(!is.na(Time24Hour), Meeting == "NEWCASTLE", RaceType == "AW")
 
 newcastleSires_Quals
@@ -271,7 +268,7 @@ if(nrow(newcastleSires_Quals) > 0) {
 
 
 
-# 
+#
 # nwcPlot <- ggplot(newcastleSires)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -279,7 +276,7 @@ if(nrow(newcastleSires_Quals) > 0) {
 #   geom_label(aes(Sire, AE_Ratio,label = round(AE_Ratio,2)), nudge_y = -0.25)+
 #   coord_flip()+
 #   labs(title = paste("Top Newcastle Sires by Actual v Expected Winner Ratio"))
-# 
+#
 # nwcPlot
 # ggsave("nwcPlot.png")
 
@@ -300,25 +297,25 @@ if(nrow(newcastleSires_Quals) > 0) {
 #             Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins)))%>%
 #   filter(Runs >= 30 & AE_Ratio >= 1.20 & meanPL >= 0.2 & WinPercent >= 0.10 & Horses >= 5, Archie > 2.50, Exp_Wins >= 5.0)%>%
 #   arrange(desc(AE_Ratio, meanPL))
-# 
+#
 # st <- southwellSires
 # st
 # write_csv(st, "st.csv")
 
 
 
-# southwellSires_Quals <- southwellSires %>% 
-#   left_join(todayAW, by = c("Sire")) %>% 
+# southwellSires_Quals <- southwellSires %>%
+#   left_join(todayAW, by = c("Sire")) %>%
 #   filter(!is.na(Time24Hour), Meeting == "SOUTHWELL", RaceType == "AW")
-# 
+#
 # southwellSires_Quals
-# # 
+# #
 # if(nrow(southwellSires_Quals) > 0) {
 #   southwellSires_Quals$System_Name <- "Southwell_Sires"
 # }
 
 
-# 
+#
 # sthPlot <- ggplot(fibresandSires)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -326,7 +323,7 @@ if(nrow(newcastleSires_Quals) > 0) {
 #   geom_label(aes(Sire, AE_Ratio,label = round(AE_Ratio,2)), nudge_y = -0.25)+
 #   coord_flip()+
 #   labs(title = paste("Top Southwell Sires by Actual v Expected Winner Ratio"))
-# 
+#
 # sthPlot
 # ggsave("sthPlot.png")
 
@@ -347,9 +344,11 @@ polyMeetingSires <- ukAW%>%
 
 polyMeetingSires
 
+write_csv(polyMeetingSires, "pSires.csv")
 
-polyMeetingSires_Quals <- polyMeetingSires %>% 
-  left_join(todayAW, by = c("Meeting", "Sire")) %>% 
+
+polyMeetingSires_Quals <- polyMeetingSires %>%
+  left_join(todayAW, by = c("Meeting", "Sire")) %>%
   filter(!is.na(Time24Hour), Meeting %in% polytrack, RaceType == "AW")
 
 polyMeetingSires_Quals
@@ -382,10 +381,10 @@ newcastleTrainers <- ukAW%>%
 
 newcastleTrainers
 
-#write_csv(nt, "nt.csv")
+write_csv(newcastleTrainers, "nTrainers.csv")
 
-newcastleTrainers_Quals <- newcastleTrainers %>% 
-  left_join(todayAW, by = c("Trainer")) %>% 
+newcastleTrainers_Quals <- newcastleTrainers %>%
+  left_join(todayAW, by = c("Trainer")) %>%
   filter(!is.na(Time24Hour), Meeting == "NEWCASTLE", RaceType == "AW")
 
 newcastleTrainers_Quals
@@ -414,10 +413,10 @@ wolvesTrainers <- ukAW%>%
 
 wolvesTrainers
 
-#write_csv(nt, "nt.csv")
+write_csv(wolvesTrainers, "wTrainers.csv")
 
-wolvesTrainers_Quals <- wolvesTrainers %>% 
-  left_join(todayAW, by = c("Trainer")) %>% 
+wolvesTrainers_Quals <- wolvesTrainers %>%
+  left_join(todayAW, by = c("Trainer")) %>%
   filter(!is.na(Time24Hour), Meeting == "WOLVERHAMPTON", RaceType == "AW")
 
 wolvesTrainers_Quals
@@ -433,7 +432,7 @@ if(nrow(wolvesTrainers_Quals) > 0) {
 
 
 
-# 
+#
 # nwcPlot <- ggplot(newcastleSires)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -441,7 +440,7 @@ if(nrow(wolvesTrainers_Quals) > 0) {
 #   geom_label(aes(Sire, AE_Ratio,label = round(AE_Ratio,2)), nudge_y = -0.25)+
 #   coord_flip()+
 #   labs(title = paste("Top Newcastle Sires by Actual v Expected Winner Ratio"))
-# 
+#
 # nwcPlot
 # ggsave("nwcPlot.png")
 
@@ -465,14 +464,13 @@ southwellTrainers <- ukAW%>%
 
 southwellTrainers
 
-# st <- southwellSires
-# st
-# write_csv(st, "st.csv")
+
+write_csv(southwellTrainers, "sTrainers.csv")
 
 
 
-southwellTrainers_Quals <- southwellTrainers %>% 
-  left_join(todayAW, by = c("Trainer")) %>% 
+southwellTrainers_Quals <- southwellTrainers %>%
+  left_join(todayAW, by = c("Trainer")) %>%
   filter(!is.na(Time24Hour), Meeting == "SOUTHWELL", RaceType == "AW")
 
 southwellTrainers_Quals
@@ -481,7 +479,7 @@ if(nrow(southwellTrainers_Quals) > 0) {
   southwellTrainers_Quals$System_Name <- "Southwell_Trainers"
 }
 
-# 
+#
 # sthPlot <- ggplot(fibresandSires)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -489,7 +487,7 @@ if(nrow(southwellTrainers_Quals) > 0) {
 #   geom_label(aes(Sire, AE_Ratio,label = round(AE_Ratio,2)), nudge_y = -0.25)+
 #   coord_flip()+
 #   labs(title = paste("Top Southwell Sires by Actual v Expected Winner Ratio"))
-# 
+#
 # sthPlot
 # ggsave("sthPlot.png")
 
@@ -510,9 +508,11 @@ polyMeetingTrainers <- ukAW%>%
 
 polyMeetingTrainers
 
+write_csv(polyMeetingTrainers, "pTrainers.csv")
 
-polyMeetingTrainers_Quals <- polyMeetingTrainers %>% 
-  left_join(todayAW, by = c("Meeting", "Trainer")) %>% 
+
+polyMeetingTrainers_Quals <- polyMeetingTrainers %>%
+  left_join(todayAW, by = c("Meeting", "Trainer")) %>%
   filter(!is.na(Time24Hour), Meeting %in% polytrack, RaceType == "AW")
 
 polyMeetingTrainers_Quals
@@ -528,7 +528,7 @@ if(nrow(polyMeetingTrainers_Quals) > 0) {
 
 
 
-# 
+#
 # lngPlot <- ggplot(lingfieldSires)+
 #   geom_col(aes(x=reorder(Sire,AE_Ratio,sum), y=AE_Ratio, fill = Sire))+
 #   xlab("Sire")+
@@ -536,21 +536,21 @@ if(nrow(polyMeetingTrainers_Quals) > 0) {
 #   geom_label(aes(Sire, AE_Ratio,label = round(AE_Ratio,2)), nudge_y = -0.25)+
 #   coord_flip()+
 #   labs(title = paste("Top Lingfield Sires by Actual v Expected Winner Ratio"))
-# 
+#
 # lngPlot
 # ggsave("lngPlot.png")
-# 
+#
 
 # ####################################################################################################
-# 
+#
 # # AW Trainer/Jockey Combo's
-# 
+#
 # # AW data models
-# 
+#
 # #filter data to exclude races before 11th August 14 (New Tapeta surface at Wolverhampton replaced Polytrack)
 
-trJkComboAW <- ukAW %>% 
-  group_by(Trainer, Jockey) %>% 
+trJkComboAW <- ukAW %>%
+  group_by(Trainer, Jockey) %>%
   summarise(Runs = n(),meanPL = round(mean(BFSP_PL),2), totalPL = round(sum(BFSP_PL),2), Horses = length(unique(Horse)),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -572,8 +572,8 @@ write_csv(trJkComboAW, "TopTrJkCombos_AW.csv")
 #Today's qualifiers
 
 
-todayAWTJQ <- trJkComboAW %>% 
-  left_join(todayAW, by = c("Trainer", "Jockey")) %>% 
+todayAWTJQ <- trJkComboAW %>%
+  left_join(todayAW, by = c("Trainer", "Jockey")) %>%
   filter(!is.na(Time24Hour), RaceType == "AW")
 
 todayAWTJQ
@@ -585,20 +585,20 @@ if(nrow(todayAWTJQ) > 0) {
 
 #View(todayAWTJQ)
 
-# tdyAWSummary <- todayAWQualifierSummary %>% 
-#   full_join(todayAWTJQ) %>% 
+# tdyAWSummary <- todayAWQualifierSummary %>%
+#   full_join(todayAWTJQ) %>%
 #   arrange(Time24Hour, Meeting, Horse)
-# 
+#
 # tdyAWSummary <- select(tdyAWSummary, 1:5, Runs, meanPL, totalPL, AE_Ratio, WinPercent,
 #                        Sire, Trainer, Jockey, everything())
-# 
+#
 # tdyAWSummary
 
 #View(tdyAWSummary)
 
 ##########################################################################################
 
-# AW Sire/Distance Range 
+# AW Sire/Distance Range
 
 #table(tap$Meeting, tap$Furlongs)
 
@@ -644,7 +644,7 @@ dRangeSiresPol <- pol%>%
 
 dRangeSiresPol
 
-write_csv(dRangeSiresTap, "PolySires_DistanceRange.csv")
+write_csv(dRangeSiresPol, "PolySires_DistanceRange.csv")
 
 #View(dRangeSiresPol)
 
@@ -667,11 +667,11 @@ dRangeSiresFib <- fib%>%
 
 dRangeSiresFib
 
-#write_csv(dRangeSiresFib, "FibSires_DistanceRange.csv")
+write_csv(dRangeSiresFib, "FibSires_DistanceRange.csv")
 
 siresDistRange <- rbind(dRangeSiresTap,dRangeSiresPol,dRangeSiresFib)
 
-siresDistRange <- siresDistRange %>% 
+siresDistRange <- siresDistRange %>%
   arrange(Meeting, Dist_Range, desc(AE_Ratio))
 
 siresDistRange
@@ -686,8 +686,8 @@ todayAW$Dist_Range <- as.factor(ifelse(todayAW$Furlongs < 8, "Sprint", "Route"))
 
 levels(todayAW$Dist_Range)
 
-siresDistRangeQuals <- siresDistRange %>% 
-  left_join(todayAW, by = c("Sire", "Meeting", "Dist_Range")) %>% 
+siresDistRangeQuals <- siresDistRange %>%
+  left_join(todayAW, by = c("Sire", "Meeting", "Dist_Range")) %>%
   filter(!is.na(Time24Hour))
 
 siresDistRangeQuals
@@ -700,19 +700,19 @@ if(nrow(siresDistRangeQuals) > 0) {
 
 ###################################################
 
-todayAllAW_Qualifiers <- tapSiresT_Quals %>% 
-  full_join(polSiresT_Quals) %>% 
-  full_join(fibSiresT_Quals) %>% 
-  full_join(wolvesSires_Quals) %>% 
-  full_join(newcastleSires_Quals) %>% 
-  #full_join(southwellSires_Quals) %>% 
-  full_join(polyMeetingSires_Quals) %>% 
-  full_join(wolvesTrainers_Quals) %>% 
-  full_join(newcastleTrainers_Quals) %>% 
-  full_join(southwellTrainers_Quals) %>% 
-  full_join(polyMeetingTrainers_Quals) %>% 
-  full_join(todayAWTJQ) %>% 
+todayAllAW_Qualifiers <- tapSiresT_Quals %>%
+  full_join(polSiresT_Quals) %>%
+  full_join(fibSiresT_Quals) %>%
+  full_join(wolvesSires_Quals) %>%
+  full_join(newcastleSires_Quals) %>%
+  #full_join(southwellSires_Quals) %>%
+  full_join(polyMeetingSires_Quals) %>%
+  full_join(wolvesTrainers_Quals) %>%
+  full_join(newcastleTrainers_Quals) %>%
+  full_join(southwellTrainers_Quals) %>%
+  full_join(polyMeetingTrainers_Quals) %>%
+  full_join(todayAWTJQ) %>%
   full_join(siresDistRangeQuals)
 
 todayAllAW_Qualifiers
-  
+

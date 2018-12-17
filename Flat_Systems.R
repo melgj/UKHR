@@ -1,9 +1,12 @@
 # filter Flat turf races only
 
-ukFlat <- filter(ukhr_master_BF, RaceType == "FLAT") 
+ukFlat <- filter(ukhr_master_BF, RaceType == "FLAT")
 
-ukFlat$Dist_Range <- as.factor(ifelse(ukFlat$Furlongs < 8, "Sprint", 
+ukFlat$Dist_Range <- as.factor(ifelse(ukFlat$Furlongs < 8, "Sprint",
                                     ifelse(ukFlat$Furlongs < 14,"Middle", "Long")))
+
+ukFlat$Dist_Range_Split <- as.factor(ifelse(ukFlat$Furlongs < 8, "Sprint",
+                                            ifelse(ukFlat$Furlongs < 14,"Middle", "Long")))
 
 #remove jump specific fields
 
@@ -12,7 +15,7 @@ ukFlat <- select(ukFlat, -c(ChaseJumpingAbility, HunterChase, Beginner))
 
 #colnames(ukFlat)
 
-# Analyse profitable trainers 
+# Analyse profitable trainers
 
 trainersFlatUK <- ukFlat%>%
   group_by(Trainer,Meeting, RaceType)%>%
@@ -58,21 +61,21 @@ if(nrow(trQuals) > 0) {
 
 ################################################################################
 
-#softGround 
+#softGround
 
 ukFlat$Dist_Range <- as.factor(ifelse(ukFlat$Furlongs < 8, "Sprint", "Route"))
 
 levels(ukFlat$Dist_Range)
-                                    
+
 
 #softGroundFlat <- filter(ukFlat, Going %in% softGround)
 
 
 
 softSiresFlat <- ukFlat %>%
-  filter(NumberOfResults >= 1, Going %in% softGround) %>% 
+  filter(NumberOfResults >= 1, Going %in% softGround) %>%
   group_by(Sire, Dist_Range)%>%
-  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected), 
+  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -80,28 +83,28 @@ softSiresFlat <- ukFlat %>%
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.2, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>%
+  filter(Runs >= 30, AE_Ratio >= 1.2, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>%
   arrange(desc(AE_Ratio), Dist_Range)
 
 softSiresFlat
 
-#write_csv(softSiresFlat, "Soft_Ground_Sires_Flat.csv")
+write_csv(softSiresFlat, "Soft_Ground_Sires_Flat.csv")
 
 todayFlat$Dist_Range <- as.factor(ifelse(todayFlat$Furlongs < 8, "Sprint", "Route"))
 
 levels(todayFlat$Dist_Range)
-                                                            
-todaySoftSiresFlat <- softSiresFlat %>% 
-  left_join(todayFlat, by = c("Sire", "Dist_Range")) %>% 
-  arrange(Time24Hour, Meeting, Horse) %>% 
-  filter(Going %in% softGround, NumberOfResults >= 1, !is.na(Time24Hour), RaceType == "FLAT") 
+
+todaySoftSiresFlat <- softSiresFlat %>%
+  left_join(todayFlat, by = c("Sire", "Dist_Range")) %>%
+  arrange(Time24Hour, Meeting, Horse) %>%
+  filter(Going %in% softGround, NumberOfResults >= 1, !is.na(Time24Hour), RaceType == "FLAT")
 
 unique(todaySoftSiresFlat$Dist_Range)
-  
+
 todaySoftSiresFlatQ <- select(todaySoftSiresFlat, everything())
 
-todaySoftSiresFlatQ 
+todaySoftSiresFlatQ
 
 if(nrow(todaySoftSiresFlatQ) > 0) {
   todaySoftSiresFlatQ$System_Name <- "Soft_Ground_Flat_Sires"
@@ -114,7 +117,7 @@ if(nrow(todaySoftSiresFlatQ) > 0) {
 
 trJkComboFlat <- ukFlat%>%
   group_by(Trainer, Jockey)%>%
-  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected), 
+  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -128,11 +131,13 @@ trJkComboFlat <- ukFlat%>%
 
 trJkComboFlat
 
+write_csv(trJkComboFlat, "TrainerJockeyFlatCombo.csv")
+
 
 #todayFlat <- select(today, RaceType, Trainer, Jockey, Meeting, Horse, Time24Hour, BetFairSPForecastWinPrice,ValueOdds_BetfairFormat,Rating_Rank)
 
 trJkComboFlatQ <- trJkComboFlat%>%
-  left_join(todayFlat, by = c("Trainer","Jockey")) %>% 
+  left_join(todayFlat, by = c("Trainer","Jockey")) %>%
   filter(RaceType == "FLAT", !is.na(Time24Hour))
 
 
@@ -160,29 +165,26 @@ irishMeetings <- c("BALLINROBE ", "BELLEWSTOWN", "CLONMEL", "CORK", "CURRAGH", "
                    "GALWAY", "GOWRAN PARK", "KILLARNEY", "LEOPARDSTOWN", "LIMERICK", "LISTOWEL", "NAAS", "PUNCHESTOWN",
                    "ROSCOMMON", "SLIGO", "TIPPERARY", "TRAMORE", "WEXFORD")
 
-#slowGround <- c("SOFT","SFT-HVY","HEAVY") 
+#slowGround <- c("SOFT","SFT-HVY","HEAVY")
 
-ukFlat$Dist_Range <- as.factor(ifelse(ukFlat$Furlongs < 8, "Sprint", 
-                                      ifelse(ukFlat$Furlongs < 14,"Middle", "Long")))
-
-# flat.TR.TW <- ukFlat %>% 
+# flat.TR.TW <- ukFlat %>%
 #   filter(Handicap == "HANDICAP", Rating_Rank <= 3, Weight_Rank <= 2, Going %in% softGround) %>%
-#   group_by(Weight_Rank, Going) %>% 
+#   group_by(Weight_Rank, Going) %>%
 #   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
 #             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
 #             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
 #             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
 #             WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
 #             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
-#             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>% 
+#             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
 #   arrange(desc(AE_Ratio))
-# 
+#
 # flat.TR.TW
 
-flat.TR.BW <- ukFlat %>% 
+flat.TR.BW <- ukFlat %>%
   filter(Handicap == "HANDICAP", Going %in% softGround, Rev_Weight_Rank <= 2, Rating_Rank <= 3,
          !(Meeting %in% irishMeetings)) %>%
-  group_by(Rev_Weight_Rank) %>% 
+  group_by(Rev_Weight_Rank) %>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
@@ -196,11 +198,13 @@ flat.TR.BW <- ukFlat %>%
 
 flat.TR.BW
 
+write_csv(flat.TR.BW, "TopRatedSoftGroundLowWeights.csv")
+
 #View(flat.TR.BW)
 
 
-todayBWHQuals <- flat.TR.BW %>% 
-  left_join(today, by = c("Rev_Weight_Rank")) %>% 
+todayBWHQuals <- flat.TR.BW %>%
+  left_join(today, by = c("Rev_Weight_Rank")) %>%
   filter(Going %in% softGround, Handicap == "HANDICAP", RaceType == "FLAT", Rating_Rank <= 3, !is.na(Time24Hour),
          !(Meeting %in% irishMeetings)) %>%
   arrange(Time24Hour, Meeting, Horse)
@@ -222,10 +226,9 @@ if(nrow(todayBWHQuals) > 0) {
 
 ################################################################################
 
-
-flatTrDr <- ukFlat %>% 
+flatTrDr <- ukFlat %>%
   filter(Age <= 5) %>%
-  group_by(Trainer, Dist_Range, Handicap) %>% 
+  group_by(Trainer, Dist_Range_Split, Handicap) %>%
   summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
@@ -235,16 +238,18 @@ flatTrDr <- ukFlat %>%
             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
             Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
-  filter(Exp_Wins >= 5, AE_Ratio >= 1.20, Archie > 2.5) %>% 
+  filter(Exp_Wins >= 5, AE_Ratio >= 1.20, Archie > 2.5) %>%
   arrange(desc(AE_Ratio))
 
 flatTrDr
 
-today$Dist_Range <- as.factor(ifelse(today$Furlongs < 8, "Sprint", 
+write_csv(flatTrDr, "FlatTrainerDistanceRange.csv")
+
+today$Dist_Range_Split <- as.factor(ifelse(today$Furlongs < 8, "Sprint",
                                      ifelse(today$Furlongs < 14,"Middle", "Long")))
 
-todayTrDrQuals <- flatTrDr %>% 
-  left_join(today, by = c("Trainer", "Dist_Range", "Handicap")) %>% 
+todayTrDrQuals <- flatTrDr %>%
+  left_join(today, by = c("Trainer", "Dist_Range_Split", "Handicap")) %>%
   filter(Age <= 5, RaceType == "FLAT", !is.na(Time24Hour)) %>%
   arrange(Time24Hour, Meeting, Horse)
 
@@ -262,7 +267,7 @@ if(nrow(todayTrDrQuals) > 0) {
 ################################################################################
 
 
-#allSlowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT") 
+#allSlowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT")
 
 #fastGround <- c("GOOD", "GD-FM", "FIRM")
 
@@ -270,10 +275,12 @@ levels(ukFlat$Dist_Range)
 
 #ukFlat$Going_Range <- ifelse(ukFlat$Going %in% slowGround, "Slow", "Fast")
 
+today$Dist_Range <- as.factor(ifelse(today$Furlongs < 8, "Sprint", "Route"))
+
 sireGngDist <- ukFlat %>%
-  filter(NumberOfResults >= 1) %>% 
+  filter(NumberOfResults >= 1) %>%
   group_by(Sire, Dist_Range, Going_Range)%>%
-  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected), 
+  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -281,24 +288,26 @@ sireGngDist <- ukFlat %>%
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, WinPercent >= 0.10, Archie > 2.5) %>% 
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>%
+  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, WinPercent >= 0.10, Archie > 2.5) %>%
   arrange(desc(AE_Ratio))
 
 sireGngDist
 
+write_csv(sireGngDist, "SireGoingDistanceRange.csv")
+
 
 #today$Going_Range <- ifelse(today$Going %in% slowGround, "Slow", "Fast")
 
-todaySireGngDistQ <- sireGngDist %>% 
-  left_join(today, by = c("Sire", "Dist_Range", "Going_Range")) %>% 
-  filter(RaceType == "FLAT", !is.na(Time24Hour), NumberOfResults >= 1) %>% 
+todaySireGngDistQ <- sireGngDist %>%
+  left_join(today, by = c("Sire", "Dist_Range", "Going_Range")) %>%
+  filter(RaceType == "FLAT", !is.na(Time24Hour), NumberOfResults >= 1) %>%
   # select(Time24Hour, RaceType, Meeting, Horse, Rating_Rank, Ratings_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
-  #        Sire, Going_Range, Dist_Range, Runs, meanPL, totalPL, AE_Ratio, WinPercent, Winners, Exp_Wins, Archie) %>% 
+  #        Sire, Going_Range, Dist_Range, Runs, meanPL, totalPL, AE_Ratio, WinPercent, Winners, Exp_Wins, Archie) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 
-todaySireGngDistQ 
+todaySireGngDistQ
 
 if(nrow(todaySireGngDistQ) > 0) {
   todaySireGngDistQ$System_Name <- "Flat_Sires_Going_Distance_Range"
@@ -307,12 +316,12 @@ if(nrow(todaySireGngDistQ) > 0) {
 
 ################################################################################
 
-allFlatQuals <- trQuals %>% 
-  full_join(todaySoftSiresFlatQ) %>% 
-  full_join(trJkComboFlatQ) %>% 
-  full_join(todayBWHQuals) %>% 
-  full_join(todayTrDrQuals) %>% 
+allFlatQuals <- trQuals %>%
+  full_join(todaySoftSiresFlatQ) %>%
+  full_join(trJkComboFlatQ) %>%
+  full_join(todayBWHQuals) %>%
+  full_join(todayTrDrQuals) %>%
   full_join(todaySireGngDistQ)
-  
-  
+
+
 allFlatQuals

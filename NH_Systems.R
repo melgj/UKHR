@@ -26,8 +26,8 @@ trainersNH <- ukNH%>%
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>%
+  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>%
   arrange(desc(AE_Ratio))
 
 trainersNH
@@ -50,16 +50,16 @@ if(nrow(trTFCQuals) > 0) {
   trTFCQuals$System_Name <- "NH_TFC"
 }
 
-write_csv(trTFCQuals, "NH_TFC_Quals_041117")
+
 
 ####################################################################
 
 #NH Hurdle Staying Sires by Course
 
 hdlStaySires <- ukHurdle%>%
-  filter(Furlongs > 20) %>% 
+  filter(Furlongs > 20) %>%
   group_by(Sire,RaceType)%>%
-  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected), 
+  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -67,8 +67,8 @@ hdlStaySires <- ukHurdle%>%
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>%
+  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>%
   arrange(desc(AE_Ratio))
 
 hdlStaySires
@@ -102,7 +102,7 @@ if(nrow(NHSireQuals) > 0) {
 hdlStayTrainers<- ukHurdle%>%
   group_by(Trainer, RaceType)%>%
   filter(Furlongs > 20)%>%
-  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected), 
+  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -110,13 +110,13 @@ hdlStayTrainers<- ukHurdle%>%
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>%
+  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>%
   arrange(Trainer,desc(AE_Ratio),desc(meanPL))
 
 hdlStayTrainers
 
-#write_csv(hdlStayTrainers, "HdlStayTrainers.csv")
+write_csv(hdlStayTrainers, "HdlStayTrainers.csv")
 
 # todays qualifiers
 
@@ -148,7 +148,7 @@ softGroundNH <- filter(ukNH, Going %in% softGround)
 
 softSiresNH <- softGroundNH%>%
   group_by(Sire)%>%
-  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected), 
+  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
             Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
             Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
             Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
@@ -156,8 +156,8 @@ softSiresNH <- softGroundNH%>%
             Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
             Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
             Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
-            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>% 
-  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>% 
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>%
+  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>%
   arrange(desc(AE_Ratio),desc(meanPL))
 
 softSiresNH
@@ -166,15 +166,15 @@ write_csv(softSiresNH, "SoftGroundSires_NH.csv")
 
 #todayNH <- filter(today, RaceType == "CHASE" | RaceType == "HURDLE" | RaceType == "NH FLAT")
 
-todaySoftSiresNH <- softSiresNH %>% 
-  left_join(today, by = c("Sire")) %>% 
-  arrange(Time24Hour, Meeting, Horse) %>% 
+todaySoftSiresNH <- softSiresNH %>%
+  left_join(today, by = c("Sire")) %>%
+  arrange(Time24Hour, Meeting, Horse) %>%
   filter(Going %in% softGround, RaceType == "CHASE" | RaceType == "HURDLE" | RaceType == "NH FLAT")
 
 
 todaySoftSiresNHQ <- select(todaySoftSiresNH, everything())
 
-todaySoftSiresNHQ 
+todaySoftSiresNHQ
 
 if(nrow(todaySoftSiresNHQ) > 0) {
   todaySoftSiresNHQ$System_Name <- "NH_Soft_Ground_Sires"
@@ -182,14 +182,13 @@ if(nrow(todaySoftSiresNHQ) > 0) {
 
 
 
-allNHSystemQualifiers <- trTFCQuals %>% 
-  full_join(todaySoftSiresNHQ) %>% 
-  full_join(trHLDQuals) %>% 
-  full_join(NHSireQuals) %>% 
+allNHSystemQualifiers <- trTFCQuals %>%
+  full_join(todaySoftSiresNHQ) %>%
+  full_join(trHLDQuals) %>%
+  full_join(NHSireQuals) %>%
   arrange(Time24Hour, Meeting, Horse)
 
-#allNHSystemQualifiers <- select(allNHSystemQualifiers, Time24Hour, Meeting, Horse, BetFairSPForecastWinPrice,
-                                #ValueOdds_BetfairFormat, Trainer, Sire, everything())
+
 
 allNHSystemQualifiers
 

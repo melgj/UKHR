@@ -360,6 +360,35 @@ train.control <- trainControl(method = "repeatedcv",
                               number = 10,
                               repeats = 3,
                               verboseIter = T)
+
 set.seed(100)
 
-## Todo - add final models in SVM, NN etc.
+ridgeMod <- train(BF_Placed_SP_PL ~ .,
+                  data = blenderData,
+                  method = "ridge",
+                  preProc = c("center", "scale"),
+                  tuneLength = 20,
+                  metric = "RMSE",
+                  trControl = train.control)
+
+ridgeMod
+
+testingData$FinalPredsRIDGE <- predict(ridgeMod, newdata = testingData, type = "raw")
+
+
+RMSE(testingData$FinalPredsRIDGE, testingData$BF_Placed_SP_PL)
+
+testingData %>%
+  group_by() %>%
+  filter(FinalPredsRIDGE > 0) %>%
+  mutate(Placed = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
+  summarise(Runs = n(),
+            Places = sum(Placed),
+            PlacePercent = mean(Placed),
+            Avg_PL = mean(BF_Placed_SP_PL),
+            Total_PL = sum(BF_Placed_SP_PL)) %>%
+  arrange(desc(Avg_PL))
+
+
+
+mean(testingData$BF_Placed_SP_PL)

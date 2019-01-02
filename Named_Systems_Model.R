@@ -41,7 +41,7 @@ quals$System_Name <- as.factor(quals$System_Name)
 
 
 qualsData <- quals %>%
-  select(BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
+  select(BetFairSPForecastWinPrice, System_Name, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Placed_AE_Ratio, Placed_Archie,
          Btn_AE_Ratio, WinPercent, meanPL, totalPL, VSP_ROI, Place_Percent, BF_Place_ROI, RaceCode, Handicap, Going_Range,
          Ratings_Range, Rev_Weight_Rank, NumberOfResults, Age, Spd_Rank, ClassDiffTotal, FCPAdvantage, RAdj.Advantage,
          Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
@@ -65,9 +65,9 @@ set.seed(100)
 
 splitB <- createDataPartition(trainingQualsData$BF_Placed_SP_PL, p = 0.5, list = F)
 
-ensembleData <- trainingQualsData[splitB, -34]
-blenderData <- trainingQualsData[-splitB, -34]
-testingData <- qualsData[-splitA, -34]
+ensembleData <- trainingQualsData[splitB, -35]
+blenderData <- trainingQualsData[-splitB, -35]
+testingData <- qualsData[-splitA, -35]
 
 targetName <- 'BF_Placed_SP_PL'
 predVars <- names(qualsData)[names(qualsData) != targetName]
@@ -116,9 +116,32 @@ print(xgbMod)
 
 varImp(xgbMod)
 
+testingData$XGB_Pred <- predict(xgbMod, newdata = testingData, type = "raw")
+testingQualsData$XGB_Pred <- predict(xgbMod, newdata = testingQualsData, type = "raw")
 
 
+testingQualsData %>%
+  group_by(Handicap) %>%
+  filter(XGB_Pred > 0.0) %>%
+  mutate(Won = if_else(BFSP_PL > 0, 1, 0)) %>%
+  summarise(Runs = n(),
+            Winners = sum(Won),
+            WinPercent = mean(Won),
+            Avg_PL = mean(BFSP_PL),
+            Total_PL = sum(BFSP_PL)) %>%
+  arrange(desc(Avg_PL))
 
+
+tdy <- read_csv("Today_All_System_Qualifiers.csv")
+
+tdy$RaceCode <- if_else(tdy$RaceType == "AW" | tdy$RaceType == "FLAT", "FLAT", "NH")
+
+tdy$XGB_Preds <- predict(xgbMod, newdata = tdy, type = "raw")
+
+tdy <- tdy %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Handicap, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, XGB_Preds)
+
+write_csv(tdy, "Today_XGB_Model.csv")
 
 saveRDS(xgbMod, "XGB_Linear_Systems_BFPL_Model_m1.RDS")
 

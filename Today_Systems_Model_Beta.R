@@ -40,7 +40,7 @@ colnames(todaySQ)
 
 flat <- c("AW", "FLAT")
 
-todaySQ$RaceCode <- if_else(quals$RaceType %in% flat, "FLAT", "NH")
+todaySQ$RaceCode <- if_else(todaySQ$RaceType %in% flat, "FLAT", "NH")
 
 todaySQ$Handicap <- as.factor(todaySQ$Handicap)
 todaySQ$Ratings_Range <- as.factor(todaySQ$Ratings_Range)
@@ -77,15 +77,19 @@ todaySQ2 <- todaySQ %>%
 
 XGB_Final_Model <- readRDS("XGB_Final_Ensemble_p1.RDS")
 
-todaySQ2$Final_Model_Preds <- predict(XGB_Final_Model, newdata = todaySQ2, type = "raw")
+todaySQ2$Final_Place_Model_Preds <- predict(XGB_Final_Model, newdata = todaySQ2, type = "raw")
 
+XGB_Final_Win_Model <- readRDS("Final_XGB_Win_Model.RDS")
 
+todaySQ2$Final_Win_Model_Preds <- predict(XGB_Final_Win_Model, newdata = todaySQ2, type = "raw")
+
+todaySQ2$Final_Models_Avg <- (todaySQ2$Final_Place_Model_Preds + todaySQ2$Final_Win_Model_Preds)/2
 
 todaySQ2ModelQuals <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Preds, Base_Models_Avg, predXGB, predRF, predSVM, predCUB,
-         predPLS, predNN, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Model_Preds > 0) %>%
-  arrange(Time24Hour, Meeting, Horse)
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Models_Avg, Final_Win_Model_Preds, Final_Place_Model_Preds,
+         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
+  filter(predRF >= 0.25 | predXGB >= 0.25 | Final_Place_Model_Preds >= 0.25) %>%
+  arrange(Time24Hour, Meeting, Horse, desc(Final_Models_Avg))
 
 todaySQ2ModelQuals
 
@@ -95,12 +99,53 @@ View(todaySQ2ModelQuals)
 write_csv(todaySQ2ModelQuals, paste0("Today_Model_Sys_Quals_", Sys.Date(), ".csv"))
 
 
+todaySQ2ModelEliteQuals <- todaySQ2 %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Models_Avg, Final_Win_Model_Preds, Final_Place_Model_Preds,
+         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
+  filter(Final_Place_Model_Preds >= 0.25, predXGB >= 0.25, predRF >= 0.25) %>%
+  arrange(Time24Hour, Meeting, Horse, desc(Final_Models_Avg))
 
 
+todaySQ2ModelEliteQuals
+
+View(todaySQ2ModelEliteQuals)
+
+write_csv(todaySQ2ModelEliteQuals, paste0("Today_Model_Elite_Quals_", Sys.Date(), ".csv"))
 
 
+todaySQ2DualQuals <- todaySQ2 %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Models_Avg, Final_Win_Model_Preds, Final_Place_Model_Preds,
+         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
+  filter(predXGB >= 0.25, predRF >= 0.25)
+
+View(todaySQ2DualQuals)
+
+write_csv(todaySQ2DualQuals, paste0("Today_Model_Dual_Quals_", Sys.Date(), ".csv"))
+
+todaySQ2FinalModelsDQ <- todaySQ2 %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Models_Avg, Final_Win_Model_Preds, Final_Place_Model_Preds,
+         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
+  filter(Final_Win_Model_Preds > 0, Final_Place_Model_Preds > 0) %>%
+  arrange(Time24Hour, Meeting, Horse, desc(Final_Models_Avg))
 
 
+todaySQ2FinalModelsDQ
 
+View(todaySQ2FinalModelsDQ)
+
+write_csv(todaySQ2FinalModelsDQ, paste0("Today_Final_Models_DQ_", Sys.Date(), ".csv"))
+
+
+todaySQ2ModelRatings <- todaySQ2 %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Models_Avg, Final_Win_Model_Preds, Final_Place_Model_Preds,
+         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
+  arrange(Time24Hour, Meeting, Horse, desc(Final_Models_Avg))
+
+
+todaySQ2ModelRatings
+
+View(todaySQ2ModelRatings)
+
+write_csv(todaySQ2ModelRatings, paste0("Today_Model_Ratings_", Sys.Date(), ".csv"))
 
 

@@ -74,7 +74,7 @@ predVars <- names(qualsData)[names(qualsData) != targetName]
 
 # Benchmark all BF_Placed_SP_PL
 
-mean(testingData$BF_Placed_SP_PL) # -0.03
+mean(testingData$BF_Placed_SP_PL) # -0.0448
 
 #######################################################################
 
@@ -119,10 +119,9 @@ varImp(xgbMod)
 
 
 
-
 saveRDS(xgbMod, "XGB_Linear_Systems_BFPL_Model_m1.RDS")
 
-#xgbMod <- readRDS("XGB_Linear_Systems_BFPL_Model_m1.RDS")
+xgbMod <- readRDS("XGB_Linear_Systems_BFPL_Model_m1.RDS")
 
 
 
@@ -173,7 +172,7 @@ print(nnMod)
 
 saveRDS(nnMod, "Systems_NN_BFSPPL_Model_m1.RDS")
 
-#nnMod <- readRDS("Systems_NN_BFSPPL_Model_m1.RDS")
+nnMod <- readRDS("Systems_NN_BFSPPL_Model_m1.RDS")
 
 ################################################################
 
@@ -206,7 +205,7 @@ varImp(rfMod)
 
 saveRDS(rfMod, "RF_BFPL_Model_m1.RDS")
 
-#rfMod <- readRDS("RF_BFPL_Model_m1.RDS")
+rfMod <- readRDS("RF_BFPL_Model_m1.RDS")
 
 
 ##############################################################
@@ -227,7 +226,7 @@ print(svmMod)
 
 saveRDS(svmMod, "SVM_BFPL_Model_m1.RDS")
 
-#svmMod <- readRDS("SVM_BFPL_Model_m1.RDS")
+svmMod <- readRDS("SVM_BFPL_Model_m1.RDS")
 
 
 
@@ -249,6 +248,8 @@ plsMod
 
 
 saveRDS(plsMod, "PLS_BFPL_Model_m1.RDS")
+
+plsMod <- readRDS("PLS_BFPL_Model_m1.RDS")
 
 
 #############################################################
@@ -284,6 +285,8 @@ print(cubistMod)
 
 saveRDS(cubistMod, "Cubist_BFPL_Model_m1.RDS")
 
+cubistMod <- readRDS("Cubist_BFPL_Model_m1.RDS")
+
 #stopCluster(cl)
 
 ##############################################################
@@ -318,7 +321,7 @@ cor(predDF)
 # RMSE(testingData$predSVM, testingData$BF_Placed_SP_PL)
 
 testingData %>%
-  group_by() %>%
+  group_by(Handicap) %>%
   filter(predXGB > 0.0) %>%
   mutate(Won = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
   summarise(Runs = n(),
@@ -342,6 +345,29 @@ predVars <- names(blenderData)[names(blenderData) != targetName]
 
 predVars
 
+# Final Linear Ensemble Model
+
+train.control <- trainControl(method = "repeatedcv",
+                              number = 10,
+                              repeats = 3,
+                              verboseIter = T)
+
+finalLinMod <- train(BF_Placed_SP_PL ~ predNN + predRF + predPLS + predCUB + predXGB + predSVM,
+                     method = "lm",
+                     data = blenderData,
+                     preProc = c("scale", "center"),
+                     trControl = train.control,
+                     metric = "RMSE")
+
+print(finalLinMod)
+
+summary(finalLinMod)
+
+testingData$FinalPredLM <- predict(finalLinMod, newdata = testingData, type = "raw")
+
+saveRDS(finalLinMod, "Final_Linear_Mod_m1.RDS")
+
+
 # Final Ensemble XGB Model
 
 train.control <- trainControl(method = "repeatedcv",
@@ -360,7 +386,7 @@ tune.grid <- expand.grid(eta = c(0.01, 0.025),
 
 set.seed(100)
 
-xgbFinal <- train(BF_Placed_SP_PL ~ .,
+xgbFinal <- train(BF_Placed_SP_PL ~ predNN + predRF + predPLS + predCUB + predSVM,
                 data = blenderData,
                 method = "xgbLinear",
                 preProc = c("center", "scale"),
@@ -371,6 +397,8 @@ xgbFinal <- train(BF_Placed_SP_PL ~ .,
 print(xgbFinal)
 
 varImp(xgbFinal)
+
+saveRDS(xgbFinal, "XGB_Final_Model_m1.RDS")
 
 testingData$FinalPredsXGB <- predict(xgbFinal, newdata = testingData, type = "raw")
 
@@ -387,7 +415,7 @@ testingData <- testingData %>%
 
 testingData %>%
   group_by() %>%
-  filter(FinalPredsXGB > 0.0) %>%
+  filter(FinalPredLM > 0) %>%
   mutate(Won = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
   summarise(Runs = n(),
             Winners = sum(Won),
@@ -409,31 +437,75 @@ set.seed(100)
 
 splitB2 <- createDataPartition(trainingQualsData$BF_Placed_SP_PL, p = 0.5, list = F)
 
-ensembleData2 <- trainingQualsData[splitB, -33]
-blenderData2 <- trainingQualsData[-splitB, -33]
-testingData2 <- qualsData[-splitA, -33]
-
-colnames(testingQualsData2)
-colnames(testingData2)
+ensembleData2 <- trainingQualsData[splitB,]
+blenderData2 <- trainingQualsData[-splitB,]
+testingData2 <- qualsData[-splitA,]
 
 
 
-blenderData2$predNN <- blenderData$predNN
-blenderData2$predRF <- blenderData$predRF
-blenderData2$predPLS <- blenderData$predPLS
-blenderData2$predCUB <- blenderData$predCUB
-blenderData2$predXGB <- blenderData$predXGB
-blenderData2$predSVM <- blenderData$predSVM
 
-testingData2$predNN <- testingData$predNN
-testingData2$predRF <- testingData$predRF
-testingData2$predPLS <- testingData$predPLS
-testingData2$predCUB <- testingData$predCUB
-testingData2$predXGB <- testingData$predXGB
-testingData2$predSVM <- testingData$predSVM
 
-xgbFinal <- readRDS("XGB_Final_Ensemble_p1.RDS")
-xgbFinalWinMod <- readRDS("Final_XGB_Win_Model.RDS")
+blenderData2$predNN <- predict(nnMod, newdata = blenderData2, type = "raw")
+blenderData2$predRF <- predict(rfMod, newdata = blenderData2, type = "raw")
+blenderData2$predPLS <- predict(plsMod, newdata = blenderData2, type = "raw")
+blenderData2$predCUB <- predict(cubistMod, newdata = blenderData2, type = "raw")
+blenderData2$predXGB <- predict(xgbMod, newdata = blenderData2, type = "raw")
+blenderData2$predSVM <- predict(svmMod, newdata = blenderData2, type = "raw")
+
+testingData2$predNN <- predict(nnMod, newdata = testingData2, type = "raw")
+testingData2$predRF <- predict(rfMod, newdata = testingData2, type = "raw")
+testingData2$predPLS <- predict(plsMod, newdata = testingData2, type = "raw")
+testingData2$predCUB <- predict(cubistMod, newdata = testingData2, type = "raw")
+testingData2$predXGB <- predict(xgbMod, newdata = testingData2, type = "raw")
+testingData2$predSVM <- predict(svmMod, newdata = testingData2, type = "raw")
+testingData2$FinalLinearModel <- predict(finalLinMod, newdata = testingData2, type = "raw")
+
+testingData2 <- testingData2 %>%
+  mutate(Final_Linear_Band = cut(FinalLinearModel, breaks = c(-10000, 0, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 10000),
+                                  labels = c("<=0.0", ">0.0 to 0.05", ">0.05 to 0.10", ">0.10 to 0.20" ,">0.20 to 0.30",
+                                             ">0.30 to 0.40", ">0.40 to 0.50", ">0.50"),
+                                  ordered_result = T),
+         RF_XGB_Avg = (predRF + predXGB)/2,
+         RF_XGB_Avg_Band = cut(RF_XGB_Avg, breaks = c(-10000, 0, 0.25, 0.5, 1.0, 2.5, 5.0, 10000),
+                               labels = c("<=0.0", ">0.0 to 0.25", ">0.25 to 0.5", ">0.5 to 1.0", ">1.0 to 2.5", ">2.5 to 5", ">5"),
+                               ordered_result = T),
+         XGB_Pred_Band = cut(predXGB, breaks = c(-10000, 0, 0.25, 0.5, 1.0, 2.5, 5.0, 10000),
+                             labels = c("<=0.0", ">0.0 to 0.25", ">0.25 to 0.5", ">0.5 to 1.0", ">1.0 to 2.5", ">2.5 to 5", ">5"),
+                             ordered_result = T),
+         RF_Pred_Band = cut(predRF, breaks = c(-10000, 0, 0.25, 0.5, 1.0, 2.5, 5.0, 10000),
+                            labels = c("<=0.0", ">0.0 to 0.25", ">0.25 to 0.5", ">0.5 to 1.0", ">1.0 to 2.5", ">2.5 to 5", ">5"),
+                            ordered_result = T),
+         NN_Pred_Band = cut(predNN, breaks = c(-10000, 0, 0.05, 0.10, 0.15, 0.20, 0.25, 10000),
+                            labels = c("<=0.0", ">0.0 to 0.05", ">0.05 to 0.10", ">0.10 to 0.15", ">0.15 to 0.20", ">0.20 to 0.25", ">0.25"),
+                            ordered_result = T),
+         PLS_Pred_Band = cut(predPLS, breaks = c(-10000, 0, 0.05, 0.10, 0.15, 0.20, 0.25, 10000),
+                             labels = c("<=0.0", ">0.0 to 0.05", ">0.05 to 0.10", ">0.10 to 0.15", ">0.15 to 0.20", ">0.20 to 0.25", ">0.25"),
+                             ordered_result = T))
+
+write_csv(testingData2, "Final_Linear_Model_Predictions.csv")
+
+#testingData2 <- read_csv("Final_Linear_Model_Predictions.csv")
+
+testingData2 %>%
+  group_by(RaceCode, Final_Linear_Band) %>%
+  filter(FinalLinearModel > 0) %>%
+  mutate(Won = if_else(BFSP_PL > 0, 1, 0),
+         Placed = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
+  summarise(Runs = n(),
+            Winners = sum(Won, na.rm = T),
+            Places = sum(Placed, na.rm = T),
+            WinPercent = mean(Won, na.rm = T),
+            Place_Percent = mean(Placed, na.rm = T),
+            Avg_W_PL = mean(BFSP_PL, na.rm = T),
+            Total_W_PL = sum(BFSP_PL, na.rm = T),
+            Avg_P_PL = mean(BF_Placed_SP_PL, na.rm = T),
+            Total_P_PL = sum(BF_Placed_SP_PL, na.rm = T)) %>%
+  arrange(desc(Avg_W_PL)) %>%
+  View()
+
+
+
+
 
 colnames(blenderData2)
 
@@ -701,7 +773,7 @@ RMSE(testingData$FinalPredsCUBIST, testingData$BF_Placed_SP_PL)
 
 testingData %>%
   group_by() %>%
-  filter(FinalPredsCUBIST < 0.0) %>%
+  filter(FinalPredsCUBIST > 0.0) %>%
   mutate(Won = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
   summarise(Runs = n(),
             Winners = sum(Won),

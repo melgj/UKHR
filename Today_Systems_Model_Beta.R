@@ -83,14 +83,23 @@ XGB_Final_Win_Model <- readRDS("Final_XGB_Win_Model.RDS")
 
 todaySQ2$Final_Win_Model_Preds <- predict(XGB_Final_Win_Model, newdata = todaySQ2, type = "raw")
 
-Final_Linear_Model <- readRDS("Final_Linear_Mod_m1.RDS")
+Final_Linear_Model <- readRDS("Final_Linear_Mod_Int_m2.RDS")
 
 todaySQ2$Final_Linear_Model <- predict(Final_Linear_Model, newdata = todaySQ2, type = "raw")
 
+Final_SVM_Model <- readRDS("Final_SVM_Mod_Int_m2.RDS")
+
+todaySQ2$Final_SVM_Model <- predict(Final_SVM_Model, newdata = todaySQ2, type = "raw")
+
+Final_GAM_Model <- readRDS("Final_GAM_Mod_m2.RDS")
+
+todaySQ2$Final_GAM_Model <- predict(Final_GAM_Model, newdata = todaySQ2, type = "raw")
+
+
 todaySQ2ModelQuals <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_Win_Model_Preds, Final_Place_Model_Preds,
-         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Linear_Model > 0.05) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_SVM_Model, Final_GAM_Model, Final_Place_Model_Preds,
+         predXGB, predRF, predPLS, predNN, Handicap, Ratings_Range, everything()) %>%
+  filter(Final_Linear_Model > 0 | Final_GAM_Model > 0 | Final_Place_Model_Preds > 0 | Final_SVM_Model > 0) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Linear_Model))
 
 todaySQ2ModelQuals
@@ -102,9 +111,9 @@ write_csv(todaySQ2ModelQuals, paste0("Today_Model_Sys_Quals_", Sys.Date(), ".csv
 
 
 todaySQ2ModelEliteQuals <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_Win_Model_Preds, Final_Place_Model_Preds,
-         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Linear_Model > 0.20) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_SVM_Model, Final_GAM_Model, Final_Place_Model_Preds,
+         predXGB, predRF, predPLS, predNN, Handicap, Ratings_Range, everything()) %>%
+  filter(Final_Linear_Model > 0, predXGB >= 0.25, predRF >= 0.25, Final_GAM_Model > 0, Final_Place_Model_Preds > 0) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Linear_Model))
 
 
@@ -116,8 +125,8 @@ write_csv(todaySQ2ModelEliteQuals, paste0("Today_Model_Elite_Quals_", Sys.Date()
 
 
 todaySQ2DualQuals <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_Win_Model_Preds, Final_Place_Model_Preds,
-         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_SVM_Model, Final_GAM_Model, Final_Place_Model_Preds,
+         predXGB, predRF, predPLS, predNN, Handicap, Ratings_Range, everything()) %>%
   filter(predXGB >= 0.25, predRF >= 0.25)
 
 View(todaySQ2DualQuals)
@@ -125,9 +134,10 @@ View(todaySQ2DualQuals)
 write_csv(todaySQ2DualQuals, paste0("Today_Model_Dual_Quals_", Sys.Date(), ".csv"))
 
 todaySQ2FinalModelsDQ <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_Win_Model_Preds, Final_Place_Model_Preds,
-         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Linear_Model > 0.05, Final_Place_Model_Preds > 0.25) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_SVM_Model, Final_GAM_Model, Final_Place_Model_Preds,
+         predXGB, predRF, predPLS, predNN, Handicap, Ratings_Range, everything()) %>%
+  filter((Final_Linear_Model > 0 | Final_Place_Model_Preds > 0 | Final_GAM_Model > 0 | Final_SVM_Model > 0),
+         predXGB > 0, predRF > 0) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Linear_Model))
 
 
@@ -139,8 +149,8 @@ write_csv(todaySQ2FinalModelsDQ, paste0("Today_Final_Models_DQ_", Sys.Date(), ".
 
 
 todaySQ2ModelRatings <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_Win_Model_Preds, Final_Place_Model_Preds,
-         predXGB, predRF, predSVM, predPLS, predNN, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_SVM_Model, Final_GAM_Model, Final_Place_Model_Preds,
+         predXGB, predRF, predPLS, predNN, Handicap, Ratings_Range, everything()) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Linear_Model))
 
 

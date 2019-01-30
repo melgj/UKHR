@@ -16,6 +16,8 @@ library(lubridate)
 
 ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv",col_names = T)
 
+
+
 #colnames(ukhr_master_BF)
 
 #head(ukhr_master_BF$Weight_Rank, 30)
@@ -155,10 +157,10 @@ asq <- allSystemQualifiers %>%
          Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
          Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
          BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
-         RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-         DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank,
-         NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected, Betfair.Placed, Place_Expected,
-         Betfair.Win.S.P., Betfair.Place.S.P.) %>%
+         Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
+         Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
+         Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
+         Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5) %>%
   arrange(Time24Hour, Meeting, Horse)
 
@@ -171,10 +173,10 @@ allArchie <- asq %>%
          Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
          Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
          BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
-         RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-         DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank,
-         NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected, Betfair.Placed, Place_Expected,
-         Betfair.Win.S.P., Betfair.Place.S.P.) %>%
+         Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
+         Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
+         Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
+         Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   filter(Archie >= 4.0, Exp_Wins >= 5, AE_Ratio >= 1.20) %>%
   arrange(Time24Hour, Meeting, Horse)
 
@@ -200,10 +202,10 @@ highArchieQuals <- highArchieQuals %>%
          Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
          Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
          BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
-         RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-         DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank,
-         NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected, Betfair.Placed, Place_Expected,
-         Betfair.Win.S.P., Betfair.Place.S.P.) %>%
+         Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
+         Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
+         Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
+         Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 highArchieQuals
@@ -217,10 +219,10 @@ goodStatsQuals <- goodStatsQuals %>%
          Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
          Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
          BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
-         RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-         DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank,
-         NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected, Betfair.Placed, Place_Expected,
-         Betfair.Win.S.P., Betfair.Place.S.P.) %>%
+         Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
+         Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
+         Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
+         Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 goodStatsQuals

@@ -8,8 +8,7 @@ setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv", col_names = T)
-
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30_Header.csv", col_names = T)
 
 # create season vars
 
@@ -208,11 +207,14 @@ today <- today %>%
                                 ordered_result = T))
 
 today <- today %>%
+  group_by(UKHRCardRaceID) %>%
   rename(Declared = Runners) %>%
   mutate(Runners = length(unique(Horse)),
          Runners_Range = cut(Runners, breaks = c(0, 8, 16, 100),
                              labels = c("<=8", "9-16", "17+"),
                              ordered_result = T))
+
+today$Declared
 
 #######################################################
 

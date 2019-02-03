@@ -99,7 +99,8 @@ todaySQ2$Final_GAM_Model <- predict(Final_GAM_Model, newdata = todaySQ2, type = 
 todaySQ2ModelQuals <- todaySQ2 %>%
   select(Time24Hour, Meeting, Horse, System_Name, Final_Linear_Model, Final_SVM_Model, Final_GAM_Model, Final_Place_Model_Preds,
          predXGB, predRF, predPLS, predNN, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Linear_Model > 0 | Final_GAM_Model > 0 | Final_Place_Model_Preds > 0 | Final_SVM_Model > 0) %>%
+  filter(Final_Linear_Model > 0 | Final_GAM_Model > 0 | Final_Place_Model_Preds > 0 |
+           Final_SVM_Model > 0 | predXGB >= 0.25 | predRF >= 0.25) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Linear_Model))
 
 todaySQ2ModelQuals
@@ -156,7 +157,7 @@ todaySQ2ModelRatings <- todaySQ2 %>%
 
 todaySQ2ModelRatings
 
-View(todaySQ2ModelRatings)
+#View(todaySQ2ModelRatings)
 
 write_csv(todaySQ2ModelRatings, paste0("Today_Model_Ratings_", Sys.Date(), ".csv"))
 

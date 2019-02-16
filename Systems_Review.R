@@ -14,7 +14,7 @@ library(lubridate)
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv",col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31.csv",col_names = T)
 
 
 
@@ -38,17 +38,19 @@ ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv",col_names = T)
 #   filter(Year == 2018) %>%
 #   write_csv("uk2018_07.csv")
 
-q1 <- which(ukhr_master_BF$Month <= 3 & ukhr_master_BF$Year == 2018)
-q2 <- which(ukhr_master_BF$Month > 3 & ukhr_master_BF$Month <= 6 & ukhr_master_BF$Year == 2018)
-q3 <- which(ukhr_master_BF$Month > 6 & ukhr_master_BF$Month <= 9 & ukhr_master_BF$Year == 2018)
-q4 <- which(ukhr_master_BF$Month > 9 & ukhr_master_BF$Year == 2018)
+# q1 <- which(ukhr_master_BF$Month <= 3 & ukhr_master_BF$Year == 2018)
+# q2 <- which(ukhr_master_BF$Month > 3 & ukhr_master_BF$Month <= 6 & ukhr_master_BF$Year == 2018)
+# q3 <- which(ukhr_master_BF$Month > 6 & ukhr_master_BF$Month <= 9 & ukhr_master_BF$Year == 2018)
+# q4 <- which(ukhr_master_BF$Month > 9 & ukhr_master_BF$Year == 2018)
+#
+# mid <- c(q1,q2)
+# threeQtr <- c(q1,q2,q3)
 
-mid <- c(q1,q2)
-threeQtr <- c(q1,q2,q3)
+novdec18 <- which(ukhr_master_BF$Month > 10 & ukhr_master_BF$Year == 2018)
 
-today <- ukhr_master_BF[q4,]
+today <- ukhr_master_BF[novdec18,]
 
-ukhr_master_BF <- ukhr_master_BF[-q4,]
+ukhr_master_BF <- ukhr_master_BF[-novdec18,]
 
 # uk1 <- ukhr_master_BF[q1,]
 # uk2 <- ukhr_master_BF[mid,]
@@ -83,6 +85,9 @@ if (sum(is.na(today$BetFairSPForecastWinPrice) > 0)) {
   today$BetFairSPForecastWinPrice <- imputedBFSP$BetFairSPForecastWinPrice
 }
 
+today <- today %>%
+  drop_na(BFSP_PL)
+
 # str(ukhr_master_BF$BetFairSPForecastWinPrice)
 # str(today$BetFairSPForecastWinPrice)
 
@@ -103,10 +108,15 @@ autumn <- c(9,10,11)
 # str(today$BetFairSPForecastWinPrice)
 # str(ukhr_master_BF$BetFairSPForecastWinPrice)
 
-source("AW_Systems.R")
-source("Flat_Systems.R")
-source("NH_Systems.R")
-source("Extra_Qualifiers.R")
+# source("AW_Systems.R")
+# source("Flat_Systems.R")
+# source("NH_Systems.R")
+# source("Extra_Qualifiers.R")
+
+source("Today_AW_Systems.R")
+source("Today_Flat_Systems.R")
+source("Today_NH_Systems.R")
+source("Today_Extra_Qualifiers.R")
 
 #############################################
 
@@ -165,6 +175,8 @@ asq <- allSystemQualifiers %>%
   arrange(Time24Hour, Meeting, Horse)
 
 asq
+
+write_csv(asq, "All_System_Qualifiers_Nov_Dec_18.csv")
 
 #####################################################################################
 

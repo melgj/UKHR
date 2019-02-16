@@ -8,7 +8,11 @@ setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31_Header.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31.csv", col_names = T)
+
+hbf <- head(ukhr_master_BF)
+
+write_csv(hbf, "UKHR_Master_BF_2018_12_31_Header.csv" )
 
 # create season vars
 
@@ -221,18 +225,18 @@ today$Declared
 table(today$Meeting, today$Going)
 table(today$Meeting, today$RaceType)
 
-# source("AW_Systems.R")
-# source("Flat_Systems.R")
-# source("NH_Systems.R")
-# source("Extra_Qualifiers.R")
+source("AW_Systems.R")
+source("Flat_Systems.R")
+source("NH_Systems.R")
+source("Extra_Qualifiers.R")
 
 
-source("Today_AW_Systems.R")
-source("Today_Flat_Systems.R")
-source("Today_NH_Systems.R")
-source("Today_Extra_Qualifiers.R")
-source("Todays_Master_Qualifiers.R")
-#source("Draw_Range_Analysis.R")
-source("Min_Rank_Val_Bet.R")
-#source("Today_Systems_Model.R")
-source("Today_Systems_Model_Beta.R")
+# source("Today_AW_Systems.R")
+# source("Today_Flat_Systems.R")
+# source("Today_NH_Systems.R")
+# source("Today_Extra_Qualifiers.R")
+# source("Todays_Master_Qualifiers.R")
+# source("Draw_Range_Analysis.R")
+# source("Min_Rank_Val_Bet.R")
+# source("Today_Systems_Model.R")
+# source("Today_Systems_Model_Beta.R")

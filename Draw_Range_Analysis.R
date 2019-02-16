@@ -1,6 +1,6 @@
 #setwd("~/git_projects/UKHR_Project")
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31.csv", col_names = T)
 
 ukhr_master_BF <- ukhr_master_BF %>%
   group_by(UKHR_RaceID) %>%

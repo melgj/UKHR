@@ -16,60 +16,45 @@ library(lubridate)
 
 ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31.csv",col_names = T)
 
+# ukhr_master_BF %>%
+#   drop_na(BF_Placed_SP_PL) %>%
+#   filter(Year == 2018) %>%
+#   summarise(mean(BFSP_PL), #Avg -0.0573
+#             mean(BF_Placed_SP_PL))  # Avg -0.0587
 
-
-#colnames(ukhr_master_BF)
-
-#head(ukhr_master_BF$Weight_Rank, 30)
-#head(ukhr_master_BF$Weight_Pounds, 30)
-
-#split <- createDataPartition(ukhr_master_BF$ValueOdds_Probability, p = 0.75, list = F)
-
-#summary(split)
-
-#head(ukhr_master_BF$VSP_Stake)
-
-# Load today's racecard
-
-#today <- read_csv(file.choose(),col_names = T)
 
 
 # ukhr_master_BF %>%
 #   filter(Year == 2018) %>%
 #   write_csv("uk2018_07.csv")
 
-# q1 <- which(ukhr_master_BF$Month <= 3 & ukhr_master_BF$Year == 2018)
-# q2 <- which(ukhr_master_BF$Month > 3 & ukhr_master_BF$Month <= 6 & ukhr_master_BF$Year == 2018)
-# q3 <- which(ukhr_master_BF$Month > 6 & ukhr_master_BF$Month <= 9 & ukhr_master_BF$Year == 2018)
-# q4 <- which(ukhr_master_BF$Month > 9 & ukhr_master_BF$Year == 2018)
+q1 <- which(ukhr_master_BF$Month <= 3 & ukhr_master_BF$Year == 2018)
+q2 <- which(ukhr_master_BF$Month > 3 & ukhr_master_BF$Month <= 6 & ukhr_master_BF$Year == 2018)
+q3 <- which(ukhr_master_BF$Month > 6 & ukhr_master_BF$Month <= 9 & ukhr_master_BF$Year == 2018)
+q4 <- which(ukhr_master_BF$Month > 9 & ukhr_master_BF$Year == 2018)
 #
 # mid <- c(q1,q2)
 # threeQtr <- c(q1,q2,q3)
 
-novdec18 <- which(ukhr_master_BF$Month > 10 & ukhr_master_BF$Year == 2018)
+#novdec18 <- which(ukhr_master_BF$Month > 10 & ukhr_master_BF$Year == 2018)
 
-today <- ukhr_master_BF[novdec18,]
+today <- ukhr_master_BF[q4,]
 
-ukhr_master_BF <- ukhr_master_BF[-novdec18,]
+ukhr_master_BF <- ukhr_master_BF[-c(q4),]
 
-# uk1 <- ukhr_master_BF[q1,]
-# uk2 <- ukhr_master_BF[mid,]
+
+# qtr1 <- read_csv("All_System_Qualifiers_Q1_2018.csv", col_names = T)
+# qtr2 <- read_csv("All_System_Qualifiers_Q2_2018.csv", col_names = T)
+# qtr3 <- read_csv("All_System_Qualifiers_Q3_2018.csv", col_names = T)
+# qtr4 <- read_csv("All_System_Qualifiers_Q4_2018.csv", col_names = T)
 #
-# ukhr_master_BF <- ukhr_master_BF %>%
-#   filter(ukhr_master_BF$Year != 2018)
+# yr <- rbind(qtr1, qtr2, qtr3, qtr4)
+#
+# write_csv(yr, "All_System_Quals_Full_Year_2018.csv")
 
-#uk3 <- ukhr_master_BF[threeQtr,]
-#
-#
-#ukhr_master_BF <-  ukhr_master_BF %>%
-#   filter(Year <= 2017)
-#
-#ukhr_master_BF <- rbind(ukhr_master_BF, uk2)
-#ukhr_master_BF <- rbind(ukhr_master_BF, uk2)
-
-# summary(today$Month)
 table(today$Month, today$Year)
 table(ukhr_master_BF$Month, ukhr_master_BF$Year)
+
 
 if (sum(is.na(today$BetFairSPForecastWinPrice) > 0)) {
 
@@ -113,10 +98,10 @@ autumn <- c(9,10,11)
 # source("NH_Systems.R")
 # source("Extra_Qualifiers.R")
 
-source("Today_AW_Systems.R")
-source("Today_Flat_Systems.R")
-source("Today_NH_Systems.R")
-source("Today_Extra_Qualifiers.R")
+source("AW_Systems.R")
+source("Flat_Systems.R")
+source("NH_Systems.R")
+source("Extra_Qualifiers.R")
 
 #############################################
 
@@ -176,7 +161,7 @@ asq <- allSystemQualifiers %>%
 
 asq
 
-write_csv(asq, "All_System_Qualifiers_Nov_Dec_18.csv")
+write_csv(asq, "All_System_Qualifiers_Q4_2018.csv")
 
 #####################################################################################
 
@@ -1260,3 +1245,59 @@ nnModSummary
 
 View(nnModSummary)
 
+############################################
+
+
+yr %>%
+  drop_na(BF_Placed_SP_PL) %>%
+  summarise(mean(BFSP_PL), #Avg -0.0144
+            mean(BF_Placed_SP_PL))  # Avg -0.0286
+
+systems2018 <- yr %>%
+  drop_na(BF_Placed_SP_PL) %>%
+  group_by(System_Name) %>%
+  summarise(Qualifiers = n(),
+            BFSP_Profit = sum(BFSP_PL),
+            Avg_BFSP_PL = mean(BFSP_PL),
+            Placed_Profit = sum(BF_Placed_SP_PL),
+            Avg_Placed_Profit = mean(BF_Placed_SP_PL),
+            Exp_Winners = sum(Expected),
+            Winners = sum(Actual),
+            Win_Pct = Winners/Qualifiers,
+            AER = Winners/Exp_Winners,
+            Exp_Places = sum(Place_Expected),
+            Placed = sum(Betfair.Placed),
+            Place_Pct = Placed/Qualifiers,
+            Placed_AER = Placed/Exp_Places) %>%
+  arrange(desc(AER))
+
+systems2018
+
+View(systems2018)
+
+write_csv(systems2018, "Systems_Results_Summary_All_2018.csv")
+
+colnames(yr)
+
+systems2018G <- yr %>%
+  drop_na(BF_Placed_SP_PL) %>%
+  #filter(Archie >= 8.50) %>%
+  group_by(Value_Odds_Range) %>%
+  summarise(Qualifiers = n(),
+            BFSP_Profit = sum(BFSP_PL),
+            Avg_BFSP_PL = mean(BFSP_PL),
+            Placed_Profit = sum(BF_Placed_SP_PL),
+            Avg_Placed_Profit = mean(BF_Placed_SP_PL),
+            Exp_Winners = sum(Expected),
+            Winners = sum(Actual),
+            Win_Pct = Winners/Qualifiers,
+            AER = Winners/Exp_Winners,
+            Exp_Places = sum(Place_Expected),
+            Placed = sum(Betfair.Placed),
+            Place_Pct = Placed/Qualifiers,
+            Placed_AER = Placed/Exp_Places) %>%
+  arrange(desc(AER))
+
+systems2018G
+
+View(systems2018G)

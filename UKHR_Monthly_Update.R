@@ -327,7 +327,7 @@ ukhr_master_BF <- ukhr_master_BF %>%
 
 slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT")
 
-fastGround <- c("GD-FM", "FIRM", "HARD")
+fastGround <- c("GD-FM", "FIRM", "HARD", "GOOD")
 
 syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
 
@@ -335,8 +335,12 @@ softGround <- c("SOFT", "SFT-HVY", "HEAVY")
 
 unique(ukhr_master_BF$Going)
 
-ukhr_master_BF$Going_Range <- ifelse(ukhr_master_BF$Going %in% slowGround, "SLOW",
-                                     ifelse(ukhr_master_BF$Going %in% fastGround,"FAST", "SYNTHETIC"))
+#ukhr_master_BF$Going_Range <- ifelse(ukhr_master_BF$Going %in% slowGround, "SLOW",
+                                     #ifelse(ukhr_master_BF$Going %in% fastGround,"FAST", "SYNTHETIC"))
+
+ukhr_master_BF$Going_Range <- if_else(ukhr_master_BF$Going %in% slowGround, "SLOW",
+                             if_else(ukhr_master_BF$Going %in% fastGround,"FAST",
+                                     "SYNTHETIC"))
 
 ukhr_master_BF <- ukhr_master_BF %>%
   group_by(UKHR_RaceID) %>%

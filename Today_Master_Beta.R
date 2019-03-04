@@ -22,7 +22,7 @@ autumn <- c(9,10,11)
 
 slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT")
 
-fastGround <- c("GD-FM", "FIRM", "HARD")
+fastGround <- c("GD-FM", "FIRM", "HARD", "GOOD")
 
 syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
 
@@ -176,7 +176,7 @@ today <- today %>%
 
 today$Going_Range <- if_else(today$Going %in% slowGround, "SLOW",
                             if_else(today$Going %in% fastGround,"FAST",
-                                   if_else(today$RaceType == "AW", "SYNTHETIC", "GOOD")))
+                                   "SYNTHETIC"))
 
 today <- today %>%
   mutate(Weight_Range = cut(desc(Weight_Pounds), 3,

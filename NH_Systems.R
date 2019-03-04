@@ -1,5 +1,7 @@
 # Filter NH Codes only
 
+#ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31.csv", col_names = T)
+
 ukChase <- filter(ukhr_master_BF, RaceType == "CHASE")
 ukHurdle <- filter(ukhr_master_BF, RaceType == "HURDLE")
 ukNHflat <- filter(ukhr_master_BF, RaceType == "NH FLAT")
@@ -97,6 +99,42 @@ if(nrow(NHSireQuals) > 0) {
 
 #write_csv(NHSireQuals, "NH_LDH_Sires_Quals_041117")
 
+stayChaseSires <- ukChase %>%
+  filter(Furlongs >= 26) %>%
+  group_by(Sire)%>%
+  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
+            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+            Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+            Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+            WinPercent = sum(Actual)/Runs, Horses = length(unique(Horse)),
+            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+            Archie = (Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))) %>%
+  filter(Runs >= 30, AE_Ratio >= 1.20, Horses >= 5, Exp_Wins >= 5.0, Archie > 2.5) %>%
+  arrange(desc(AE_Ratio))
+
+stayChaseSires
+
+write_csv(stayChaseSires, "StayingChaseSires.csv")
+
+#View(stayChaseSires)
+
+
+# todays qualifiers
+
+stayChSire <- stayChaseSires %>%
+  left_join(today, by = c("Sire"))%>%
+  filter(RaceType == "CHASE", Furlongs >= 26, !is.na(Time24Hour))
+
+
+stayChSire
+
+if(nrow(stayChSire) > 0) {
+  stayChSire$System_Name <- "NH_Staying_Chase_Sires"
+}
+
+
 ########################################################
 
 hdlStayTrainers<- ukHurdle%>%
@@ -186,6 +224,7 @@ allNHSystemQualifiers <- trTFCQuals %>%
   full_join(todaySoftSiresNHQ) %>%
   full_join(trHLDQuals) %>%
   full_join(NHSireQuals) %>%
+  full_join(stayChSire) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 

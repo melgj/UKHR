@@ -8,7 +8,11 @@ setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31_Header.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31.csv", col_names = T)
+
+ukhrHeader <- head(ukhr_master_BF)
+
+write_csv(ukhrHeader, "UKHR_Master_BF_2018_12_31_Header.csv")
 
 # create season vars
 
@@ -22,7 +26,7 @@ autumn <- c(9,10,11)
 
 slowGround <- c("SOFT","SFT-HVY","HEAVY", "GD-SFT", "YIELD", "GD-YLD", "YLD-SFT")
 
-fastGround <- c("GD-FM", "FIRM", "HARD")
+fastGround <- c("GD-FM", "FIRM", "HARD", "GOOD")
 
 syntheticGround <- c("STAND", "STD-SLOW", "STANDARD", "STD-FAST", "SLOW")
 
@@ -175,9 +179,8 @@ today <- today %>%
                          ordered_result = T))
 
 today$Going_Range <- if_else(today$Going %in% slowGround, "SLOW",
-                            if_else(today$Going %in% fastGround,"FAST",
-                                   if_else(today$RaceType == "AW", "SYNTHETIC", "GOOD")))
-
+                             if_else(today$Going %in% fastGround,"FAST",
+                                     "SYNTHETIC"))
 today <- today %>%
   mutate(Weight_Range = cut(desc(Weight_Pounds), 3,
                             labels = c("High", "Middle", "Low"),
@@ -223,16 +226,16 @@ table(today$Meeting, today$Going)
 table(today$Meeting, today$RaceType)
 table(today$Meeting, today$Going_Range)
 
-# source("AW_Systems.R")
-# source("Flat_Systems.R")
-# source("NH_Systems.R")
-# source("Extra_Qualifiers.R")
+source("AW_Systems.R")
+source("Flat_Systems.R")
+source("NH_Systems.R")
+source("Extra_Qualifiers.R")
 
 
-source("Today_AW_Systems.R")
-source("Today_Flat_Systems.R")
-source("Today_NH_Systems.R")
-source("Today_Extra_Qualifiers.R")
+# source("Today_AW_Systems.R")
+# source("Today_Flat_Systems.R")
+# source("Today_NH_Systems.R")
+# source("Today_Extra_Qualifiers.R")
 source("Todays_Master_Qualifiers.R")
 #source("Draw_Range_Analysis.R")
 source("Min_Rank_Val_Bet.R")

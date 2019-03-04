@@ -37,6 +37,18 @@ if(nrow(NHSireQuals) > 0) {
   NHSireQuals$System_Name <- "NH_Staying_Hurdle_Sires"
 }
 
+stayChaseSires <- read_csv("StayingChaseSires.csv", col_names = T)
+
+stayChSire <- stayChaseSires %>%
+  left_join(today, by = c("Sire"))%>%
+  filter(RaceType == "CHASE", Furlongs >= 26, !is.na(Time24Hour))
+
+stayChSire
+
+if(nrow(stayChSire) > 0) {
+  stayChSire$System_Name <- "NH_Staying_Chase_Sires"
+}
+
 hdlStayTrainers <- read_csv("HdlStayTrainers.csv", col_names = T)
 
 
@@ -71,6 +83,7 @@ allNHSystemQualifiers <- trTFCQuals %>%
   full_join(todaySoftSiresNHQ) %>%
   full_join(trHLDQuals) %>%
   full_join(NHSireQuals) %>%
+  full_join(stayChSire) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 

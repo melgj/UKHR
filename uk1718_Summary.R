@@ -139,3 +139,9 @@ print(xgbMod)
 varImp(xgbMod)
 
 saveRDS(xgbMod, "Lng_Btn_AW_Mod.RDS")
+
+xgbMod$results
+
+
+
+

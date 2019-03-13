@@ -53,8 +53,8 @@ asq <- allSystemQualifiers %>%
          Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL,
          totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire,
          Spd_Rank, ClassDiffTotal, FCPAdvantage, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage,
-         HCPAdvantage, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range,
-         Rev_Weight_Rank, NumberOfResults, Alarms, Age) %>%
+         HCPAdvantage, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, WeightDelta,
+         Rev_Weight_Rank, NumberOfResults, Alarms, Age, Runners) %>%
   filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5, !(System_Name %in% poorSystems$System_Name)) %>%
   arrange(Time24Hour, Meeting, Horse)
 
@@ -85,7 +85,7 @@ allHcpQuals <- allSystemQualifiers %>%
          totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire,
          Spd_Rank, ClassDiffTotal, FCPAdvantage, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage,
          HCPAdvantage, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range,
-         Rev_Weight_Rank, NumberOfResults, Alarms, Age) %>%
+         Rev_Weight_Rank, NumberOfResults, Alarms, Age, Runners, WeightDelta,) %>%
   filter(Handicap != "NONHCP", Ratings_Range != "Bottom_Third", !(System_Name %in% poorHcpSystems)) %>%
   arrange(Time24Hour, Meeting, Horse)
 
@@ -100,7 +100,7 @@ allArchie <- asq %>%
          Spd_Rank, ClassDiffTotal, FCPAdvantage, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage,
          HCPAdvantage, DifferentialRankingClassWeight5Years, Spd_Rank, ClassDiffTotal, FCPAdvantage, RAdj.Advantage, Class_Rank, DaysSinceLastRun,
          ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap,
-         Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age) %>%
+         Going, Going_Range, Furlongs, Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Runners, WeightDelta,) %>%
   filter(Archie >= 4.0, Exp_Wins >= 5, AE_Ratio >= 1.20) %>%
   arrange(Time24Hour, Meeting, Horse)
 
@@ -135,7 +135,7 @@ highArchieQuals <- highArchieQuals %>%
         Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI, AE_Ratio,
         WinPercent, Winners, Exp_Wins, Archie, Total_Exp_Btn, Total_Btn, Btn_AE_Ratio, Arch_Strength, Arch_Placed_Strength, Spd_Rank, ClassDiffTotal,
         FCPAdvantage, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-        DifferentialRankingClassWeight5Years) %>%
+        DifferentialRankingClassWeight5Years, Runners, WeightDelta,) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 highArchieQuals
@@ -149,7 +149,8 @@ goodStatsQuals <- goodStatsQuals %>%
          BFSPFC_Odds_Range, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, Value_Odds_Range, Rev_Weight_Rank, NumberOfResults, Alarms,
          Age, Runs, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Placed_AE_Ratio, Placed_Archie, Place_Percent, BF_Place_ROI, AE_Ratio, WinPercent, Winners,
          Exp_Wins, Archie, Total_Exp_Btn, Total_Btn, Btn_AE_Ratio, Arch_Strength, Arch_Placed_Strength, Spd_Rank, ClassDiffTotal, FCPAdvantage, RAdj.Advantage,
-         Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage, DifferentialRankingClassWeight5Years) %>%
+         Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage, DifferentialRankingClassWeight5Years,
+         Runners, WeightDelta,) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 goodStatsQuals

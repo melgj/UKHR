@@ -960,9 +960,17 @@ testingData2 <- testingData2 %>%
                                      labels = c("<=0.0", ">0.0 to 0.05", ">0.05 to 0.10", ">0.10 to 0.20" ,">0.20 to 0.30",
                                                 ">0.30 to 0.40", ">0.40 to 0.50", ">0.50")))
 
+testingData2 <- testingData2 %>%
+  mutate(FLM_Score = if_else(FinalLinearModel > 0, 1, 0),
+         FXGB_Score = if_else(FinalXGBMod > 0, 1, 0),
+         FRF_Score = if_else(FinalRFMod > 0, 1, 0),
+         FSVM_Score = if_else(FinalSVMModel > 0, 1, 0),
+         FGAM_Score = if_else(FinalGamMod > 0, 1, 0),
+         Final_Model_Score = FLM_Score + FXGB_Score + FRF_Score + FSVM_Score + FGAM_Score)
+
 
 testingData2 %>%
-  group_by(Handicap) %>%
+  group_by(Final_Model_Score) %>%
   filter(Final_Models_Avg > 0.05) %>%
   mutate(Won = if_else(BFSP_PL > 0, 1, 0),
          Placed = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%

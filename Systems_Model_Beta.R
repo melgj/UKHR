@@ -968,22 +968,30 @@ testingData2 <- testingData2 %>%
          FGAM_Score = if_else(FinalGamMod > 0, 1, 0),
          Final_Model_Score = FLM_Score + FXGB_Score + FRF_Score + FSVM_Score + FGAM_Score)
 
+colnames(testingData2)
+
+testingData2 <- testingData2 %>%
+  mutate(Exp_Win = 1/Betfair.Win.S.P.,
+         Act_Win = if_else(BFSP_PL > 0, 1, 0))
+
+
 
 testingData2 %>%
-  group_by(Final_Model_Score) %>%
-  filter(Final_Models_Avg > 0.05) %>%
+  group_by(Ratings_Range, Handicap) %>%
+  filter(Final_Models_Avg > 0, Final_Model_Score > 1.5) %>%
   mutate(Won = if_else(BFSP_PL > 0, 1, 0),
          Placed = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
   summarise(Runs = n(),
             Winners = sum(Won, na.rm = T),
-            Places = sum(Placed, na.rm = T),
             WinPercent = mean(Won, na.rm = T),
-            Place_Percent = mean(Placed, na.rm = T),
             Avg_W_PL = mean(BFSP_PL, na.rm = T),
             Total_W_PL = sum(BFSP_PL, na.rm = T),
+            AER_Win = sum(Act_Win, na.rm = T)/sum(Exp_Win, na.rm = T),
+            Places = sum(Placed, na.rm = T),
+            Place_Percent = mean(Placed, na.rm = T),
             Avg_P_PL = mean(BF_Placed_SP_PL, na.rm = T),
             Total_P_PL = sum(BF_Placed_SP_PL, na.rm = T)) %>%
-  arrange(desc(Avg_W_PL))
+  arrange(desc(AER_Win))
 
 
 ########################################################################################################################

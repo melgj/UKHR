@@ -127,7 +127,7 @@ todaySQ2 <- todaySQ2 %>%
 todaySQ2ModelQuals <- todaySQ2 %>%
   select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
          Final_XGB_Model, predXGB, predRF, predCUB, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Model_Score > 1.5, Final_Model_Avg > 0.05) %>%
+  filter(Final_Model_Score > 1.5, Final_Model_Avg > 0.0) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Score))
 
 todaySQ2ModelQuals
@@ -141,7 +141,7 @@ write_csv(todaySQ2ModelQuals, paste0("Today_Model_Sys_Quals_", Sys.Date(), ".csv
 todaySQ2ModelEliteQuals <- todaySQ2 %>%
   select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
          Final_XGB_Model, predXGB, predRF, predCUB, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Model_Score > 4.5) %>%
+  filter(Final_Model_Score > 3.5, Handicap == "HANDICAP") %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Avg))
 
 
@@ -184,8 +184,23 @@ todaySQ2ModelRatings <- todaySQ2 %>%
 
 todaySQ2ModelRatings
 
+write_csv(todaySQ2ModelRatings, paste0("Today_Model_Ratings_", Sys.Date(), ".csv"))
+
+
+
+todaySQ2ModelWarnings <- todaySQ2ModelQuals %>%
+  mutate(Avg_Score_Warning = if_else(Final_Model_Avg < 0.05, "YES", "NO"),
+         Value_Odds_Warning = if_else(ValueOdds_BetfairFormat > 21.0, "YES", "NO")) %>%
+  select(Time24Hour, Meeting, Horse, Avg_Score_Warning, Value_Odds_Warning, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
+         Final_XGB_Model, Handicap, Ratings_Range, ValueOdds_BetfairFormat) %>%
+  filter(Avg_Score_Warning == "YES" | Value_Odds_Warning == "YES") %>%
+  arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Score))
+
+
+todaySQ2ModelWarnings
+
 #View(todaySQ2ModelRatings)
 
-write_csv(todaySQ2ModelRatings, paste0("Today_Model_Ratings_", Sys.Date(), ".csv"))
+write_csv(todaySQ2ModelWarnings, paste0("Today_Model_Warnings_", Sys.Date(), ".csv"))
 
 

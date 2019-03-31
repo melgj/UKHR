@@ -496,19 +496,8 @@ train.control <- trainControl(method = "repeatedcv",
 
 set.seed(1234)
 
-finalLinMod <- train(BF_Placed_SP_PL ~ ValueOdds_BetfairFormat +
-                       Runners +
-                       Val_Ratio +
-                       ClsAdvantage +
-                       Archie +
-                       DaysSinceLastRun +
-                       RAdj.Advantage +
-                       FrmAdvantage +
-                       HCPAdvantage +
-                       FCPAdvantage +
-                       Handicap +
-                       Class_Rank +
-                       totalPL +
+finalLinMod <- train(BF_Placed_SP_PL ~ predBRNN +
+                       predGAM +
                        predRF +
                        predCUB +
                        predSVM +
@@ -525,9 +514,9 @@ summary(finalLinMod)
 
 testingData$FinalPredLM <- predict(finalLinMod, newdata = testingData, type = "raw")
 
-saveRDS(finalLinMod, "Final_Linear_Mod_m7.RDS")
+saveRDS(finalLinMod, "Final_Linear_Mod_m9.RDS")
 
-finalLinMod <- readRDS("Final_Linear_Mod_m7.RDS")
+finalLinMod <- readRDS("Final_Linear_Mod_m9.RDS")
 
 ###############################################################
 
@@ -540,19 +529,8 @@ train.control <- trainControl(method = "repeatedcv",
 
 set.seed(1234)
 
-finalLinModInt <- train(BF_Placed_SP_PL ~ (ValueOdds_BetfairFormat +
-                          Runners +
-                          Val_Ratio +
-                          ClsAdvantage +
-                          Archie +
-                          DaysSinceLastRun +
-                          RAdj.Advantage +
-                          FrmAdvantage +
-                          HCPAdvantage +
-                          FCPAdvantage +
-                          Handicap +
-                          Class_Rank +
-                          totalPL +
+finalLinModInt <- train(BF_Placed_SP_PL ~ (predBRNN +
+                          predGAM +
                           predRF +
                           predCUB +
                           predSVM +
@@ -569,13 +547,13 @@ summary(finalLinModInt)
 
 testingData$FinalPredLMI <- predict(finalLinModInt, newdata = testingData, type = "raw")
 
-saveRDS(finalLinModInt, "Final_Linear_Mod_Int_m7.RDS")
+saveRDS(finalLinModInt, "Final_Linear_Mod_Int_m9.RDS")
 
-finalLinModInt <- readRDS("Final_Linear_Mod_Int_m7.RDS")
+finalLinModInt <- readRDS("Final_Linear_Mod_Int_m9.RDS")
 
 testingData %>%
   #group_by(Handicap) %>%
-  filter(FinalPredLMI > 0.0) %>%
+  filter(FinalPredLM > 0.0) %>%
   mutate(Won = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
   summarise(Runs = n(),
             Winners = sum(Won),
@@ -586,7 +564,10 @@ testingData %>%
 
 #########################################
 
-# Final Interactive SVM Radial Model
+# Final SVM Radial Model
+library(doMC)
+
+registerDoMC(4)
 
 train.control <- trainControl(method = "repeatedcv",
                               number = 10,
@@ -595,23 +576,12 @@ train.control <- trainControl(method = "repeatedcv",
 
 set.seed(1234)
 
-finalSVMMod <- train(BF_Placed_SP_PL ~ ValueOdds_BetfairFormat +
-                       Runners +
-                       Val_Ratio +
-                       ClsAdvantage +
-                       Archie +
-                       DaysSinceLastRun +
-                       RAdj.Advantage +
-                       FrmAdvantage +
-                       HCPAdvantage +
-                       FCPAdvantage +
-                       Handicap +
-                       Class_Rank +
-                       totalPL +
-                       predRF +
-                       predCUB +
-                       predSVM +
-                       predXGB,
+finalSVMMod <- train(BF_Placed_SP_PL ~ predBRNN +
+                                          predGAM +
+                                          predRF +
+                                          predCUB +
+                                          predSVM +
+                                          predXGB,
                      method = "svmRadial",
                      data = blenderData,
                      preProc = c("scale", "center"),
@@ -625,9 +595,9 @@ summary(finalSVMMod)
 
 testingData$FinalPredSVM <- predict(finalSVMMod, newdata = testingData, type = "raw")
 
-saveRDS(finalSVMMod, "Final_SVM_Mod_m7.RDS")
+saveRDS(finalSVMMod, "Final_SVM_Mod_m9.RDS")
 
-finalSVMMod <- readRDS("Final_SVM_Mod_m7.RDS")
+finalSVMMod <- readRDS("Final_SVM_Mod_m9.RDS")
 
 testingData %>%
   #group_by(Handicap) %>%
@@ -651,23 +621,12 @@ train.control <- trainControl(method = "repeatedcv",
 
 set.seed(1234)
 
-finalGamMod <- train(BF_Placed_SP_PL ~ ValueOdds_BetfairFormat +
-                       Runners +
-                       Val_Ratio +
-                       ClsAdvantage +
-                       Archie +
-                       DaysSinceLastRun +
-                       RAdj.Advantage +
-                       FrmAdvantage +
-                       HCPAdvantage +
-                       FCPAdvantage +
-                       Handicap +
-                       Class_Rank +
-                       totalPL +
-                       predRF +
-                       predCUB +
-                       predSVM +
-                       predXGB,
+finalGamMod <- train(BF_Placed_SP_PL ~ predBRNN +
+                                          predGAM +
+                                          predRF +
+                                          predCUB +
+                                          predSVM +
+                                          predXGB,
                      method = "gam",
                      data = blenderData,
                      preProc = c("scale", "center"),
@@ -680,9 +639,9 @@ summary(finalGamMod)
 
 testingData$FinalPredGAM <- predict(finalGamMod, newdata = testingData, type = "raw")
 
-saveRDS(finalGamMod, "Final_GAM_Mod_m7.RDS")
+saveRDS(finalGamMod, "Final_GAM_Mod_m9.RDS")
 
-finalGamMod <- readRDS("Final_GAM_Mod_m7.RDS")
+finalGamMod <- readRDS("Final_GAM_Mod_m9.RDS")
 
 colnames(testingData)
 
@@ -701,23 +660,12 @@ testingData %>%
 
 set.seed(1234)
 
-finalRFMod <- train(BF_Placed_SP_PL ~ ValueOdds_BetfairFormat +
-                 Runners +
-                 Val_Ratio +
-                 ClsAdvantage +
-                 Archie +
-                 DaysSinceLastRun +
-                 RAdj.Advantage +
-                 FrmAdvantage +
-                 HCPAdvantage +
-                 FCPAdvantage +
-                 Handicap +
-                 Class_Rank +
-                 totalPL +
-                 predRF +
-                 predCUB +
-                 predSVM +
-                 predXGB,
+finalRFMod <- train(BF_Placed_SP_PL ~ predBRNN +
+                                         predGAM +
+                                         predRF +
+                                         predCUB +
+                                         predSVM +
+                                         predXGB,
                method = "rf",
                data = blenderData,
                preProc = c("scale", "center"),
@@ -728,9 +676,9 @@ summary(finalRFMod)
 
 testingData$FinalPredRF <- predict(finalRFMod, newdata = testingData, type = "raw")
 
-saveRDS(finalRFMod, "Final_RF_Mod_m7.RDS")
+saveRDS(finalRFMod, "Final_RF_Mod_m9.RDS")
 
-finalRFMod <- readRDS("Final_RF_Mod_m7.RDS")
+finalRFMod <- readRDS("Final_RF_Mod_m9.RDS")
 
 print(finalRFMod)
 
@@ -772,19 +720,8 @@ tune.grid <- expand.grid(eta = c(0.01, 0.025, 0.05),
 
 set.seed(1234)
 
-finalXGBMod <- train(BF_Placed_SP_PL ~ ValueOdds_BetfairFormat +
-                                          Runners +
-                                          Val_Ratio +
-                                          ClsAdvantage +
-                                          Archie +
-                                          DaysSinceLastRun +
-                                          RAdj.Advantage +
-                                          FrmAdvantage +
-                                          HCPAdvantage +
-                                          FCPAdvantage +
-                                          Handicap +
-                                          Class_Rank +
-                                          totalPL +
+finalXGBMod <- train(BF_Placed_SP_PL ~ predBRNN +
+                                          predGAM +
                                           predRF +
                                           predCUB +
                                           predSVM +
@@ -800,9 +737,9 @@ print(finalXGBMod)
 
 varImp(finalXGBMod)
 
-saveRDS(finalXGBMod, "Final_XGB_Mod_m7.RDS")
+saveRDS(finalXGBMod, "Final_XGB_Mod_m9.RDS")
 
-finalXGBMod <- readRDS("Final_XGB_Mod_m7.RDS")
+finalXGBMod <- readRDS("Final_XGB_Mod_m9.RDS")
 
 testingData$FinalPredsXGB <- predict(finalXGBMod, newdata = testingData, type = "raw")
 
@@ -831,6 +768,8 @@ testingData %>%
 View(tail(testingData))
 
 head(testingData)
+
+colnames(testingData)
 
 write_csv(testingData, paste0("ukhr_testing_data_final_", targetName, ".csv"))
 
@@ -952,21 +891,26 @@ colnames(testingData2)
 
 View(head(testingData2))
 
+fp <- testingData2[,70:75]
+
+cor(fp)
+
 testingData2 <- read_csv("Final_Models_Testing_Set_Predictions.csv")
 
 testingData2 <- testingData2 %>%
-  mutate(Final_Models_Avg = (FinalLinearModel + FinalXGBMod + FinalRFMod + FinalSVMModel + FinalGamMod)/5,
+  mutate(Final_Models_Avg = (FinalLinearModelInt + FinalXGBMod + FinalRFMod + FinalSVMModel + FinalGamMod)/5,
          Final_Models_Avg_Band = cut(Final_Models_Avg, breaks = c(-10000, 0, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 10000),
                                      labels = c("<=0.0", ">0.0 to 0.05", ">0.05 to 0.10", ">0.10 to 0.20" ,">0.20 to 0.30",
                                                 ">0.30 to 0.40", ">0.40 to 0.50", ">0.50")))
 
 testingData2 <- testingData2 %>%
-  mutate(FLM_Score = if_else(FinalLinearModel > 0, 1, 0),
+  mutate(FLM_Score = if_else(FinalLinearModelInt > 0, 1, 0),
          FXGB_Score = if_else(FinalXGBMod > 0, 1, 0),
          FRF_Score = if_else(FinalRFMod > 0, 1, 0),
          FSVM_Score = if_else(FinalSVMModel > 0, 1, 0),
          FGAM_Score = if_else(FinalGamMod > 0, 1, 0),
          Final_Model_Score = FLM_Score + FXGB_Score + FRF_Score + FSVM_Score + FGAM_Score)
+
 
 colnames(testingData2)
 
@@ -977,8 +921,8 @@ testingData2 <- testingData2 %>%
 
 
 testingData2 %>%
-  group_by(Ratings_Range, Handicap) %>%
-  filter(Final_Models_Avg > 0, Final_Model_Score > 1.5) %>%
+  group_by(Final_Model_Score) %>%
+  filter(Final_Models_Avg > 0.0, Handicap != "NONHCP") %>%
   mutate(Won = if_else(BFSP_PL > 0, 1, 0),
          Placed = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
   summarise(Runs = n(),

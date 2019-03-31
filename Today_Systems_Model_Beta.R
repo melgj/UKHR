@@ -54,8 +54,8 @@ todaySQ$Dist_Range <- as.factor(todaySQ$Dist_Range)
 todaySQ$RaceCode <- as.factor(todaySQ$RaceCode)
 
 #predMARSBFPL <- predict(bfPLMod, newdata = todaySQ, type = "raw")
-predNNBFPL <- predict(bfNNPLMod, newdata = todaySQ, type = "raw")
-predXGBL_BFPL <- predict(bfXGB_PL_Mod, newdata = todaySQ, type = "raw")
+predNN_BFPL <- predict(bfNNPLMod, newdata = todaySQ, type = "raw")
+predXGB_BFPL <- predict(bfXGB_PL_Mod, newdata = todaySQ, type = "raw")
 predRF_BFPL <- predict(bfRFMod, newdata = todaySQ, type = "raw")
 predSVM_BFPL <- predict(bfSVMMod, newdata = todaySQ, type = "raw")
 predPLS_BFPL <- predict(bfPLS_PL_Mod, newdata = todaySQ, type = "raw")
@@ -65,9 +65,9 @@ predBRNN_BFPL <- predict(bfBRNNMod, newdata = todaySQ, type = "raw")
 #predXGBBFProb <- predict(bfXGBMod, newdata = todaySQ, type = "prob")
 
 #
-todaySQ$predNN <- predNNBFPL
+todaySQ$predNN <- predNN_BFPL
 
-todaySQ$predXGB <- predXGBL_BFPL
+todaySQ$predXGB <- predXGB_BFPL
 
 todaySQ$predRF <- predRF_BFPL
 
@@ -127,7 +127,7 @@ todaySQ2 <- todaySQ2 %>%
 todaySQ2ModelQuals <- todaySQ2 %>%
   select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
          Final_XGB_Model, predXGB, predRF, predCUB, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Model_Score > 1.5, Final_Model_Avg > 0.0) %>%
+  filter(Final_Model_Score > 2.5, Final_Model_Avg > 0.0) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Score))
 
 todaySQ2ModelQuals
@@ -141,7 +141,7 @@ write_csv(todaySQ2ModelQuals, paste0("Today_Model_Sys_Quals_", Sys.Date(), ".csv
 todaySQ2ModelEliteQuals <- todaySQ2 %>%
   select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
          Final_XGB_Model, predXGB, predRF, predCUB, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Model_Score > 3.5, Handicap == "HANDICAP") %>%
+  filter(Final_Model_Score > 3.5, Handicap == "HANDICAP", Final_Model_Avg > 0.0) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Avg))
 
 

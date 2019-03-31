@@ -1,5 +1,26 @@
 # Full database queries
 
+ukhr_Val_Vor <- ukhr_master_BF %>%
+  filter(Handicap != "NONHCP") %>%
+  group_by(VOR_Range, LTO_Days_Range, Ratings_Range, RaceType) %>%
+  summarise(Runs = n(),meanPL = mean(BFSP_PL), totalPL = sum(BFSP_PL), AE_Ratio = sum(Actual)/sum(Expected),
+            Placed_AE_Ratio = round(sum(Betfair.Placed, na.rm = T)/sum(Place_Expected, na.rm = T),2), BF_Place_ROI = round(mean(BF_Placed_SP_PL, na.rm = T),2),
+            Avg_BFVSP_PL = round(mean(VSP_PL), 2), Total_BFVSP_PL = round(sum(VSP_PL),2),
+            Avg_VSP_Stake = mean(VSP_Stake), Total_VSP_Stake = sum(VSP_Stake), VSP_ROI = Total_BFVSP_PL/Total_VSP_Stake,
+            WinPercent = sum(Actual)/Runs, Races = length(unique(UKHR_RaceID)),
+            Winners = sum(Actual), Exp_Wins = round(sum(Expected),2), Places = sum(Betfair.Placed, na.rm = T), Exp_Places = sum(Place_Expected, na.rm = T),
+            Total_Btn = sum(Act_Btn), Total_Exp_Btn = sum(Exp_Btn),
+            Btn_AE_Ratio = round(sum(Act_Btn)/sum(Exp_Btn),2),
+            Archie = ifelse(Exp_Wins >= 5.0,((Runs * ((Winners - Exp_Wins) ^ 2)) / (Exp_Wins * (Runs - Exp_Wins))),0)) %>%
+  filter(Runs >= 100, AE_Ratio >= 1.20, meanPL >= 0.10, Archie > 2.5, Exp_Wins >= 10) %>%
+  arrange(desc(AE_Ratio))
+
+ukhr_Val_Vor
+
+View(ukhr_Val_Vor)
+
+#######################################
+
 hcpTr3yo <- ukhr_master_BF %>%
   filter(Age == 3, Handicap == "HANDICAP", RaceType == "AW" | RaceType == "FLAT") %>%
   group_by(Trainer, RaceType) %>%

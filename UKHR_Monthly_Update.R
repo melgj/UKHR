@@ -4,7 +4,7 @@ library(stringr)
 library(lubridate)
 
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_11_30.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2019_01_31.csv", col_names = T)
 
 length(which(ukhr_master_BF$BetFairSPForecastWinPrice <= 0))
 
@@ -426,6 +426,6 @@ summary(ukhr_master_BF$Year)
 
 table(ukhr_master_BF$Year, ukhr_master_BF$Month)
 
-write_csv(ukhr_master_BF, "UKHR_Master_BF_2018_12_31.csv")
+write_csv(ukhr_master_BF, "UKHR_Master_BF_2019_02_28.csv")
 
 ukhr_master_BF$Year[1]

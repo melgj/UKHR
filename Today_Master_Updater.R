@@ -8,11 +8,11 @@ setwd("~/git_projects/UKHR_Project")
 
 #registerDoMC(4)
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2019_02_28.csv", col_names = T)
 
 ukhrHeader <- head(ukhr_master_BF)
 
-write_csv(ukhrHeader, "UKHR_Master_BF_2018_12_31_Header.csv")
+write_csv(ukhrHeader, "UKHR_Master_BF_2019_02_28_Header.csv")
 
 # create season vars
 

@@ -790,9 +790,12 @@ ensembleData2 <- trainingQualsData2[splitB2,]
 blenderData2 <- trainingQualsData2[-splitB2,]
 testingData2 <- testingQualsData2 #qualsData[-splitA,]
 
-
-
-
+finalLinMod <- readRDS("Final_Linear_Mod_m7.RDS")
+finalLinModInt <- readRDS("Final_Linear_Mod_Int_m7.RDS")
+finalSVMMod <- readRDS("Final_SVM_Mod_m7.RDS")
+finalGamMod <- readRDS("Final_GAM_Mod_m7.RDS")
+finalRFMod <- readRDS("Final_RF_Mod_m7.RDS")
+finalXGBMod <- readRDS("Final_XGB_Mod_m7.RDS")
 
 blenderData2$predNN <- predict(nnMod, newdata = blenderData2, type = "raw")
 blenderData2$predRF <- predict(rfMod, newdata = blenderData2, type = "raw")
@@ -895,13 +898,26 @@ fp <- testingData2[,70:75]
 
 cor(fp)
 
+###################################################################
+
+library(tidyverse)
+library(lubridate)
+library(caret)
+library(stringi)
+library(stringr)
+
+
 testingData2 <- read_csv("Final_Models_Testing_Set_Predictions.csv")
+
+colnames(testingData2)
 
 testingData2 <- testingData2 %>%
   mutate(Final_Models_Avg = (FinalLinearModelInt + FinalXGBMod + FinalRFMod + FinalSVMModel + FinalGamMod)/5,
          Final_Models_Avg_Band = cut(Final_Models_Avg, breaks = c(-10000, 0, 0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 10000),
                                      labels = c("<=0.0", ">0.0 to 0.05", ">0.05 to 0.10", ">0.10 to 0.20" ,">0.20 to 0.30",
-                                                ">0.30 to 0.40", ">0.40 to 0.50", ">0.50")))
+                                                ">0.30 to 0.40", ">0.40 to 0.50", ">0.50")),
+         Runners_Band = cut(Runners, breaks = c(-1, 4, 7, 15, 100),
+                            labels = c("<5", "5-7", "8-15", "16+")))
 
 testingData2 <- testingData2 %>%
   mutate(FLM_Score = if_else(FinalLinearModelInt > 0, 1, 0),
@@ -911,8 +927,17 @@ testingData2 <- testingData2 %>%
          FGAM_Score = if_else(FinalGamMod > 0, 1, 0),
          Final_Model_Score = FLM_Score + FXGB_Score + FRF_Score + FSVM_Score + FGAM_Score)
 
+testingData2 <- testingData2 %>%
+  group_by(Year, Month, DayOfMonth) %>%
+  mutate(FMA_Rank = min_rank(desc(Final_Models_Avg))) %>%
+  ungroup()
 
-colnames(testingData2)
+testingData2$FMA_Rank
+
+
+
+
+summary(testingData2$ClassDiffTotal)
 
 testingData2 <- testingData2 %>%
   mutate(Exp_Win = 1/Betfair.Win.S.P.,
@@ -921,8 +946,8 @@ testingData2 <- testingData2 %>%
 
 
 testingData2 %>%
-  group_by(Final_Model_Score) %>%
-  filter(Final_Models_Avg > 0.0, Handicap != "NONHCP") %>%
+  group_by(FMA_Rank) %>%
+  filter(Final_Models_Avg > 0.05, Handicap != "NONHCP") %>%
   mutate(Won = if_else(BFSP_PL > 0, 1, 0),
          Placed = if_else(BF_Placed_SP_PL > 0, 1, 0)) %>%
   summarise(Runs = n(),
@@ -935,7 +960,13 @@ testingData2 %>%
             Place_Percent = mean(Placed, na.rm = T),
             Avg_P_PL = mean(BF_Placed_SP_PL, na.rm = T),
             Total_P_PL = sum(BF_Placed_SP_PL, na.rm = T)) %>%
-  arrange(desc(AER_Win))
+  arrange(desc(AER_Win)) %>%
+  View()
+
+
+
+
+
 
 
 ########################################################################################################################

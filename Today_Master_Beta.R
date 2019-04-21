@@ -223,6 +223,12 @@ table(today$Meeting, today$Going)
 table(today$Meeting, today$RaceType)
 table(today$Meeting, today$Going_Range)
 
+todayCard <- today %>%
+  select(Time24Hour, Meeting, Horse, RatingsPosition, RatingAdvantage, ValueOdds_BetfairFormat, BetFairSPForecastWinPrice) %>%
+  arrange(Time24Hour, Meeting, RatingsPosition, Horse)
+
+write_csv(todayCard, "TodaysCard.csv")
+
 # source("AW_Systems.R")
 # source("Flat_Systems.R")
 # source("NH_Systems.R")

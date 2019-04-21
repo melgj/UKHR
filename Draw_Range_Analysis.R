@@ -1,6 +1,11 @@
-#setwd("~/git_projects/UKHR_Project")
+# library(tidyverse)
+# library(stringr)
+# library(stringi)
+# library(lubridate)
+#
+# setwd("~/git_projects/UKHR_Project")
 
-ukhr_master_BF <- read_csv("UKHR_Master_BF_2018_12_31.csv", col_names = T)
+ukhr_master_BF <- read_csv("UKHR_Master_BF_2019_02_28.csv", col_names = T)
 
 ukhr_master_BF <- ukhr_master_BF %>%
   group_by(UKHR_RaceID) %>%

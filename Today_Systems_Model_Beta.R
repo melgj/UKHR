@@ -13,21 +13,21 @@ library(kernlab)
 
 #bfPLMod <- readRDS("Systems_MARS_BFSPPL_Model.RDS")
 
-bfNNPLMod <- readRDS("Systems_NN_BFSPPL_Model_m7.RDS")
+#bfNNPLMod <- readRDS("Systems_NN_BFSPPL_Model_m7.RDS")
 
-bfRFMod <- readRDS("RF_BFPL_Model_m7.RDS")
+bfRFMod <- readRDS("RF_1159_Model.RDS")
 
-bfXGB_PL_Mod <- readRDS("XGB_Linear_Systems_BFPL_Model_m7.RDS")
+bfXGB_PL_Mod <- readRDS("XGB_1159_Model.RDS")
 
-bfPLS_PL_Mod <- readRDS("PLS_BFPL_Model_m7.RDS")
+bfPLS_PL_Mod <- readRDS("PLS_1159_Model.RDS")
 
-bfCUB_PL_Mod <- readRDS("Cubist_BFPL_Model_m7.RDS")
+bfCUB_PL_Mod <- readRDS("Cubist_1159_Model.RDS")
 
-bfSVMMod <- readRDS("SVM_BFPL_Model_m7.RDS")
+bfSVMMod <- readRDS("SVM_1159_Model.RDS")
 
-bfGAMMod <- readRDS("Gam_BFPL_Model_m7.RDS")
+bfGAMMod <- readRDS("GAM_1159_Model.RDS")
 
-bfBRNNMod <- readRDS("BRNN_BFPL_Model_m7.RDS")
+bfBRNNMod <- readRDS("BRNN_1159_Model.RDS")
 
 
 
@@ -54,7 +54,7 @@ todaySQ$Dist_Range <- as.factor(todaySQ$Dist_Range)
 todaySQ$RaceCode <- as.factor(todaySQ$RaceCode)
 
 #predMARSBFPL <- predict(bfPLMod, newdata = todaySQ, type = "raw")
-predNN_BFPL <- predict(bfNNPLMod, newdata = todaySQ, type = "raw")
+#predNN_BFPL <- predict(bfNNPLMod, newdata = todaySQ, type = "raw")
 predXGB_BFPL <- predict(bfXGB_PL_Mod, newdata = todaySQ, type = "raw")
 predRF_BFPL <- predict(bfRFMod, newdata = todaySQ, type = "raw")
 predSVM_BFPL <- predict(bfSVMMod, newdata = todaySQ, type = "raw")
@@ -65,7 +65,7 @@ predBRNN_BFPL <- predict(bfBRNNMod, newdata = todaySQ, type = "raw")
 #predXGBBFProb <- predict(bfXGBMod, newdata = todaySQ, type = "prob")
 
 #
-todaySQ$predNN <- predNN_BFPL
+#todaySQ$predNN <- predNN_BFPL
 
 todaySQ$predXGB <- predXGB_BFPL
 
@@ -83,7 +83,7 @@ todaySQ$predBRNN <- predBRNN_BFPL
 
 
 todaySQ2 <- todaySQ %>%
-  mutate(Base_Models_Avg = (predXGB + predRF + predCUB)/3) %>%
+  mutate(Base_Models_Avg = (predXGB + predRF + predCUB + predSVM + predBRNN + predGAM + predPLS)/6) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 XGB_Final_Model <- readRDS("Final_XGB_Mod_m7.RDS")
@@ -92,23 +92,23 @@ todaySQ2$Final_XGB_Model <- predict(XGB_Final_Model, newdata = todaySQ2, type = 
 
 #todaySQ2$Final_Place_Model_Preds <- predict(XGB_Final_Model, newdata = todaySQ2, type = "raw")
 
-XGB_Final_Win_Model <- readRDS("Final_XGB_Win_Model.RDS")
+#XGB_Final_Win_Model <- readRDS("Final_XGB_Win_Model.RDS")
 
-todaySQ2$Final_Win_Model_Preds <- predict(XGB_Final_Win_Model, newdata = todaySQ2, type = "raw")
+#todaySQ2$Final_Win_Model_Preds <- predict(XGB_Final_Win_Model, newdata = todaySQ2, type = "raw")
 
-Final_Linear_Model <- readRDS("Final_Linear_Mod_m7.RDS")
+Final_Linear_Model <- readRDS("Final_Linear_Mod_1159.RDS")
 
 todaySQ2$Final_Linear_Model <- predict(Final_Linear_Model, newdata = todaySQ2, type = "raw")
 
-Final_SVM_Model <- readRDS("Final_SVM_Mod_m7.RDS")
+Final_SVM_Model <- readRDS("Final_SVM_Mod_1159.RDS")
 
 todaySQ2$Final_SVM_Model <- predict(Final_SVM_Model, newdata = todaySQ2, type = "raw")
 
-Final_GAM_Model <- readRDS("Final_GAM_Mod_m7.RDS")
+Final_GAM_Model <- readRDS("Final_GAM_Mod_1159.RDS")
 
 todaySQ2$Final_GAM_Model <- predict(Final_GAM_Model, newdata = todaySQ2, type = "raw")
 
-Final_RF_Model <- readRDS("Final_RF_Mod_m7.RDS")
+Final_RF_Model <- readRDS("Final_RF_Mod_1159.RDS")
 
 todaySQ2$Final_RF_Model <- predict(Final_RF_Model, newdata = todaySQ2, type = "raw")
 
@@ -125,9 +125,10 @@ todaySQ2 <- todaySQ2 %>%
 
 
 todaySQ2ModelQuals <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
-         Final_XGB_Model, predXGB, predRF, predCUB, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Final_Model_Avg >= 0.05 | Final_Model_Score > 2.5) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model,
+         Final_RF_Model, Final_XGB_Model, predXGB, predRF, predCUB, predBRNN, predGAM, predSVM, Base_Models_Avg, Handicap, Ratings_Range,
+         BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, AE_Ratio, Placed_AE_Ratio, Btn_AE_Ratio, Archie, Placed_Archie) %>%
+  filter(Final_Model_Avg >= 0.10, ValueOdds_BetfairFormat < 21) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Score))
 
 todaySQ2ModelQuals
@@ -139,9 +140,10 @@ write_csv(todaySQ2ModelQuals, paste0("Today_Model_Sys_Quals_", Sys.Date(), ".csv
 
 
 todaySQ2ModelEliteQuals <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
-         Final_XGB_Model, predXGB, predRF, predCUB, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(Handicap == "HANDICAP", Final_Model_Avg > 0.05) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model,
+         Final_RF_Model, Final_XGB_Model, predXGB, predRF, predCUB, predBRNN, predGAM, predSVM, Base_Models_Avg, Handicap, Ratings_Range,
+         BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, AE_Ratio, Placed_AE_Ratio, Btn_AE_Ratio, Archie, Placed_Archie) %>%
+  filter(Handicap == "HANDICAP", Final_Model_Avg > 0.10, Final_Model_Score > 2.5, ValueOdds_BetfairFormat < 21) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Avg))
 
 
@@ -153,9 +155,10 @@ write_csv(todaySQ2ModelEliteQuals, paste0("Today_Model_Elite_Quals_", Sys.Date()
 
 
 todaySQ2RFXGBQuals <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
-         Final_XGB_Model, predXGB, predRF, predCUB, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
-  filter(predXGB > 0.50 | predRF > 0.10) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model,
+         Final_RF_Model, Final_XGB_Model, predXGB, predRF, predCUB, predBRNN, predGAM, predSVM, Base_Models_Avg, Handicap, Ratings_Range,
+         BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, AE_Ratio, Placed_AE_Ratio, Btn_AE_Ratio, Archie, Placed_Archie) %>%
+  filter(predXGB > 0.50 | predRF > 0.10, ValueOdds_BetfairFormat < 21) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Avg))
 
 View(todaySQ2RFXGBQuals)
@@ -177,8 +180,9 @@ write_csv(todaySQ2RFXGBQuals, paste0("Today_RF_XGB_Quals_", Sys.Date(), ".csv"))
 
 
 todaySQ2ModelRatings <- todaySQ2 %>%
-  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
-         Final_XGB_Model, predXGB, predRF, predCUB, Base_Models_Avg, Handicap, Ratings_Range, everything()) %>%
+  select(Time24Hour, Meeting, Horse, System_Name, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model,
+         Final_RF_Model, Final_XGB_Model, predXGB, predRF, predCUB, predBRNN, predGAM, predSVM, Base_Models_Avg, Handicap, Ratings_Range,
+         BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, AE_Ratio, Placed_AE_Ratio, Btn_AE_Ratio, Archie, Placed_Archie) %>%
   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Score))
 
 
@@ -188,19 +192,19 @@ write_csv(todaySQ2ModelRatings, paste0("Today_Model_Ratings_", Sys.Date(), ".csv
 
 
 
-todaySQ2ModelWarnings <- todaySQ2ModelQuals %>%
-  mutate(Avg_Score_Warning = if_else(Final_Model_Avg < 0.05, "YES", "NO"),
-         Value_Odds_Warning = if_else(ValueOdds_BetfairFormat > 21.0, "YES", "NO")) %>%
-  select(Time24Hour, Meeting, Horse, Avg_Score_Warning, Value_Odds_Warning, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
-         Final_XGB_Model, Handicap, Ratings_Range, ValueOdds_BetfairFormat) %>%
-  filter(Avg_Score_Warning == "YES" | Value_Odds_Warning == "YES") %>%
-  arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Score))
-
-
-todaySQ2ModelWarnings
+# todaySQ2ModelWarnings <- todaySQ2ModelQuals %>%
+#   mutate(Avg_Score_Warning = if_else(Final_Model_Avg < 0.05, "YES", "NO"),
+#          Value_Odds_Warning = if_else(ValueOdds_BetfairFormat > 21.0, "YES", "NO")) %>%
+#   select(Time24Hour, Meeting, Horse, Avg_Score_Warning, Value_Odds_Warning, Final_Model_Score, Final_Model_Avg, Final_Linear_Model, Final_GAM_Model, Final_SVM_Model, Final_RF_Model,
+#          Final_XGB_Model, Handicap, Ratings_Range, ValueOdds_BetfairFormat) %>%
+#   filter(Avg_Score_Warning == "YES" | Value_Odds_Warning == "YES") %>%
+#   arrange(Time24Hour, Meeting, Horse, desc(Final_Model_Score))
+#
+#
+# todaySQ2ModelWarnings
 
 #View(todaySQ2ModelRatings)
 
-write_csv(todaySQ2ModelWarnings, paste0("Today_Model_Warnings_", Sys.Date(), ".csv"))
+# write_csv(todaySQ2ModelWarnings, paste0("Today_Model_Warnings_", Sys.Date(), ".csv"))
 
 

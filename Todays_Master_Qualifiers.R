@@ -49,12 +49,6 @@ asq <- allSystemQualifiers %>%
          #Arch_Btn_Strength = cut(Btn_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100),
                                     #labels = c("-", "*", "**", "***", "****", "*****")),
          Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat) %>%
-  select(Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat, Val_Ratio, AE_Ratio, Archie, Arch_Strength,
-         Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio, Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL,
-         totalPL, VSP_ROI, Places, Exp_Places, Place_Percent, BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire,
-         Spd_Rank, ClassDiffTotal, FCPAdvantage, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage,
-         HCPAdvantage, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs, Ratings_Range, WeightDelta,
-         Rev_Weight_Rank, NumberOfResults, Alarms, Age, Runners) %>%
   filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5, !(System_Name %in% poorSystems$System_Name)) %>%
   arrange(Time24Hour, Meeting, Horse)
 

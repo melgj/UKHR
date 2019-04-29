@@ -343,9 +343,9 @@ write_csv(badDrawToday, "Today_Bad_Draw.csv")
 }
 ###############################################################################################
 
-qualsGD <- filter(asq, Horse %in% goodDrawToday$Horse)
+qualsGD <- filter(todaySQ2ModelRatings, Horse %in% goodDrawToday$Horse)
 
-qualsBD <- filter(asq, Horse %in% badDrawToday$Horse)
+qualsBD <- filter(todaySQ2ModelRatings, Horse %in% badDrawToday$Horse)
 
 qualsGD
 qualsBD

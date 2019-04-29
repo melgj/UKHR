@@ -148,32 +148,45 @@ asq <- allSystemQualifiers %>%
          #Arch_Btn_Strength = cut(Btn_Archie, breaks = c(-1, 2.5, 3.5, 4.5, 5.5, 8.0, 100),
          #labels = c("-", "*", "**", "***", "****", "*****")),
          Val_Ratio = BetFairSPForecastWinPrice / ValueOdds_BetfairFormat) %>%
-  select(Year, DayOfMonth, Month, Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
-         Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
-         Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
-         BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
-         Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-         Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
-         Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
-         Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
+  # select(Year, DayOfMonth, Month, Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
+  #        Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
+  #        Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
+  #        BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
+  #        Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
+  #        Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
+  #        Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
+  #        Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   filter(AE_Ratio >= 1.20, Exp_Wins > 5.0, Archie > 2.5) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 asq
 
-write_csv(asq, "All_System_Qualifiers_Q4_2018.csv")
+write_csv(asq, "All_System_Quals_2018q4.csv")
+
+#write_csv(asq, "All_System_Qualifiers_Q1_2018.csv")
+
+qtr1 <- read_csv("All_System_Quals_2018q1.csv", col_names = T)
+qtr2 <- read_csv("All_System_Quals_2018q2.csv", col_names = T)
+qtr3 <- read_csv("All_System_Quals_2018q3.csv", col_names = T)
+qtr4 <- read_csv("All_System_Quals_2018q4.csv", col_names = T)
+
+asq2018 <- rbind(qtr1, qtr2, qtr3, qtr4)
+
+write_csv(asq2018, "All_System_Qualifiers_Yr_2018_v3.csv")
+
+
 
 #####################################################################################
 
 allArchie <- asq %>%
-  select(Year, DayOfMonth, Month, Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
-         Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
-         Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
-         BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
-         Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-         Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
-         Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
-         Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
+  # select(Year, DayOfMonth, Month, Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
+  #        Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
+  #        Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
+  #        BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
+  #        Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
+  #        Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
+  #        Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
+  #        Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   filter(Archie >= 4.0, Exp_Wins >= 5, AE_Ratio >= 1.20) %>%
   arrange(Time24Hour, Meeting, Horse)
 
@@ -195,14 +208,14 @@ length(unique(allArchie$Horse))
 highArchieQuals <- filter(asq, Archie >= 8.5, AE_Ratio >= 1.20)
 
 highArchieQuals <- highArchieQuals %>%
-  select(Year, DayOfMonth, Month, Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
-         Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
-         Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
-         BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
-         Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-         Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
-         Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
-         Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
+  # select(Year, DayOfMonth, Month, Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
+  #        Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
+  #        Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
+  #        BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
+  #        Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
+  #        Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
+  #        Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
+  #        Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 highArchieQuals
@@ -212,42 +225,42 @@ highArchieQuals
 goodStatsQuals <- filter(asq, Archie >= 4.0, AE_Ratio >= 1.40, Placed_AE_Ratio >= 1.10)
 
 goodStatsQuals <- goodStatsQuals %>%
-  select(Year, DayOfMonth, Month, Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
-         Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
-         Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
-         BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
-         Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
-         Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
-         Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
-         Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
+  # select(Year, DayOfMonth, Month, Time24Hour, Meeting, Horse, System_Name, BetFairSPForecastWinPrice, ValueOdds_BetfairFormat,
+  #        Val_Ratio, AE_Ratio, Archie, Arch_Strength, Placed_AE_Ratio, Placed_Archie, Arch_Placed_Strength, Btn_AE_Ratio,
+  #        Total_Exp_Btn, Total_Btn, Runs, Winners, Exp_Wins, WinPercent, meanPL, totalPL, VSP_ROI, Places, Exp_Places, Place_Percent,
+  #        BF_Place_ROI, Value_Odds_Range, VOR_Range, BFSPFC_Odds_Range, Trainer, Jockey, Sire, Spd_Rank, ClassDiffTotal, FCPAdvantage,
+  #        Runners, RAdj.Advantage, Class_Rank, DaysSinceLastRun, ClassWeightDiffRuns1Year, ClsAdvantage, FrmAdvantage, HCPAdvantage,
+  #        Weight_Rank, WeightDelta, DifferentialRankingClassWeight5Years, Dist_Range, RaceType, Handicap, Going, Going_Range, Furlongs,
+  #        Ratings_Range, Rev_Weight_Rank, NumberOfResults, Alarms, Age, Month, Season, BFSP_PL, BF_Placed_SP_PL, VSP_PL, Actual, Expected,
+  #        Betfair.Placed, Place_Expected, Betfair.Win.S.P., Betfair.Place.S.P.) %>%
   arrange(Time24Hour, Meeting, Horse)
 
 goodStatsQuals
 
 #View(goodStatsQuals)
 
-write_csv(asq, "All_System_Quals_2018q4.csv")
+#write_csv(asq, "All_System_Quals_2018q1.csv")
 # #
-write_csv(allArchie, "All_Archie_Quals_2018q4.csv")
+#write_csv(allArchie, "All_Archie_Quals_2018q1.csv")
 # #
-write_csv(highArchieQuals, "All_High_Archie_Quals_2018q4.csv")
+#write_csv(highArchieQuals, "All_High_Archie_Quals_2018q1.csv")
 # #
-write_csv(goodStatsQuals, "All_Good_Stats_Quals_2018q4.csv")
+#write_csv(goodStatsQuals, "All_Good_Stats_Quals_2018q1.csv")
 
-source("Draw_Range_Analysis.R")
-source("Min_Rank_Val_Bet.R")
-source("Today_Systems_Model.R")
+# source("Draw_Range_Analysis.R")
+# source("Min_Rank_Val_Bet.R")
+# source("Today_Systems_Model.R")
 # #
 # write_csv(highAERQuals, "All_High_AER_Archie_Quals_to_2018_08.csv")
 
-qtr1 <- read_csv("All_System_Quals_2018q1.csv", col_names = T)
-qtr2 <- read_csv("All_System_Quals_2018q2.csv", col_names = T)
-qtr3 <- read_csv("All_System_Quals_2018q3.csv", col_names = T)
-qtr4 <- read_csv("All_System_Quals_2018q4.csv", col_names = T)
-
-asq2018 <- rbind(qtr1, qtr2, qtr3, qtr4)
-
-write_csv(asq2018, "All_System_Qualifiers_Yr_2018_v2.csv")
+# qtr1 <- read_csv("All_System_Quals_2018q1.csv", col_names = T)
+# qtr2 <- read_csv("All_System_Quals_2018q2.csv", col_names = T)
+# qtr3 <- read_csv("All_System_Quals_2018q3.csv", col_names = T)
+# qtr4 <- read_csv("All_System_Quals_2018q4.csv", col_names = T)
+#
+# asq2018 <- rbind(qtr1, qtr2, qtr3, qtr4)
+#
+# write_csv(asq2018, "All_System_Qualifiers_Yr_2018_v3.csv")
 
 systemsAnalysisASQ_2018 <- read_csv("All_System_Qualifiers_Yr_2018v2.csv", col_names = T)
 
